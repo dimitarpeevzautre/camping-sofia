@@ -1,24 +1,21 @@
 # Site settings
 title: Camping Sofia
-email: ""
 description: "Camping Sofia"
 url: "https://camping-sofia.com"
 baseurl: ""
-facebook_username: ""
-twitter_username: ""
-instagram_username: ""
-github_username:  ""
-deviantart_username: ""
-flickr_username: ""
-discus_shortname: ""
+# Contact and social links: the footer icons are only shown for keys that are set.
+# Add them here when real accounts exist, e.g.
+# email: "info@example.com"
+# facebook_username: "yourpage"
+# instagram_username: "yourname"
 share: true
 
 # Owner/author information
 owner:
-  name:   photorama
+  name:   Camping Sofia
   avatar: avatar.png
   favicon: favicon.ico
-  info: photography website template
+  info: Your base to enjoy Sofia
 
 # Settings for comments helper
 # Set 'provider' to the comment provider you want to use. (i.e.  Disqus, Intense Debate, livefyre, or Facebook Comments)
@@ -27,15 +24,10 @@ owner:
 # Disable comments for individual pages/posts by specifying 'comments: false' in the page/post YAML Front Matter.
 #
 comments :
-  provider : disqus
-  disqus :
-    short_name : ""
+  provider : false
 
 # Internal nav
-nav:
-  - GALLERY: "/gallery/"  
-  - JOURNAL: "/journal/"
-  - ABOUT: "/about/"
+nav: []
 
 # All translation keys
 translations:
