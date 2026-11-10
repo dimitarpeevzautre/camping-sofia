@@ -2,8 +2,8 @@
 title: Camping Sofia
 email: ""
 description: "Camping Sofia"
-url: "https://dimitarpeevzautre.github.io/"
-baseurl: "/camping-sofia"
+url: "https://camping-sofia.com"
+baseurl: ""
 facebook_username: ""
 twitter_username: ""
 instagram_username: ""
@@ -33,9 +33,9 @@ comments :
 
 # Internal nav
 nav:
-  - GALLERY: "https://dimitarpeevzautre.github.io/camping-sofia/gallery/"  
-  - JOURNAL: "https://dimitarpeevzautre.github.io/camping-sofia/journal/"
-  - ABOUT: "https://dimitarpeevzautre.github.io/camping-sofia/about/"
+  - GALLERY: "/gallery/"  
+  - JOURNAL: "/journal/"
+  - ABOUT: "/about/"
 
 # All translation keys
 translations:
