@@ -40,6 +40,7 @@
       who: { kid: 'child', cat: 'cat', dog: 'dog', adult: 'guest' },
       share: (n) => `I scored ${n} parking campers at Camping Sofia. Can you beat it?`,
       copy: 'Copy text', copied: 'Copied', copyFailed: 'Could not copy',
+      imgPoints: 'points for parking campers', imgParked: 'guests parked', imgAcc: 'accuracy', imgSpd: 'speed', imgBeat: 'Can you beat it?',
     },
     bg: {
       other: 'English', otherCode: 'en',
@@ -58,6 +59,7 @@
       who: { kid: 'дете', cat: 'котка', dog: 'куче', adult: 'гост' },
       share: (n) => `Събрах ${n} точки с паркиране на кемпери в Camping Sofia. Ще ме биеш ли?`,
       copy: 'Копирай текста', copied: 'Копирано', copyFailed: 'Копирането не успя',
+      imgPoints: 'точки от паркиране на кемпери', imgParked: 'паркирани гости', imgAcc: 'точност', imgSpd: 'бързина', imgBeat: 'Ще ме биеш ли?',
       title: 'Camping Sofia: очаквайте скоро',
       html: {
         tagline: 'Очаквайте скоро. Вашата база за София.',
@@ -71,7 +73,7 @@
         cardTitle: 'Вашият къмпинг дотук',
         stParked: 'Паркирани гости', stOnsite: 'В къмпинга сега', stAcc: 'Средна точност', stSpd: 'Средна бързина',
         stTop: 'Най-добро паркиране', stBumps: 'Удари', stScares: 'Стреснати хора', stGaveUp: 'Гости, които се отказаха да чакат',
-        stTime: 'Време зад волана', shareTitle: 'Споделете резултата', shareNative: 'Сподели', close: 'Обратно към паркирането',
+        stTime: 'Време зад волана', shareTitle: 'Споделете резултата', shareNative: 'Сподели', savePic: 'Запази картинката', close: 'Обратно към паркирането',
       },
       aria: {
         camp: 'Къмпинг, гледан отгоре. Закарайте всеки пристигащ гост до мястото му.',
@@ -1170,7 +1172,43 @@
   // Pressing the Score plate pauses the game and opens a card with the figures behind the score and ways to share it.
   const stats = { acc: 0, spd: 0, top: 0, bumps: 0, scares: 0, gaveUp: 0, time: 0 };
   const card = $('card'), SITE = 'https://camping-sofia.com/';
-  let paused = false;
+  let paused = false, pic = null, picUrl = '';
+  // A 1200 x 630 picture of the score for sharing: the camp as it looks right now, behind a plate with the figures.
+  function scoreImage(top) {
+    const c = document.createElement('canvas'), W = 1200, H = 630, n = parkedCount, INK = '#12211a';
+    c.width = W; c.height = H;
+    const g = c.getContext('2d'), font = (w, px) => `${w} ${px}px Overpass, "Segoe UI", sans-serif`;
+    const k = Math.max(W / cv.width, H / cv.height), dw = cv.width * k, dh = cv.height * k;
+    g.fillStyle = '#1c3327'; g.fillRect(0, 0, W, H);
+    g.drawImage(cv, (W - dw) / 2, (H - dh) / 2, dw, dh);
+    g.fillStyle = 'rgba(18, 33, 26, 0.45)'; g.fillRect(0, 0, W, H);
+    const shape = (x, y, w, h, r) => { g.beginPath(); if (g.roundRect) g.roundRect(x, y, w, h, r); else g.rect(x, y, w, h); };
+    const plate = (x, y, w, h, r, fill) => {
+      g.fillStyle = INK; shape(x, y + 10, w, h, r); g.fill();
+      g.fillStyle = fill; shape(x, y, w, h, r); g.fill();
+      g.lineWidth = 8; g.strokeStyle = INK; g.stroke();
+    };
+    plate(250, 84, 700, 486, 26, '#f6f1df');
+    plate(300, 30, 600, 104, 20, '#f4c531');
+    const logo = document.querySelector('.sign img');
+    if (logo && logo.complete && logo.naturalWidth) g.drawImage(logo, 318, 46, 72, 72);
+    g.fillStyle = INK; g.textBaseline = 'middle'; g.textAlign = 'left';
+    g.font = font(900, 56); g.fillText('Camping Sofia', 412, 86);
+    g.textAlign = 'center';
+    g.font = font(900, 190); g.fillText(String(top), 600, n ? 262 : 300);
+    g.font = font(600, 32); g.fillText(L.imgPoints, 600, n ? 372 : 420);
+    if (n) {
+      const cols = [[n, L.imgParked], [Math.round(stats.acc / n), L.imgAcc], [Math.round(stats.spd / n), L.imgSpd]];
+      cols.forEach(([v, label], i) => {
+        const x = 400 + i * 200;
+        g.font = font(900, 46); g.fillText(String(v), x, 438);
+        g.font = font(600, 22); g.fillText(label, x, 476);
+      });
+    }
+    g.font = font(800, 30); g.fillText(`${L.imgBeat}  camping-sofia.com`, 600, 530);
+    return c;
+  }
+
   function openCard() {
     if (!card.showModal || card.open) return;
     const now = score(), top = Math.max(best, now), n = parkedCount, enc = encodeURIComponent;
@@ -1187,7 +1225,22 @@
     $('sh-wa').href = `https://wa.me/?text=${enc(`${text} ${SITE}`)}`;
     $('sh-tg').href = `https://t.me/share/url?url=${enc(SITE)}&text=${enc(text)}`;
     $('sh-native').hidden = !navigator.share;
-    $('sh-native').onclick = () => { navigator.share({ title: 'Camping Sofia', text, url: SITE }).catch(() => { /* closed without sharing */ }); };
+    $('sh-native').onclick = () => {
+      const data = { title: 'Camping Sofia', text, url: SITE };
+      if (pic && navigator.canShare && navigator.canShare({ files: [pic] })) data.files = [pic];   // phones attach the picture
+      navigator.share(data).catch(() => { /* closed without sharing */ });
+    };
+    pic = null; $('sh-pic').hidden = true; $('sh-img').hidden = true;
+    try {
+      scoreImage(top).toBlob((b) => {
+        if (!b) return;
+        pic = new File([b], 'camping-sofia-score.png', { type: 'image/png' });
+        if (picUrl) URL.revokeObjectURL(picUrl);
+        picUrl = URL.createObjectURL(b);
+        $('sh-img').src = picUrl; $('sh-img').hidden = false;
+        $('sh-pic').href = picUrl; $('sh-pic').hidden = false;
+      }, 'image/png');
+    } catch (e) { /* no picture: the links still work */ }
     $('sh-copy').textContent = L.copy;
     $('sh-copy').onclick = () => {
       const say = (t) => () => { $('sh-copy').textContent = t; };

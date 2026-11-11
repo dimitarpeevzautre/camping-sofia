@@ -118,6 +118,8 @@ button.plate:active { transform: translateY(3px); box-shadow: none; }
 .stats div { display: flex; justify-content: space-between; gap: 16px; padding: 6px 0; border-bottom: 2px dotted rgba(18, 33, 26, 0.3); }
 .stats dt { font-size: 0.95rem; }
 .stats dd { margin: 0; font-weight: 800; font-variant-numeric: tabular-nums; white-space: nowrap; }
+.pic { display: block; width: 100%; height: auto; margin: 0 0 12px; border: 3px solid var(--ink); border-radius: 8px; }
+.pic[hidden] { display: none; }
 .share { display: flex; flex-wrap: wrap; gap: 8px; }
 .share a, .share button {
   font: inherit; font-size: 0.9rem; font-weight: 800; color: var(--ink); text-decoration: none; cursor: pointer;
