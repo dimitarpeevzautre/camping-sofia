@@ -92,13 +92,15 @@
   const TYPES = {
     van: { name: 'campervan', L: 5.6, Wd: 2.1, wb: 3.3, rear: 1.0, vmax: 10, z: 2.3 },
     motorhome: { name: 'motorhome', L: 7.2, Wd: 2.35, wb: 4.0, rear: 1.6, vmax: 8.5, z: 2.9 },
-    combo: { name: 'caravan', L: 4.5, Wd: 1.85, wb: 2.7, rear: 0.9, vmax: 8.5, z: 1.5, trailer: { hitch: 1.2, bar: 1.3, L: 5.2, Wd: 2.25, axle: 4.2, z: 2.6 } },
+    combo: { name: 'car and caravan', L: 4.5, Wd: 1.85, wb: 2.7, rear: 0.9, vmax: 8.5, z: 1.5, trailer: { hitch: 1.2, bar: 1.3, L: 5.2, Wd: 2.25, axle: 4.2, z: 2.6 } },
+    car: { name: 'car', L: 4.5, Wd: 1.85, wb: 2.7, rear: 0.9, vmax: 8.5, z: 1.5 },   // a tow car once it has unhitched
+    caravan: { name: 'caravan', L: 5.2, Wd: 2.25, wb: 0, rear: 2.3, vmax: 0, z: 2.6 },   // unhitched, its car away in town
   };
   const PAINT = ['#f2efe6', '#e6dcc4', '#d5503c', '#3f7fa6', '#f0b83a', '#5f9070', '#c9d4da', '#8b6fae'];
 
   function makeVehicle(kind, x, y, th) {
     const t = TYPES[kind];
-    return { kind, t, x, y, th, ph: th, v: 0, steer: 0, paint: PAINT[(rnd() * PAINT.length) | 0], parked: null, alpha: 1 };
+    return { kind, t, x, y, th, ph: th, v: 0, steer: 0, paint: PAINT[(rnd() * PAINT.length) | 0], side: rnd() < 0.5 ? 1 : -1, extra: (rnd() * 3) | 0, parked: null, alpha: 1 };
   }
   // Body rectangle: (x, y) is the rear axle.
   function bodyRect(v) {
@@ -157,11 +159,12 @@
 
   // ---------- game state ----------
   const guests = [];           // parked vehicles, oldest first
+  const ghosts = [];           // tow cars fading out as they leave for town; nothing can hit them
   let car = null;              // the vehicle being driven
   let target = null;           // its pitch
   let mode = 'attract';
   let parkedCount = 0, best = 0, bumps = 0, holdT = 0, patience = 1, patienceMax = 60, bumpCool = 0, shake = 0;
-  let clock = 0, lastNote = 0;
+  let clock = 0, lastNote = 0, metCaravan = false;
   try { best = +localStorage.getItem('camp-best') || 0; } catch (e) { /* private window */ }
 
   const keys = { up: false, down: false, left: false, right: false, brake: false };
@@ -202,15 +205,16 @@
     const cy = p.y + p.d / 2;
     v.x = cx; v.y = cy;
     const r = livingRect(v); v.x += cx - r.cx; v.y += cy - r.cy;
-    v.parked = { pitch: p, t: clock, side: rnd() < 0.5 ? 1 : -1 }; p.guest = v; guests.push(v);
+    v.parked = { pitch: p, t: clock }; p.guest = v; guests.push(v);
   }
-  [3, 12, 20, 27, 34, 40].forEach((i, n) => settle(makeVehicle(n % 3 === 2 ? 'motorhome' : 'van', 0, 0, 0), pitches[i]));
+  [3, 12, 20, 27, 34, 40].forEach((i, n) => settle(makeVehicle(['van', 'caravan', 'motorhome'][n % 3], 0, 0, 0), pitches[i]));
 
   function nextGuest() {
     const free = freePitches();
     if (free.length < 8) checkout();
     const roll = rnd();
-    const kind = parkedCount < 2 ? 'van' : parkedCount < 4 ? (roll < 0.6 ? 'van' : 'motorhome') : roll < 0.45 ? 'van' : roll < 0.75 ? 'motorhome' : 'combo';
+    // The second guest always tows a caravan, so everyone meets one early.
+    const kind = parkedCount === 0 ? 'van' : parkedCount === 1 ? 'combo' : roll < 0.4 ? 'van' : roll < 0.65 ? 'motorhome' : 'combo';
     car = makeVehicle(kind, 60, 80.5, -Math.PI / 2);
     const options = freePitches();
     target = options[(rnd() * options.length) | 0];
@@ -218,7 +222,8 @@
     patienceMax = Math.max(34, 75 - parkedCount * 2) + (kind === 'combo' ? 25 : kind === 'motorhome' ? 8 : 0);
     patience = patienceMax;
     hud();
-    if (parkedCount > 0) toast(`Next: a ${car.t.name} for pitch ${target.n}`, 1500);
+    if (kind === 'combo' && !metCaravan) { metCaravan = true; toast(`A car and caravan for pitch ${target.n}. Get the caravan onto the pitch`, 3800); }
+    else if (parkedCount > 0) toast(`Next: a ${car.t.name} for pitch ${target.n}`, 1500);
   }
   function checkout() {
     const leaving = guests.filter((g) => !g.leaving).slice(0, 5);
@@ -233,6 +238,7 @@
     if (matchMedia('(pointer: coarse)').matches) $('pad').hidden = false;
     parkedCount = 0;
     nextGuest();
+    setTimeout(() => document.body.classList.add('sign-away'), 5000);   // the name plate steps aside once the driving starts
     toast(`First guest: pitch ${target.n}`, 2200);
     cv.focus();
   }
@@ -245,7 +251,12 @@
     for (let i = guests.length - 1; i >= 0; i--) {
       const g = guests[i];
       if (g.leaving) { g.alpha -= dt / 1.4; if (g.alpha <= 0) { g.parked.pitch.guest = null; guests.splice(i, 1); } }
+      if (g.slide) {   // a caravan being pushed the last metre onto its pitch
+        const k = 1 - Math.exp(-dt * 3);
+        g.x = lerp(g.x, g.slide.x, k); g.y = lerp(g.y, g.slide.y, k); g.th = wrap(g.th + wrap(g.slide.th - g.th) * k);
+      }
     }
+    for (let i = ghosts.length - 1; i >= 0; i--) { ghosts[i].alpha -= dt / 1.2; if (ghosts[i].alpha <= 0) ghosts.splice(i, 1); }
     if (mode !== 'play' || !car) return;
 
     const t = car.t, v0 = car.v;
@@ -255,6 +266,8 @@
     else if (keys.up) car.v += (car.v < 0 ? 14 : 6.5) * dt;
     else if (keys.down) car.v -= (car.v > 0 ? 14 : 4.5) * dt;
     else car.v -= Math.sign(car.v) * Math.min(Math.abs(car.v), (onRoad ? 2.6 : 5) * dt);
+    car.braking = keys.brake || (keys.down && car.v > 0.3) || (keys.up && car.v < -0.3);
+    car.reversing = car.v < -0.2;
     car.v = clamp(car.v, -3.6, vmax);
     if (!onRoad && Math.abs(car.v) > 4.5) car.v *= 0.96;
 
@@ -288,9 +301,12 @@
 
     // Parked when the living part sits inside the pitch and has stopped for a moment.
     const p = target, r = livingRect(car);
-    // A car and caravan is longer than a pitch is deep, so the caravan may stand a little out onto the lane.
-    const out = car.t.trailer ? 2.4 : 0.15, top = p.laneBelow ? 0.15 : out, bottom = p.laneBelow ? out : 0.15;
-    const inside = corners(r).every((c) => c.x > p.x - 0.15 && c.x < p.x + p.w + 0.15 && c.y > p.y - top && c.y < p.y + p.d + bottom);
+    // A car and caravan is longer than a pitch is deep and hard to get square, so the caravan only has to have
+    // its middle on the pitch: once it stops, the car unhitches and the caravan is pushed the rest of the way.
+    const lane = car.t.trailer ? 1.5 : 0.15, top = p.laneBelow ? 0.15 : lane, bottom = p.laneBelow ? lane : 0.15;
+    const inside = car.t.trailer
+      ? r.cx > p.x + 0.9 && r.cx < p.x + p.w - 0.9 && r.cy > p.y - top && r.cy < p.y + p.d + bottom
+      : corners(r).every((c) => c.x > p.x - 0.15 && c.x < p.x + p.w + 0.15 && c.y > p.y - top && c.y < p.y + p.d + bottom);
     holdT = inside && Math.abs(car.v) < 0.3 ? holdT + dt : 0;
     if (holdT > 0.6) return arrived();
 
@@ -302,13 +318,26 @@
   }
 
   function arrived() {
-    const off = Math.abs(Math.sin(car.th - Math.PI / 2)) < 0.14;   // lined up with the pitch
-    car.v = 0; car.steer = 0;
-    car.parked = { pitch: target, t: clock, side: rnd() < 0.5 ? 1 : -1 };
-    target.guest = car; guests.push(car);
+    const straight = Math.abs(Math.cos(car.t.trailer ? car.ph : car.th)) < 0.14;   // lined up with the pitch
+    car.v = 0; car.steer = 0; car.braking = false; car.reversing = false;
+    let stay = car, note = bumps > 1 ? 'Parked. A few new dents, though' : bumps === 1 ? 'Parked, with one small bump' : straight ? 'Parked dead straight' : 'Parked';
+    if (car.t.trailer) {   // the caravan stays; its car unhitches and heads into town
+      const r = trailerRect(car), p = target;
+      stay = makeVehicle('caravan', 0, 0, car.ph);
+      stay.paint = car.paint; stay.side = car.side;
+      const off = stay.t.L / 2 - stay.t.rear, th = Math.sin(car.ph) >= 0 ? Math.PI / 2 : -Math.PI / 2;
+      stay.x = r.cx - Math.cos(car.ph) * off; stay.y = r.cy - Math.sin(car.ph) * off;
+      stay.slide = { x: p.x + p.w / 2 - Math.cos(th) * off, y: p.y + p.d / 2 - Math.sin(th) * off, th };
+      const tow = makeVehicle('car', car.x, car.y, car.th);
+      tow.paint = car.paint; tow.extra = car.extra;
+      ghosts.push(tow);
+      if (bumps === 0) note = 'Caravan pitched. The car is off to town';
+    }
+    stay.parked = { pitch: target, t: clock + (stay === car ? 0 : 1) };
+    target.guest = stay; guests.push(stay);
     parkedCount++;
     if (parkedCount > best) { best = parkedCount; try { localStorage.setItem('camp-best', String(best)); } catch (e) { /* private window */ } }
-    toast(bumps > 1 ? 'Parked. A few new dents, though' : bumps === 1 ? 'Parked, with one small bump' : off ? 'Parked dead straight' : 'Parked', 1400);
+    toast(note, 1400);
     car = null;
     setTimeout(() => { if (mode === 'play' && !car) nextGuest(); }, 1100);
     hud();
@@ -328,7 +357,7 @@
   addEventListener('resize', resize); resize();
 
   function updateCamera(dt) {
-    const base = clamp(Math.min(vw, vh) / 44, 8.5, 22);
+    const base = clamp(Math.min(vw, vh) / 38, 9.5, 26);
     let tx, ty, tz;
     if (mode === 'play' && car) {
       const look = clamp(car.v, -3, 10) * 0.75;
@@ -440,33 +469,166 @@
     return top;
   }
 
-  function drawVehicle(v, night) {
+  // Each vehicle is a stack of extruded shapes drawn in its own frame (l along its length, w across).
+  // A shape whose top outline is smaller than its base gets sloping sides, which is how windscreens show from above.
+  const GLASS = '#26343d', SKYLIGHT = 'rgba(150,182,200,0.92)', SHELL = '#f3f0e6', SHELL_WALL = '#ddd8c9', TRIM = '#34383b';
+  const HEAD = '#fff3c4', TAIL = '#a8281f', TAIL_ON = '#ff5a45', EDGE = 'rgba(18,33,26,0.22)';
+  const SUN = [-0.55, -0.83];   // where the light comes from, for shading walls
+
+  // Outline of a rounded rectangle, front-left corner first, going round by the right-hand side.
+  function hull(l0, l1, hw, rf, rb = rf) {
+    const pts = [];
+    for (const [cl, cw, rad, a0] of [[l1 - rf, -hw + rf, rf, -Math.PI / 2], [l1 - rf, hw - rf, rf, 0], [l0 + rb, hw - rb, rb, Math.PI / 2], [l0 + rb, -hw + rb, rb, Math.PI]]) {
+      for (let k = 0; k <= 3; k++) { const a = a0 + (k / 3) * Math.PI / 2; pts.push([cl + Math.cos(a) * rad, cw + Math.sin(a) * rad]); }
+    }
+    return pts;
+  }
+  const box = (l0, l1, w0, w1) => [[l1, Math.min(w0, w1)], [l1, Math.max(w0, w1)], [l0, Math.max(w0, w1)], [l0, Math.min(w0, w1)]];
+
+  // Outline `lo` at height z0 rising to outline `hi` at z1. `wall` is a colour, or a function of the wall's
+  // outward direction (nl forward, nw sideways) returning one. `top` may be left out when something sits on it.
+  function solid(r, lo, z0, hi, z1, wall, top) {
+    const c = Math.cos(r.a), s = Math.sin(r.a), n = lo.length;
+    const A = lo.map(([l, w]) => RP(r, l, w, z0)), B = hi.map(([l, w]) => RP(r, l, w, z1));
+    for (let i = 0; i < n; i++) {
+      const j = (i + 1) % n;
+      let nl = lo[j][1] - lo[i][1], nw = lo[i][0] - lo[j][0];
+      const len = Math.hypot(nl, nw);
+      if (len < 1e-6) continue;
+      nl /= len; nw /= len;
+      const raw = typeof wall === 'function' ? wall(nl, nw) : wall;
+      const col = raw === GLASS ? GLASS : shade(raw, 0.84 + 0.2 * ((c * nl - s * nw) * SUN[0] + (s * nl + c * nw) * SUN[1]));
+      poly([A[i], A[j], B[j], B[i]], col, col);
+    }
+    if (top) poly(B, top, EDGE);
+  }
+  // A flat panel on the nose (end = 1) or the tail (end = -1), drawn only when that end faces away from the camera.
+  function endPanel(r, end, w0, w1, z0, z1, col) {
+    const c = Math.cos(r.a) * end, s = Math.sin(r.a) * end;
+    if (c * (r.cx + c * r.hl - cam.x) + s * (r.cy + s * r.hl - cam.y) <= 0) return;
+    const l = end * (r.hl + 0.01);
+    poly([RP(r, l, w0, z0), RP(r, l, w1, z0), RP(r, l, w1, z1), RP(r, l, w0, z1)], col);
+  }
+  function wheel(r, l, w, turn = 0) {
+    const c = Math.cos(r.a), s = Math.sin(r.a);
+    const q = { cx: r.cx + c * l - s * w, cy: r.cy + s * l + c * w, hl: 0.36, hw: 0.14, a: r.a + turn };
+    const o = box(-0.36, 0.36, -0.14, 0.14);
+    solid(q, o, 0, o, 0.7, '#1b1d1f', '#2a2d30');
+  }
+  const tailOf = (v) => (v === car && car.reversing ? '#f4f4ee' : v === car && car.braking ? TAIL_ON : TAIL);
+  const accentOf = (v) => (['#f2efe6', '#e6dcc4', '#c9d4da'].includes(v.paint) ? '#3f7fa6' : v.paint);
+  function panel(r, l0, l1, w0, w1, z, lines) {   // a solar panel lying on a roof
+    poly(quad(r, l0, l1, w0, w1, z), '#20324c', '#0f1b2c');
+    ctx.strokeStyle = 'rgba(160,190,220,0.35)';
+    for (let i = 1; i < lines; i++) { const l = lerp(l0, l1, i / lines); ctx.beginPath(); ctx.moveTo(...RP(r, l, w0, z)); ctx.lineTo(...RP(r, l, w1, z)); ctx.stroke(); }
+  }
+  function awningCase(r, v, l0, l1, z) {   // the rolled-up awning on the side it will open from
+    const o = box(l0, l1, v.side * (r.hw - 0.17), v.side * (r.hw - 0.01));
+    solid(r, o, z - 0.16, o, z + 0.04, TRIM, '#4a4f54');
+  }
+
+  function drawCar(b, v) {
+    const hl = b.hl, hw = b.hw, p = v.paint;
+    for (const w of [-1, 1]) { wheel(b, hl - 0.9, w * (hw - 0.1), v.steer); wheel(b, -hl + 0.9, w * (hw - 0.1)); }
+    solid(b, hull(-hl, hl, hw, 0.5, 0.35), 0.28, hull(-hl + 0.04, hl - 0.06, hw - 0.05, 0.5, 0.35), 0.82, shade(p, 0.84), p);
+    for (const w of [-1, 1]) {
+      poly(quad(b, hl - 0.36, hl - 0.14, w * (hw - 0.62), w * (hw - 0.22), 0.83), HEAD);
+      poly(quad(b, -hl + 0.08, -hl + 0.26, w * (hw - 0.62), w * (hw - 0.18), 0.83), tailOf(v));
+      poly(quad(b, hl - 1.62, hl - 1.42, w * (hw - 0.04), w * (hw + 0.16), 0.9), shade(p, 0.6));       // mirrors
+    }
+    solid(b, hull(-hl + 0.5, hl - 1.3, hw - 0.1, 0.3), 0.82, hull(-hl + 1.0, hl - 2.0, hw - 0.24, 0.25), 1.42, GLASS, shade(p, 1.06));
+    if (v.extra === 1) { const o = hull(-hl + 1.1, hl - 2.15, 0.4, 0.2); solid(b, o, 1.46, o, 1.8, '#2b2f33', '#3d4247'); }   // roof box
+    const [tx, ty] = RP(b, -hl - 0.15, 0, 0.4);                                                        // tow ball
+    ctx.fillStyle = TRIM; ctx.beginPath(); ctx.arc(tx, ty, cam.s * 0.1, 0, TAU); ctx.fill();
+  }
+
+  function drawVan(b, v) {
+    const hl = b.hl, hw = b.hw, p = v.paint, up = v.extra === 2 ? SHELL : p;   // some are two-tone
+    for (const w of [-1, 1]) { wheel(b, hl - 1.3, w * (hw - 0.1), v.steer); wheel(b, -hl + 1.0, w * (hw - 0.1)); }
+    const low = hull(-hl, hl, hw, 0.4, 0.22);
+    solid(b, low, 0.3, low, 1.15, shade(p, 0.86), p);
+    for (const w of [-1, 1]) {
+      endPanel(b, 1, w * 0.3, w * 0.62, 0.68, 0.95, HEAD);
+      endPanel(b, -1, w * 0.56, w * 0.8, 0.6, 1.1, tailOf(v));
+      poly(quad(b, hl - 1.2, hl - 1.0, w * (hw - 0.03), w * (hw + 0.2), 1.2), TRIM);                   // mirrors
+    }
+    solid(b, hull(-hl + 0.03, hl - 0.9, hw - 0.03, 0.3, 0.2), 1.15, hull(-hl + 0.12, hl - 1.7, hw - 0.14, 0.3, 0.2), 2.05,
+      (nl) => (Math.abs(nl) > 0.5 ? GLASS : up), up);
+    const pop = hull(-hl + 0.4, hl - 1.95, hw - 0.3, 0.25);                                            // pop-top roof
+    solid(b, pop, 2.05, pop, 2.3, shade(up, 0.8), shade(up, 1.05));
+    poly(quad(b, 0.0, 0.7, -0.4, 0.4, 2.31), SKYLIGHT, EDGE);
+    if (v.extra === 1) panel(b, -hl + 0.7, -0.4, -0.55, 0.55, 2.31, 3);
+    awningCase(b, v, -1.7, 1.0, 2.1);
+  }
+
+  function drawMotorhome(b, v) {
+    const hl = b.hl, hw = b.hw, p = v.paint, acc = accentOf(v);
+    for (const w of [-1, 1]) { wheel(b, hl - 1.6, w * (hw - 0.12), v.steer); wheel(b, -hl + 1.6, w * (hw - 0.1)); }
+    const cab = hull(hl - 2.4, hl, hw - 0.1, 0.45, 0.1);
+    solid(b, cab, 0.3, cab, 1.2, shade(p, 0.86), p);
+    for (const w of [-1, 1]) {
+      endPanel(b, 1, w * 0.28, w * 0.58, 0.7, 0.98, HEAD);
+      poly(quad(b, hl - 1.5, hl - 1.25, w * (hw - 0.12), w * (hw + 0.2), 1.5), TRIM);                  // mirrors
+    }
+    solid(b, hull(hl - 2.3, hl - 0.8, hw - 0.14, 0.3, 0.1), 1.2, hull(hl - 2.3, hl - 1.5, hw - 0.24, 0.25, 0.1), 1.95, GLASS, p);
+    const hab = hull(-hl, hl - 1.9, hw, 0.14);                                                         // the living box, with a coloured band
+    solid(b, hab, 0.45, hab, 1.3, SHELL_WALL);
+    solid(b, hab, 1.3, hab, 1.62, acc);
+    solid(b, hab, 1.62, hab, 2.9, SHELL_WALL);
+    solid(b, hull(hl - 2.2, hl - 0.7, hw, 0.5, 0.1), 1.95, hull(hl - 2.2, hl - 0.95, hw - 0.03, 0.5, 0.1), 2.9, SHELL_WALL);   // bed over the cab
+    poly(hull(-hl, hl - 0.95, hw - 0.02, 0.5, 0.14).map(([l, w]) => RP(b, l, w, 2.9)), SHELL, EDGE);   // one roof over both
+    for (const w of [-1, 1]) endPanel(b, -1, w * 0.68, w * 0.95, 0.7, 1.25, tailOf(v));
+    poly(quad(b, hl - 2.0, hl - 1.35, -0.45, 0.45, 2.91), SKYLIGHT, EDGE);
+    panel(b, -0.7, 0.9, -0.7, 0.7, 2.91, 4);
+    const hatch = box(-2.3, -1.6, -0.35, 0.35);
+    solid(b, hatch, 2.9, hatch, 3.06, '#b9c2c4', '#d6dee0');
+    const [dx, dy] = RP(b, -hl + 0.7, -v.side * 0.45, 3.0);                                            // satellite dome
+    ctx.fillStyle = '#e4e2da'; ctx.strokeStyle = EDGE; ctx.beginPath(); ctx.arc(dx, dy, cam.s * 0.36, 0, TAU); ctx.fill(); ctx.stroke();
+    awningCase(b, v, -2.7, 1.3, 2.9);
+  }
+
+  // r is the caravan body; its drawbar reaches 1.3 m ahead of it, to the tow ball.
+  function drawCaravan(r, v) {
+    const hl = r.hl, hw = r.hw, acc = accentOf(v);
+    ctx.strokeStyle = TRIM; ctx.lineWidth = Math.max(2, cam.s * 0.14); ctx.lineJoin = 'round';         // A-frame
+    ctx.beginPath(); ctx.moveTo(...RP(r, hl, -0.7, 0.45)); ctx.lineTo(...RP(r, hl + 1.3, 0, 0.45)); ctx.lineTo(...RP(r, hl, 0.7, 0.45)); ctx.stroke();
+    ctx.lineWidth = 1;
+    const [jx, jy] = RP(r, hl + 0.92, 0.2, 0.2);                                                       // jockey wheel
+    ctx.fillStyle = '#1b1d1f'; ctx.beginPath(); ctx.arc(jx, jy, cam.s * 0.13, 0, TAU); ctx.fill();
+    const gas = hull(hl - 0.05, hl + 0.5, 0.6, 0.15);                                                  // gas locker
+    solid(r, gas, 0.5, gas, 1.2, '#b4b7b2', '#cfd1cb');
+    for (const w of [-1, 1]) wheel(r, -0.3, w * (hw - 0.08));
+    const o = hull(-hl, hl, hw, 0.32, 0.2);
+    solid(r, o, 0.45, o, 1.15, SHELL_WALL);
+    solid(r, o, 1.15, o, 1.7, (nl) => (nl > 0.5 ? GLASS : acc));                                       // front window, coloured band
+    solid(r, o, 1.7, hull(-hl + 0.12, hl - 0.5, hw - 0.06, 0.32, 0.2), 2.6, SHELL_WALL, SHELL);
+    for (const w of [-1, 1]) endPanel(r, -1, w * 0.6, w * 0.88, 0.7, 1.08, tailOf(v));
+    poly(quad(r, hl - 1.75, hl - 0.95, -0.6, 0.6, 2.61), SKYLIGHT, EDGE);
+    const hatch = box(-0.9, -0.3, -0.3, 0.3);
+    solid(r, hatch, 2.6, hatch, 2.74, '#b9c2c4', '#d6dee0');
+    const [vx, vy] = RP(r, -hl + 0.7, v.side * 0.4, 2.62);                                             // roof vent
+    ctx.fillStyle = '#c9cdc8'; ctx.strokeStyle = EDGE; ctx.beginPath(); ctx.arc(vx, vy, cam.s * 0.2, 0, TAU); ctx.fill(); ctx.stroke();
+    awningCase(r, v, -1.9, 1.5, 2.6);
+  }
+
+  function drawVehicle(v) {
+    const b = bodyRect(v);
+    const [sx, sy] = P(b.cx, b.cy), far = cam.s * 14;
+    if (sx < -far || sx > vw + far || sy < -far || sy > vh + far) return;
     ctx.globalAlpha = clamp(v.alpha, 0, 1);
-    const b = bodyRect(v), t = v.t;
-    if (t.trailer) {
-      const tr = t.trailer, r = trailerRect(v), hp = hitchPoint(v);
-      ctx.strokeStyle = '#3a3a3a'; ctx.lineWidth = Math.max(2, cam.s * 0.16);   // drawbar
-      ctx.beginPath(); ctx.moveTo(...P(hp.x, hp.y, 0.4)); ctx.lineTo(...RP(r, r.hl, -0.7, 0.4)); ctx.moveTo(...P(hp.x, hp.y, 0.4)); ctx.lineTo(...RP(r, r.hl, 0.7, 0.4)); ctx.stroke();
-      drawBox(r, tr.z, '#d9d4c4', '#f4f1e8');
-      poly(quad(r, -r.hl + 0.3, r.hl - 0.3, -0.18, 0.18, tr.z), shade(v.paint, 1));          // stripe
-      poly(quad(r, 0.2, 1.3, -0.5, 0.5, tr.z), 'rgba(140,170,190,0.85)');                    // skylight
-    }
-    drawBox(b, t.z, shade(v.paint, 0.8), v.paint);
-    const nose = b.hl;
-    poly(quad(b, nose - (t.trailer ? 1.9 : 1.5), nose - 0.55, -b.hw + 0.18, b.hw - 0.18, t.z), '#27343c');   // windscreen
-    if (t.trailer) poly(quad(b, -b.hl + 0.4, -b.hl + 1.1, -b.hw + 0.2, b.hw - 0.2, t.z), '#27343c');
-    else {
-      poly(quad(b, -0.9, 0.3, -0.55, 0.55, t.z), 'rgba(140,170,190,0.85)');                    // skylight
-      poly(quad(b, -b.hl + 0.25, nose - 1.8, -b.hw + 0.02, -b.hw + 0.22, t.z), shade(v.paint, 0.62));
-    }
+    ctx.lineWidth = 1; ctx.lineJoin = 'round';
+    if (v.kind === 'van') drawVan(b, v);
+    else if (v.kind === 'motorhome') drawMotorhome(b, v);
+    else if (v.kind === 'caravan') drawCaravan(b, v);
+    else { drawCar(b, v); if (v.t.trailer) drawCaravan(trailerRect(v), v); }
     if (v.parked && v.alpha > 0.9) drawCampLife(v);
     ctx.globalAlpha = 1;
-    if (!v.parked) v._lights = [RP(b, nose, -b.hw * 0.6, 0.7), RP(b, nose, b.hw * 0.6, 0.7)];
+    if (!v.parked) v._lights = [RP(b, b.hl, -b.hw * 0.6, 0.7), RP(b, b.hl, b.hw * 0.6, 0.7)];
   }
 
   // Once parked, a guest rolls out an awning and puts two chairs under it.
   function drawCampLife(v) {
-    const r = livingRect(v), z = (v.t.trailer ? v.t.trailer.z : v.t.z) - 0.2, side = v.parked.side;
+    const r = livingRect(v), z = (v.t.trailer ? v.t.trailer.z : v.t.z) - 0.2, side = v.side;
     const w0 = side * r.hw, w1 = side * (r.hw + 2.1);
     const open = clamp((clock - v.parked.t) / 0.8, 0, 1), wm = lerp(w0, w1, open);
     for (let i = 0; i < 6; i++) {
@@ -513,14 +675,14 @@
     ctx.fillStyle = 'rgba(15,30,20,0.22)';
     for (const t of trees) { const [x, y] = P(t.x + 1.6, t.y + 1.6); if (x < -80 || x > vw + 80 || y < -80 || y > vh + 80) continue; ctx.beginPath(); ctx.arc(x, y, t.r * cam.s, 0, TAU); ctx.fill(); }
     for (const b of buildings) { const [x, y] = P(b.x + 1.2, b.y + 1.2); ctx.fillRect(x, y, b.w * cam.s, b.h * cam.s); }
-    const all = car ? [...guests, car] : guests;
+    const all = car ? [...guests, ...ghosts, car] : [...guests, ...ghosts];
     for (const v of all) for (const r of rectsOf(v)) { ctx.globalAlpha = clamp(v.alpha, 0, 1); poly(corners(r).map((c) => P(c.x + 0.5, c.y + 0.5)), 'rgba(15,30,20,0.3)'); }
     ctx.globalAlpha = 1;
 
     // campfire embers
     { const [x, y] = P(fire.x, fire.y); ctx.fillStyle = '#e8792c'; ctx.beginPath(); ctx.arc(x, y, cam.s * (0.5 + 0.08 * Math.sin(clock * 9)), 0, TAU); ctx.fill(); ctx.fillStyle = '#f9d34c'; ctx.beginPath(); ctx.arc(x, y, cam.s * 0.25, 0, TAU); ctx.fill(); }
 
-    for (const v of all) drawVehicle(v, night);
+    for (const v of all) drawVehicle(v);
 
     // tents
     for (const t of tents) {
@@ -609,5 +771,5 @@
   requestAnimationFrame(tick);
 
   // For automated checks only: /?debug exposes the state.
-  if (location.search.includes('debug')) window.camp = { get car() { return car; }, get target() { return target; }, get parked() { return parkedCount; }, guests, pitches, keys, blocked, livingRect, corners, setClock: (t) => { clock = t; } };
+  if (location.search.includes('debug')) window.camp = { get car() { return car; }, get target() { return target; }, get parked() { return parkedCount; }, guests, pitches, keys, blocked, livingRect, corners, setClock: (t) => { clock = t; }, give: (kind) => { car = makeVehicle(kind, 60, 80.5, -Math.PI / 2); } };
 })();
