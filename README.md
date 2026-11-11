@@ -36,3 +36,6 @@ Pushing to `gh-pages` (the default branch) publishes the repository root to GitH
 
 - No waiting list. There is nowhere to send sign-ups yet; add a form to the start card once there is.
 - No opening date, address or real photos. The camp in the game is made up, and the footer says so.
+
+Pressing the Score plate pauses the game and opens a card with the figures behind the score (parkings, average
+accuracy and speed, bumps, time played) and links to share it.
