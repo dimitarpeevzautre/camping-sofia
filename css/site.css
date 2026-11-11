@@ -89,6 +89,42 @@ button:focus-visible { outline: 3px solid var(--lake); outline-offset: 3px; }
 }
 .pad button.on { background: var(--plate); transform: translateY(3px); box-shadow: 0 1px 0 var(--ink); }
 
+/* The Score plate is a button: it opens the score card. */
+button.plate { font: inherit; color: inherit; cursor: pointer; }
+button.plate:hover { transform: translateY(1px); box-shadow: 0 2px 0 var(--ink); }
+button.plate:active { transform: translateY(3px); box-shadow: none; }
+
+.card {
+  width: min(420px, calc(100vw - 28px)); max-height: calc(100dvh - 28px); padding: 0; overflow: auto;
+  background: var(--paper); color: var(--ink); border: 3px solid var(--ink); border-radius: 12px; box-shadow: 0 5px 0 var(--ink);
+}
+.card::backdrop { background: rgba(18, 33, 26, 0.6); }
+.card-in { padding: 20px 22px 22px; }
+.card h2 { margin: 0 0 14px; font-size: 1.6rem; font-weight: 900; line-height: 1.08; letter-spacing: -0.01em; }
+.card h3 { margin: 18px 0 8px; font-size: 1rem; font-weight: 800; }
+.totals { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.totals .plate .v { font-size: 2rem; }
+.totals .plate:first-child { background: var(--plate); }
+.stats { margin: 14px 0 0; }
+.stats div { display: flex; justify-content: space-between; gap: 16px; padding: 6px 0; border-bottom: 2px dotted rgba(18, 33, 26, 0.3); }
+.stats dt { font-size: 0.95rem; }
+.stats dd { margin: 0; font-weight: 800; font-variant-numeric: tabular-nums; white-space: nowrap; }
+.share { display: flex; flex-wrap: wrap; gap: 8px; }
+.share a, .share button {
+  font: inherit; font-size: 0.9rem; font-weight: 800; color: var(--ink); text-decoration: none; cursor: pointer;
+  background: #fff; border: 3px solid var(--ink); border-radius: 8px; box-shadow: 0 3px 0 var(--ink); padding: 6px 12px;
+}
+.share [hidden] { display: none; }
+.share a:hover, .share button:hover { transform: translateY(1px); box-shadow: 0 2px 0 var(--ink); }
+.share a:active, .share button:active { transform: translateY(3px); box-shadow: none; }
+.share a:focus-visible { outline: 3px solid var(--lake); outline-offset: 3px; }
+#card-close {
+  margin-top: 20px; width: 100%; font-size: 1.05rem; font-weight: 800; padding: 11px 18px; border-radius: 10px;
+  background: var(--plate); border: 3px solid var(--ink); box-shadow: 0 4px 0 var(--ink);
+}
+#card-close:hover { transform: translateY(1px); box-shadow: 0 3px 0 var(--ink); }
+#card-close:active { transform: translateY(4px); box-shadow: none; }
+
 .note {
   position: fixed; left: 0; right: 0; bottom: 0; padding: 8px 14px max(8px, env(safe-area-inset-bottom));
   font-size: 0.8rem; font-weight: 600; color: var(--paper); text-align: center;
