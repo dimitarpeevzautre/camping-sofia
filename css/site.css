@@ -68,10 +68,19 @@ button { font-family: inherit; color: var(--ink); cursor: pointer; }
 #play:active { transform: translateY(4px); box-shadow: none; }
 button:focus-visible { outline: 3px solid var(--lake); outline-offset: 3px; }
 
+.by { margin: 14px 0 0 !important; font-size: 0.85rem !important; font-weight: 600; }
+.by a, .note a { color: inherit; font-weight: 800; text-underline-offset: 2px; }
+.note a { pointer-events: auto; }
+.card .by { text-align: center; }
+.lang {
+  float: right; margin: -6px -8px 6px 10px; font-size: 0.8rem; font-weight: 800; padding: 4px 9px; border-radius: 7px;
+  background: #fff; border: 2px solid var(--ink);
+}
+
 .toast {
   position: fixed; left: 50%; top: 24%; transform: translate(-50%, 0) scale(0.9);
   background: var(--ink); color: var(--paper); font-weight: 800; font-size: 1.25rem;
-  padding: 10px 18px; border-radius: 10px; opacity: 0; pointer-events: none; white-space: nowrap;
+  padding: 10px 18px; border-radius: 10px; opacity: 0; pointer-events: none; width: max-content; max-width: calc(100vw - 24px); text-align: center;
   transition: opacity .18s ease, transform .18s ease;
 }
 .toast.on { opacity: 1; transform: translate(-50%, 0) scale(1); }
@@ -109,6 +118,8 @@ button.plate:active { transform: translateY(3px); box-shadow: none; }
 .stats div { display: flex; justify-content: space-between; gap: 16px; padding: 6px 0; border-bottom: 2px dotted rgba(18, 33, 26, 0.3); }
 .stats dt { font-size: 0.95rem; }
 .stats dd { margin: 0; font-weight: 800; font-variant-numeric: tabular-nums; white-space: nowrap; }
+.pic { display: block; width: 100%; height: auto; margin: 0 0 12px; border: 3px solid var(--ink); border-radius: 8px; }
+.pic[hidden] { display: none; }
 .share { display: flex; flex-wrap: wrap; gap: 8px; }
 .share a, .share button {
   font: inherit; font-size: 0.9rem; font-weight: 800; color: var(--ink); text-decoration: none; cursor: pointer;
