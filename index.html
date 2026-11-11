@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Camping Sofia: coming soon</title>
-<meta name="description" content="Camping Sofia is on its way: your base to enjoy Sofia. While you wait, park the guests in our little camp game.">
+<meta name="description" content="Camping Sofia is on its way: your base to enjoy Sofia, from thestable.bg. While you wait, park the guests in our little camp game.">
 <link rel="canonical" href="https://camping-sofia.com/">
 <meta property="og:title" content="Camping Sofia: coming soon">
 <meta property="og:description" content="Your base to enjoy Sofia. While you wait, park the guests.">
@@ -17,80 +17,83 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Overpass:wght@400;600;800;900&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="/css/site.css?v=4">
+<link rel="stylesheet" href="/css/site.css?v=5">
 </head>
 <body>
-<canvas id="camp" aria-label="A top-down view of a campsite. Drive each arriving camper to its pitch."></canvas>
+<canvas id="camp" data-a="camp" aria-label="A top-down view of a campsite. Drive each arriving camper to its pitch."></canvas>
 
 <header class="sign">
   <img src="/logo.webp" width="56" height="56" alt="">
   <div>
     <h1>Camping Sofia</h1>
-    <p>Coming soon. Your base to enjoy Sofia.</p>
+    <p data-t="tagline">Coming soon. Your base to enjoy Sofia.</p>
   </div>
 </header>
 
 <section class="hud" id="hud" hidden aria-live="polite">
-  <div class="plate"><span class="k">Pitch</span><span class="v" id="hud-pitch">–</span></div>
-  <button class="plate" id="score-btn" type="button" aria-haspopup="dialog" title="Your statistics and sharing"><span class="k">Score</span><span class="v" id="hud-score">0</span></button>
-  <div class="plate"><span class="k">Best</span><span class="v" id="hud-best">0</span></div>
-  <div class="patience" title="How long this guest will wait"><i id="hud-patience"></i></div>
+  <div class="plate"><span class="k" data-t="pitch">Pitch</span><span class="v" id="hud-pitch">–</span></div>
+  <button class="plate" id="score-btn" type="button" aria-haspopup="dialog" data-a="scoreBtn" title="Your statistics and sharing"><span class="k" data-t="score">Score</span><span class="v" id="hud-score">0</span></button>
+  <div class="plate"><span class="k" data-t="best">Best</span><span class="v" id="hud-best">0</span></div>
+  <div class="patience" data-a="patience" title="How long this guest will wait"><i id="hud-patience"></i></div>
 </section>
 
 <div class="toast" id="toast" role="status"></div>
 
 <section class="start" id="start">
-  <h2>We're still building the real camp.</h2>
-  <p>Until it opens, the guests keep coming to this one. Drive each of them to the pitch that lights up. Park square and quickly for points; bumps cost you, and mind the children.</p>
-  <button id="play" type="button">Start parking</button>
-  <p class="keys" id="keys">Arrow keys or WASD to drive. Space to brake.</p>
+  <button type="button" class="lang" id="lang">Български</button>
+  <h2 data-t="h2">We're still building the real camp.</h2>
+  <p data-t="intro">Until it opens, the guests keep coming to this one. Drive each of them to the pitch that lights up. Park square and quickly for points; bumps cost you, and mind the children.</p>
+  <button id="play" type="button" data-t="play">Start parking</button>
+  <p class="keys" id="keys" data-t="keys">Arrow keys or WASD to drive. Space to brake.</p>
+  <p class="by" data-t="by">Camping Sofia is a project by <a href="https://thestable.bg" target="_blank" rel="noopener">thestable.bg</a></p>
 </section>
 
 <dialog class="card" id="card" aria-labelledby="card-title">
   <div class="card-in">
-    <h2 id="card-title">Your camp so far</h2>
+    <h2 id="card-title" data-t="cardTitle">Your camp so far</h2>
     <div class="totals">
-      <div class="plate"><span class="k">Score</span><span class="v" id="st-score">0</span></div>
-      <div class="plate"><span class="k">Best</span><span class="v" id="st-best">0</span></div>
+      <div class="plate"><span class="k" data-t="score">Score</span><span class="v" id="st-score">0</span></div>
+      <div class="plate"><span class="k" data-t="best">Best</span><span class="v" id="st-best">0</span></div>
     </div>
     <dl class="stats">
-      <div><dt>Guests parked</dt><dd id="st-parked">0</dd></div>
-      <div><dt>On site now</dt><dd id="st-onsite">0</dd></div>
-      <div><dt>Average accuracy</dt><dd id="st-acc">–</dd></div>
-      <div><dt>Average speed</dt><dd id="st-spd">–</dd></div>
-      <div><dt>Best single parking</dt><dd id="st-top">–</dd></div>
-      <div><dt>Bumps</dt><dd id="st-bumps">0</dd></div>
-      <div><dt>People you startled</dt><dd id="st-scares">0</dd></div>
-      <div><dt>Guests who gave up waiting</dt><dd id="st-gaveup">0</dd></div>
-      <div><dt>Time at the wheel</dt><dd id="st-time">0:00</dd></div>
+      <div><dt data-t="stParked">Guests parked</dt><dd id="st-parked">0</dd></div>
+      <div><dt data-t="stOnsite">On site now</dt><dd id="st-onsite">0</dd></div>
+      <div><dt data-t="stAcc">Average accuracy</dt><dd id="st-acc">–</dd></div>
+      <div><dt data-t="stSpd">Average speed</dt><dd id="st-spd">–</dd></div>
+      <div><dt data-t="stTop">Best single parking</dt><dd id="st-top">–</dd></div>
+      <div><dt data-t="stBumps">Bumps</dt><dd id="st-bumps">0</dd></div>
+      <div><dt data-t="stScares">People you startled</dt><dd id="st-scares">0</dd></div>
+      <div><dt data-t="stGaveUp">Guests who gave up waiting</dt><dd id="st-gaveup">0</dd></div>
+      <div><dt data-t="stTime">Time at the wheel</dt><dd id="st-time">0:00</dd></div>
     </dl>
-    <h3>Share your score</h3>
+    <h3 data-t="shareTitle">Share your score</h3>
     <div class="share">
-      <button type="button" id="sh-native" hidden>Share</button>
+      <button type="button" id="sh-native" data-t="shareNative" hidden>Share</button>
       <a id="sh-fb" target="_blank" rel="noopener">Facebook</a>
       <a id="sh-x" target="_blank" rel="noopener">X</a>
       <a id="sh-wa" target="_blank" rel="noopener">WhatsApp</a>
       <a id="sh-tg" target="_blank" rel="noopener">Telegram</a>
       <button type="button" id="sh-copy">Copy text</button>
     </div>
-    <button type="button" id="card-close">Back to parking</button>
+    <button type="button" id="card-close" data-t="close">Back to parking</button>
+    <p class="by" data-t="by">Camping Sofia is a project by <a href="https://thestable.bg" target="_blank" rel="noopener">thestable.bg</a></p>
   </div>
 </dialog>
 
 <nav class="pad" id="pad" hidden aria-label="Driving controls">
   <div class="steer">
-    <button type="button" data-k="left" aria-label="Steer left">&#9664;</button>
-    <button type="button" data-k="right" aria-label="Steer right">&#9654;</button>
+    <button type="button" data-k="left" data-a="left" aria-label="Steer left">&#9664;</button>
+    <button type="button" data-k="right" data-a="right" aria-label="Steer right">&#9654;</button>
   </div>
   <div class="pedals">
-    <button type="button" data-k="down" aria-label="Reverse">R</button>
-    <button type="button" data-k="up" aria-label="Drive">D</button>
+    <button type="button" data-k="down" data-a="down" aria-label="Reverse">R</button>
+    <button type="button" data-k="up" data-a="up" aria-label="Drive">D</button>
   </div>
 </nav>
 
-<footer class="note">This camp is made up. The real one is on its way to Sofia.</footer>
+<footer class="note" data-t="note">This camp is made up. The real one is on its way to Sofia, from <a href="https://thestable.bg" target="_blank" rel="noopener">thestable.bg</a>.</footer>
 
 <noscript><p class="noscript">Camping Sofia is coming soon. Your base to enjoy Sofia.</p></noscript>
-<script src="/js/game.js?v=6" defer></script>
+<script src="/js/game.js?v=7" defer></script>
 </body>
 </html>

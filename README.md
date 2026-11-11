@@ -39,3 +39,6 @@ Pushing to `gh-pages` (the default branch) publishes the repository root to GitH
 
 Pressing the Score plate pauses the game and opens a card with the figures behind the score (parkings, average
 accuracy and speed, bumps, time played) and links to share it.
+
+The page is in English and Bulgarian. The language follows the browser, can be switched on the start card and
+can be forced with `?lang=bg` or `?lang=en`; the Bulgarian strings live at the top of `js/game.js`.

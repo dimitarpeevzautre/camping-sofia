@@ -13,6 +13,91 @@
   const $ = (id) => document.getElementById(id);
   const reduceMotion = matchMedia('(prefers-reduced-motion: reduce)').matches;
 
+  // ---------- language ----------
+  // English or Bulgarian: ?lang=, then the visitor's earlier choice, then the browser's language. The page is
+  // written in English; for Bulgarian the elements marked data-t are rewritten once at load.
+  const LANG = (() => {
+    let l = null;
+    try { l = new URLSearchParams(location.search).get('lang') || localStorage.getItem('camp-lang'); } catch (e) { /* private window */ }
+    return l === 'bg' || l === 'en' ? l : (navigator.language || '').toLowerCase().startsWith('bg') ? 'bg' : 'en';
+  })();
+  const BY = '<a href="https://thestable.bg" target="_blank" rel="noopener">thestable.bg</a>';
+  const STR = {
+    en: {
+      other: 'Български', otherCode: 'bg',
+      touchKeys: 'Steer with the left buttons. D drives, R reverses.',
+      names: { van: 'a campervan', motorhome: 'a motorhome', combo: 'a car and caravan' },
+      labels: {},
+      firstCombo: (n) => `A car and caravan for pitch ${n}. Get the caravan onto the pitch`,
+      next: (name, n) => `Next: ${name} for pitch ${n}`,
+      packed: (n, p) => `Pitch ${n} packed up and left: −${p}`,
+      first: (n) => `First guest: pitch ${n}`,
+      jackknife: 'Jackknifed. Pull forward to straighten up',
+      bump: (c) => `Bump: −${c}`,
+      gaveUp: 'That guest got tired of waiting and left: −20',
+      parked: (p, a, s) => `+${p}: accuracy ${a}, speed ${s}`,
+      careful: (who) => `Careful, that was a ${who}! −60`,
+      who: { kid: 'child', cat: 'cat', dog: 'dog', adult: 'guest' },
+      share: (n) => `I scored ${n} parking campers at Camping Sofia. Can you beat it?`,
+      copy: 'Copy text', copied: 'Copied', copyFailed: 'Could not copy',
+    },
+    bg: {
+      other: 'English', otherCode: 'en',
+      touchKeys: 'Завивайте с левите бутони. D е напред, R е назад.',
+      names: { van: 'ван', motorhome: 'кемпер', combo: 'кола с каравана' },
+      labels: { Reception: 'Рецепция' },
+      firstCombo: (n) => `Кола с каравана за място ${n}. Вкарайте караваната на мястото`,
+      next: (name, n) => `Следва: ${name} за място ${n}`,
+      packed: (n, p) => `Място ${n} си събра багажа и замина: −${p}`,
+      first: (n) => `Първи гост: място ${n}`,
+      jackknife: 'Караваната се сгъна. Дръпнете напред, за да се изправи',
+      bump: (c) => `Удар: −${c}`,
+      gaveUp: 'Гостът се отказа да чака и си тръгна: −20',
+      parked: (p, a, s) => `+${p}: точност ${a}, бързина ${s}`,
+      careful: (who) => `Внимавайте, това беше ${who}! −60`,
+      who: { kid: 'дете', cat: 'котка', dog: 'куче', adult: 'гост' },
+      share: (n) => `Събрах ${n} точки с паркиране на кемпери в Camping Sofia. Ще ме биеш ли?`,
+      copy: 'Копирай текста', copied: 'Копирано', copyFailed: 'Копирането не успя',
+      title: 'Camping Sofia: очаквайте скоро',
+      html: {
+        tagline: 'Очаквайте скоро. Вашата база за София.',
+        pitch: 'Място', score: 'Точки', best: 'Рекорд',
+        h2: 'Истинският къмпинг още се строи.',
+        intro: 'Дотогава гостите идват в този. Закарайте всеки до мястото, което свети. Паркирайте право и бързо за точки; ударите струват скъпо, и внимавайте с децата.',
+        play: 'Започнете да паркирате',
+        keys: 'Стрелки или WASD за шофиране. Интервал за спирачка.',
+        by: `Camping Sofia е проект на ${BY}`,
+        note: `Този къмпинг е измислен. Истинският идва в София, от ${BY}.`,
+        cardTitle: 'Вашият къмпинг дотук',
+        stParked: 'Паркирани гости', stOnsite: 'В къмпинга сега', stAcc: 'Средна точност', stSpd: 'Средна бързина',
+        stTop: 'Най-добро паркиране', stBumps: 'Удари', stScares: 'Стреснати хора', stGaveUp: 'Гости, които се отказаха да чакат',
+        stTime: 'Време зад волана', shareTitle: 'Споделете резултата', shareNative: 'Сподели', close: 'Обратно към паркирането',
+      },
+      aria: {
+        camp: 'Къмпинг, гледан отгоре. Закарайте всеки пристигащ гост до мястото му.',
+        patience: 'Колко още ще чака този гост', scoreBtn: 'Вашата статистика и споделяне',
+        left: 'Завий наляво', right: 'Завий надясно', down: 'Назад', up: 'Напред',
+      },
+    },
+  };
+  const L = STR[LANG];
+  document.documentElement.lang = LANG;
+  if (L.html) {
+    document.title = L.title;
+    document.querySelectorAll('[data-t]').forEach((el) => { const v = L.html[el.dataset.t]; if (v) el.innerHTML = v; });
+    document.querySelectorAll('[data-a]').forEach((el) => {
+      const v = L.aria[el.dataset.a];
+      if (v) el.setAttribute(el.hasAttribute('title') ? 'title' : 'aria-label', v);
+    });
+  }
+  $('lang').textContent = L.other;
+  $('lang').addEventListener('click', () => {
+    const u = new URL(location.href);
+    u.searchParams.delete('lang');
+    try { localStorage.setItem('camp-lang', L.otherCode); } catch (e) { u.searchParams.set('lang', L.otherCode); }   // no storage: carry it in the address
+    location.replace(u);
+  });
+
   // ---------- world ----------
   const W = 120, H = 94, CAMP_BOTTOM = 86;
   const TAU = Math.PI * 2;
@@ -233,12 +318,12 @@
     patienceMax = Math.max(34, 75 - parkedCount * 2) + (kind === 'combo' ? 25 : kind === 'motorhome' ? 8 : 0);
     patience = patienceMax;
     hud();
-    if (kind === 'combo' && !metCaravan) { metCaravan = true; toast(`A car and caravan for pitch ${target.n}. Get the caravan onto the pitch`, 3800); }
-    else if (parkedCount > 0) toast(`Next: a ${car.t.name} for pitch ${target.n}`, 1500);
+    if (kind === 'combo' && !metCaravan) { metCaravan = true; toast(L.firstCombo(target.n), 3800); }
+    else if (parkedCount > 0) toast(L.next(L.names[kind], target.n), 1500);
   }
   function packUp(g, delay = 0) {   // roll in the awning, call the family back, then drive off
     g.packing = clock + delay;
-    if (mode === 'play' && g.points) toast(`Pitch ${g.parked.pitch.n} packed up and left: \u2212${g.points}`, 2200);
+    if (mode === 'play' && g.points) toast(L.packed(g.parked.pitch.n, g.points), 2200);
     hud();
   }
   function checkout() { guests.filter((g) => !g.packing && !g.leaving).slice(0, 3).forEach((g, i) => packUp(g, i * 5)); }
@@ -251,11 +336,11 @@
     parkedCount = 0; damage = 0; Object.keys(stats).forEach((k) => { stats[k] = 0; });
     nextGuest(true);
     setTimeout(() => document.body.classList.add('sign-away'), 5000);   // the name plate steps aside once the driving starts
-    toast(`First guest: pitch ${target.n}`, 2200);
+    toast(L.first(target.n), 2200);
     cv.focus();
   }
   $('play').addEventListener('click', start);
-  if (matchMedia('(pointer: coarse)').matches) $('keys').textContent = 'Steer with the left buttons. D drives, R reverses.';
+  if (matchMedia('(pointer: coarse)').matches) $('keys').textContent = L.touchKeys;
 
   // ---------- simulation ----------
   function step(dt) {
@@ -310,7 +395,7 @@
         car.ph = wrap(car.ph + (car.v * h / tr.axle) * Math.sin(d) - (tr.hitch / tr.axle) * dth * Math.cos(d));
         if (Math.abs(wrap(car.th - car.ph)) > 1.2) {     // jackknifed: refuse the move
           car.x = px; car.y = py; car.th = pth; car.ph = pph; car.v = 0;
-          if (clock - lastNote > 3) { toast('Jackknifed. Pull forward to straighten up'); lastNote = clock; }
+          if (clock - lastNote > 3) { toast(L.jackknife); lastNote = clock; }
           break;
         }
       }
@@ -319,7 +404,7 @@
         if (Math.abs(v0) > 1.2 && bumpCool <= 0) {
           const cost = Math.round(10 + Math.abs(v0) * 4);
           bumps++; bumpCool = 0.5; shake = reduceMotion ? 0 : Math.min(1, Math.abs(v0) / 6);
-          damage += cost; stats.bumps++; toast(`Bump: \u2212${cost}`, 1100); hud();
+          damage += cost; stats.bumps++; toast(L.bump(cost), 1100); hud();
         }
         car.v = -car.v * 0.25;
         break;
@@ -346,7 +431,7 @@
     const bar = $('hud-patience');
     bar.style.transform = `scaleX(${clamp(patience / patienceMax, 0, 1)})`;
     bar.classList.toggle('low', patience < 10);
-    if (patience <= 0) { damage += 20; stats.gaveUp++; toast('That guest got tired of waiting and left: \u221220', 2200); car = null; nextGuest(); }
+    if (patience <= 0) { damage += 20; stats.gaveUp++; toast(L.gaveUp, 2200); car = null; nextGuest(); }
   }
 
   function arrived() {
@@ -372,7 +457,7 @@
     stay.points = accuracy + speed; stay.stay = 150 + Math.random() * 170;
     target.guest = stay; guests.push(stay);
     parkedCount++; stats.acc += accuracy; stats.spd += speed; stats.top = Math.max(stats.top, stay.points);
-    toast(`+${stay.points}: accuracy ${accuracy}, speed ${speed}`, 2000);
+    toast(L.parked(stay.points, accuracy, speed), 2000);
     car = null;
     setTimeout(() => { if (mode === 'play' && !car) nextGuest(); }, 1300);
     hud();
@@ -471,7 +556,7 @@
     car.v = 0; shake = reduceMotion ? 0 : 0.6;
     const a = Math.atan2(o.y - car.y, o.x - car.x);
     o.path.unshift([o.x + Math.cos(a) * 2.5, o.y + Math.sin(a) * 2.5]);
-    toast(`Careful, that was a ${o.kind === 'kid' ? 'child' : o.kind === 'pet' ? (o.cat ? 'cat' : 'dog') : 'guest'}! − 60`, 1800);
+    toast(L.careful(L.who[o.kind === 'pet' ? (o.cat ? 'cat' : 'dog') : o.kind]), 1800);
     hud();
   }
 
@@ -1024,7 +1109,7 @@
         poly([RP(r, -r.hl, 0, b.z + 0.9), RP(r, r.hl, 0, b.z + 0.9), top[1], top[0]], shade(b.roof, 0.9));
         const [x, y] = RP(r, 0, r.hw * 0.5, b.z + 0.45);
         ctx.fillStyle = '#f6f1df'; ctx.font = `800 ${Math.round(cam.s * 1.15)}px Overpass, sans-serif`; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
-        ctx.fillText(b.label, x, y);
+        ctx.fillText(L.labels[b.label] || b.label, x, y);
       }
     }
     // lamp posts
@@ -1089,7 +1174,7 @@
   function openCard() {
     if (!card.showModal || card.open) return;
     const now = score(), top = Math.max(best, now), n = parkedCount, enc = encodeURIComponent;
-    const text = `I scored ${top} parking campers at Camping Sofia. Can you beat it?`;
+    const text = L.share(top);
     const set = (id, v) => { $(id).textContent = v; };
     set('st-score', now); set('st-best', top);
     set('st-parked', n); set('st-onsite', guests.filter((g) => !g.packing && !g.leaving).length);
@@ -1103,11 +1188,11 @@
     $('sh-tg').href = `https://t.me/share/url?url=${enc(SITE)}&text=${enc(text)}`;
     $('sh-native').hidden = !navigator.share;
     $('sh-native').onclick = () => { navigator.share({ title: 'Camping Sofia', text, url: SITE }).catch(() => { /* closed without sharing */ }); };
-    $('sh-copy').textContent = 'Copy text';
+    $('sh-copy').textContent = L.copy;
     $('sh-copy').onclick = () => {
       const say = (t) => () => { $('sh-copy').textContent = t; };
-      if (navigator.clipboard) navigator.clipboard.writeText(`${text} ${SITE}`).then(say('Copied'), say('Could not copy'));
-      else say('Could not copy')();
+      if (navigator.clipboard) navigator.clipboard.writeText(`${text} ${SITE}`).then(say(L.copied), say(L.copyFailed));
+      else say(L.copyFailed)();
     };
     paused = true; for (const k in keys) keys[k] = false;
     card.showModal();
