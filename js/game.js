@@ -163,9 +163,9 @@
   let car = null;              // the vehicle being driven
   let target = null;           // its pitch
   let mode = 'attract';
-  let parkedCount = 0, best = 0, bumps = 0, holdT = 0, patience = 1, patienceMax = 60, bumpCool = 0, shake = 0;
+  let parkedCount = 0, best = 0, damage = 0, night = 0, bumps = 0, holdT = 0, patience = 1, patienceMax = 60, bumpCool = 0, shake = 0;
   let clock = 0, lastNote = 0, metCaravan = false;
-  try { best = +localStorage.getItem('camp-best') || 0; } catch (e) { /* private window */ }
+  try { best = +localStorage.getItem('camp-best-score') || 0; } catch (e) { /* private window */ }
 
   const keys = { up: false, down: false, left: false, right: false, brake: false };
   const KEYMAP = { ArrowUp: 'up', KeyW: 'up', ArrowDown: 'down', KeyS: 'down', ArrowLeft: 'left', KeyA: 'left', ArrowRight: 'right', KeyD: 'right', Space: 'brake' };
@@ -194,10 +194,15 @@
   }
   function hud() {
     $('hud-pitch').textContent = target ? target.n : '–';
-    $('hud-parked').textContent = parkedCount;
+    const now = score();
+    if (mode === 'play' && now > best) { best = now; try { localStorage.setItem('camp-best-score', String(best)); } catch (e) { /* private window */ } }
+    $('hud-score').textContent = now;
     $('hud-best').textContent = best;
   }
 
+  // The score is what the guests now on site were worth when they parked, less every bump so far. A guest who
+  // packs up takes their points along; the bumps stay.
+  function score() { return guests.reduce((sum, g) => sum + (g.packing || g.leaving ? 0 : g.points || 0), 0) - damage; }
   function freePitches() { return pitches.filter((p) => !p.guest); }
   function settle(v, p) {   // put a vehicle on a pitch without driving it there (the campers already on site)
     const cx = p.x + p.w / 2, nose = p.laneBelow ? -1 : 1;   // nose-in, away from the lane
@@ -205,13 +210,13 @@
     const cy = p.y + p.d / 2;
     v.x = cx; v.y = cy;
     const r = livingRect(v); v.x += cx - r.cx; v.y += cy - r.cy;
-    v.parked = { pitch: p, t: clock }; p.guest = v; guests.push(v);
+    v.parked = { pitch: p, t: clock }; v.points = 0; v.stay = 70 + rnd() * 170; p.guest = v; guests.push(v);
   }
   [3, 12, 20, 27, 34, 40].forEach((i, n) => settle(makeVehicle(['van', 'caravan', 'motorhome'][n % 3], 0, 0, 0), pitches[i]));
 
   function nextGuest() {
     const free = freePitches();
-    if (free.length < 8) checkout();
+    if (free.length < 8 && !guests.some((g) => g.packing)) checkout();
     const roll = rnd();
     // The second guest always tows a caravan, so everyone meets one early.
     const kind = parkedCount === 0 ? 'van' : parkedCount === 1 ? 'combo' : roll < 0.4 ? 'van' : roll < 0.65 ? 'motorhome' : 'combo';
@@ -225,18 +230,19 @@
     if (kind === 'combo' && !metCaravan) { metCaravan = true; toast(`A car and caravan for pitch ${target.n}. Get the caravan onto the pitch`, 3800); }
     else if (parkedCount > 0) toast(`Next: a ${car.t.name} for pitch ${target.n}`, 1500);
   }
-  function checkout() {
-    const leaving = guests.filter((g) => !g.leaving).slice(0, 5);
-    leaving.forEach((g) => { g.leaving = true; });
-    if (leaving.length) toast(`Checkout time: ${leaving.length} pitches free again`, 2200);
+  function packUp(g) {   // roll in the awning, call the family back, then drive off
+    g.packing = clock;
+    if (mode === 'play' && g.points) toast(`Pitch ${g.parked.pitch.n} packed up and left: \u2212${g.points}`, 2200);
+    hud();
   }
+  function checkout() { guests.filter((g) => !g.packing && !g.leaving).slice(0, 3).forEach(packUp); }
 
   function start() {
     mode = 'play';
     document.body.classList.add('playing');
     $('start').hidden = true; $('hud').hidden = false;
     if (matchMedia('(pointer: coarse)').matches) $('pad').hidden = false;
-    parkedCount = 0;
+    parkedCount = 0; damage = 0;
     nextGuest();
     setTimeout(() => document.body.classList.add('sign-away'), 5000);   // the name plate steps aside once the driving starts
     toast(`First guest: pitch ${target.n}`, 2200);
@@ -248,8 +254,12 @@
   // ---------- simulation ----------
   function step(dt) {
     clock += dt;
+    night = clamp((Math.cos(((clock % 200) / 200) * TAU + Math.PI) - 0.25) / 0.5, 0, 1);   // 0 by day, 1 at night; a day lasts a little over three minutes
     for (let i = guests.length - 1; i >= 0; i--) {
       const g = guests[i];
+      if (!g.family && clock > g.parked.t + 1) spawnFamily(g);
+      if (mode === 'play' && !g.packing && night < 0.3 && clock > g.parked.t + g.stay) packUp(g);
+      if (g.packing && !g.leaving && clock - g.packing > 6) { g.leaving = true; dismissFamily(g); }
       if (g.leaving) { g.alpha -= dt / 1.4; if (g.alpha <= 0) { g.parked.pitch.guest = null; guests.splice(i, 1); } }
       if (g.slide) {   // a caravan being pushed the last metre onto its pitch
         const k = 1 - Math.exp(-dt * 3);
@@ -257,6 +267,7 @@
       }
     }
     for (let i = ghosts.length - 1; i >= 0; i--) { ghosts[i].alpha -= dt / 1.2; if (ghosts[i].alpha <= 0) ghosts.splice(i, 1); }
+    stepPeople(dt);
     if (mode !== 'play' || !car) return;
 
     const t = car.t, v0 = car.v;
@@ -292,11 +303,19 @@
       }
       if (blocked(car)) {
         car.x = px; car.y = py; car.th = pth; car.ph = pph;
-        if (Math.abs(v0) > 1.2 && bumpCool <= 0) { bumps++; bumpCool = 0.5; shake = reduceMotion ? 0 : Math.min(1, Math.abs(v0) / 6); }
+        if (Math.abs(v0) > 1.2 && bumpCool <= 0) {
+          const cost = Math.round(10 + Math.abs(v0) * 4);
+          bumps++; bumpCool = 0.5; shake = reduceMotion ? 0 : Math.min(1, Math.abs(v0) / 6);
+          damage += cost; toast(`Bump: \u2212${cost}`, 1100); hud();
+        }
         car.v = -car.v * 0.25;
         break;
       }
     }
+    const wp = wheelPoints(car);   // braking hard from speed leaves rubber behind
+    if (car._w && car.braking && Math.abs(v0) > 3.5) for (let i = 0; i < wp.length; i++) skids.push({ a: car._w[i], b: wp[i], t: clock });
+    if (skids.length > 1500) skids.splice(0, skids.length - 1500);
+    car._w = wp;
     bumpCool -= dt; shake = Math.max(0, shake - dt * 3);
 
     // Parked when the living part sits inside the pitch and has stopped for a moment.
@@ -314,15 +333,19 @@
     const bar = $('hud-patience');
     bar.style.transform = `scaleX(${clamp(patience / patienceMax, 0, 1)})`;
     bar.classList.toggle('low', patience < 10);
-    if (patience <= 0) { toast('That guest got tired of waiting and left'); car = null; nextGuest(); }
+    if (patience <= 0) { damage += 20; toast('That guest got tired of waiting and left: \u221220', 2200); car = null; nextGuest(); }
   }
 
   function arrived() {
-    const straight = Math.abs(Math.cos(car.t.trailer ? car.ph : car.th)) < 0.14;   // lined up with the pitch
+    // Points: up to 100 for accuracy (centred on the pitch and square to it) and up to 100 for speed (patience left).
+    const r = livingRect(car), p = target, towing = !!car.t.trailer;
+    const dx = Math.abs(r.cx - (p.x + p.w / 2)) / 1.5, dy = Math.abs(r.cy - (p.y + p.d / 2)) / 2.5, skew = Math.abs(Math.cos(r.a)) / 0.3;
+    const fit = towing ? 0.55 * (1 - clamp(dx, 0, 1)) + 0.45 * (1 - clamp(skew, 0, 1))   // a caravan is pushed in the last metre, so depth does not count
+      : 0.45 * (1 - clamp(dx, 0, 1)) + 0.2 * (1 - clamp(dy, 0, 1)) + 0.35 * (1 - clamp(skew, 0, 1));
+    const accuracy = Math.round(100 * fit), speed = Math.round(100 * clamp(patience / patienceMax, 0, 1));
     car.v = 0; car.steer = 0; car.braking = false; car.reversing = false;
-    let stay = car, note = bumps > 1 ? 'Parked. A few new dents, though' : bumps === 1 ? 'Parked, with one small bump' : straight ? 'Parked dead straight' : 'Parked';
-    if (car.t.trailer) {   // the caravan stays; its car unhitches and heads into town
-      const r = trailerRect(car), p = target;
+    let stay = car;
+    if (towing) {   // the caravan stays; its car unhitches and heads into town
       stay = makeVehicle('caravan', 0, 0, car.ph);
       stay.paint = car.paint; stay.side = car.side;
       const off = stay.t.L / 2 - stay.t.rear, th = Math.sin(car.ph) >= 0 ? Math.PI / 2 : -Math.PI / 2;
@@ -331,16 +354,209 @@
       const tow = makeVehicle('car', car.x, car.y, car.th);
       tow.paint = car.paint; tow.extra = car.extra;
       ghosts.push(tow);
-      if (bumps === 0) note = 'Caravan pitched. The car is off to town';
     }
-    stay.parked = { pitch: target, t: clock + (stay === car ? 0 : 1) };
+    stay.parked = { pitch: target, t: clock + (towing ? 1 : 0) };
+    stay.points = accuracy + speed; stay.stay = 150 + Math.random() * 170;
     target.guest = stay; guests.push(stay);
     parkedCount++;
-    if (parkedCount > best) { best = parkedCount; try { localStorage.setItem('camp-best', String(best)); } catch (e) { /* private window */ } }
-    toast(note, 1400);
+    toast(`+${stay.points}: accuracy ${accuracy}, speed ${speed}`, 2000);
     car = null;
-    setTimeout(() => { if (mode === 'play' && !car) nextGuest(); }, 1100);
+    setTimeout(() => { if (mode === 'play' && !car) nextGuest(); }, 1300);
     hud();
+  }
+
+  // ---------- families ----------
+  // Every guest brings a family: adults who stroll to the wash house, the pond or the fire, children who run
+  // about on the lane in front of their pitch, and sometimes a dog or a cat. They turn in when it gets dark.
+  // People keep to the lanes: a walk is a short list of points along the verge, across a road and along again.
+  const people = [];
+  const SHIRTS = ['#d5503c', '#3f7fa6', '#f0b83a', '#f6f1df', '#8b6fae', '#2f5d49', '#e58a5a', '#5aa9a3'];
+  const HAIR = ['#2b2018', '#5a3a22', '#c9a35a', '#8a8a86', '#101010', '#a5532a'];
+  const FUR = ['#6e4a2c', '#e9e2d0', '#22201e', '#c98f4a'];
+  const LANE_BAND = [[20.6, 27.4], [50.6, 57.4]];
+  const rand = (a, b) => a + Math.random() * (b - a);
+  const pick = (a) => a[(Math.random() * a.length) | 0];
+
+  // Where a family sits: beside their vehicle, on the awning side. `ly` is the verge they walk along, `lane`
+  // which lane that is (0 upper, 1 lower, 2 the meadow).
+  function homeOf(g) {
+    const p = g.parked.pitch, a = g.slide ? g.slide.th : livingRect(g).a;
+    const sgn = Math.sign(-Math.sin(a) * g.side) || 1;
+    return { x: p.x + p.w / 2 + sgn * 2.5, y: p.y + p.d / 2 + rand(-1.5, 1.5), ly: p.laneBelow ? p.y + p.d + 1.2 : p.y - 1.2, lane: p.y < 39 ? 0 : 1 };
+  }
+  function placeTo(kind) {
+    if (kind === 'wc') return { x: rand(20, 26), y: 19.4, ly: 21, lane: 0 };
+    if (kind === 'pond') return { x: rand(88, 101), y: 19.7, ly: 21, lane: 0 };
+    if (kind === 'fire') { const a = rand(0, TAU); return { x: fire.x + Math.cos(a) * 2.5, y: fire.y + Math.sin(a) * 2.5, ly: 70.6, lane: 2 }; }
+    if (kind === 'reception') return { x: 65.6, y: rand(73, 78), ly: 70.6, lane: 2 };
+    let x; do { x = rand(10, 110); } while (x > 55 && x < 81);   // somewhere on the meadow, clear of the road and reception
+    return { x, y: rand(71.5, 84), ly: 70.6, lane: 2 };
+  }
+  function routeTo(o, to) {
+    const at = o.at, pts = [[at.x, at.ly]];
+    if (at.lane !== to.lane) {   // change lanes along one of the three roads that join them
+      const cost = (c) => Math.abs(at.x - c) + Math.abs(to.x - c);
+      const ways = at.lane === 2 || to.lane === 2 ? [57, 63] : [11.5, 57, 63, 108.5];
+      const cx = ways.reduce((b, c) => (cost(c) < cost(b) ? c : b)) + rand(-0.6, 0.6);
+      pts.push([cx, at.ly], [cx, to.ly]);
+    }
+    pts.push([to.x, to.ly], [to.x, to.y]);
+    o.path = pts; o.dest = to; o.wait = 0;
+  }
+
+  function spawnFamily(g) {
+    g.family = true;
+    const home = homeOf(g);
+    const mk = (kind) => {
+      const kid = kind === 'kid';
+      const o = {
+        kind, g, home, at: home, dest: null, path: [], x: home.x + rand(-0.6, 0.6), y: home.y + rand(-0.6, 0.6), dir: rand(0, TAU),
+        wait: rand(0.5, kid ? 3 : 14), hidden: false, cool: 0, flee: 0, phase: rand(0, 6),
+        size: kid ? rand(0.6, 0.75) : 1, speed: kid ? rand(2.4, 3.4) : kind === 'adult' ? rand(1.1, 1.5) : 3.2,
+        shirt: pick(SHIRTS), hair: pick(kind === 'pet' ? FUR : HAIR), owl: Math.random() < 0.25, cat: false, owner: null, off: [0.8, 0.5],
+      };
+      people.push(o); return o;
+    };
+    const adults = [mk('adult')], kids = [];
+    if (Math.random() < 0.8) adults.push(mk('adult'));
+    const nk = Math.random() < 0.25 ? 0 : 1 + ((Math.random() * 2.2) | 0);
+    for (let i = 0; i < nk; i++) kids.push(mk('kid'));
+    if (Math.random() < 0.4) { const pet = mk('pet'); pet.cat = Math.random() < 0.3; pet.owner = pick(kids.length ? kids : adults); }
+  }
+  function dismissFamily(g) { for (let i = people.length - 1; i >= 0; i--) if (people[i].g === g) people.splice(i, 1); }
+
+  // Children go in first, most adults a little later, a few night owls last. A family that is leaving is called in too.
+  const bedtime = (o) => o.g.packing || night > (o.kind === 'kid' ? 0.3 : o.owl ? 0.85 : 0.55);
+
+  // What someone does next. Children mostly dart about in front of their own pitch and change their mind often.
+  function decide(o) {
+    const kid = o.kind === 'kid', atHome = o.at === o.home;
+    if (bedtime(o)) {
+      if (atHome) { o.hidden = true; return; }
+      return routeTo(o, o.home);
+    }
+    const dusk = night > 0.15;
+    if (kid) {
+      const roll = Math.random();
+      if (roll < 0.5) {
+        const band = LANE_BAND[o.home.lane], y = rand(band[0], band[1]);
+        return routeTo(o, { x: clamp(o.home.x + rand(-10, 10), 9.5, 110.5), y, ly: y, lane: o.home.lane });
+      }
+      if (roll < 0.72) return routeTo(o, atHome ? placeTo(pick(['pond', 'fire', 'meadow', 'meadow', 'wc'])) : o.home);
+      o.wait = rand(0.3, 2.5); return;
+    }
+    if (atHome) {
+      if (Math.random() < (dusk ? 0.3 : 0.55)) return routeTo(o, placeTo(dusk && o.owl ? 'fire' : pick(['wc', 'wc', 'pond', 'fire', 'reception', 'meadow'])));
+      o.wait = rand(8, 30); return;
+    }
+    routeTo(o, Math.random() < 0.75 ? o.home : placeTo(pick(['pond', 'fire', 'meadow'])));
+  }
+
+  // The car ran into someone, or nearly: it stops dead, they jump clear, and it costs points.
+  function startle(o) {
+    damage += 60; o.cool = 2.5; o.flee = 1.2; o.wait = 0;
+    car.v = 0; shake = reduceMotion ? 0 : 0.6;
+    const a = Math.atan2(o.y - car.y, o.x - car.x);
+    o.path.unshift([o.x + Math.cos(a) * 2.5, o.y + Math.sin(a) * 2.5]);
+    toast(`Careful, that was a ${o.kind === 'kid' ? 'child' : o.kind === 'pet' ? (o.cat ? 'cat' : 'dog') : 'guest'}! − 60`, 1800);
+    hud();
+  }
+
+  function stepPeople(dt) {
+    const moving = car && Math.abs(car.v) > 0.6, rects = car ? rectsOf(car) : [];
+    for (const o of people) {
+      o.cool -= dt; o.flee -= dt;
+      if (o.kind === 'pet') {   // a dog trots around its owner, a cat prowls around the pitch
+        const base = o.cat ? o.home : o.owner;
+        o.hidden = o.cat ? false : o.owner.hidden;
+        if (o.hidden) { o.x = base.x; o.y = base.y; continue; }
+        o.wait -= dt;
+        if (o.wait <= 0) { const a = rand(0, TAU), d = rand(0.6, o.cat ? 3 : 2.5); o.off = [Math.cos(a) * d, Math.sin(a) * d]; o.wait = o.cat ? rand(3, 12) : rand(0.8, 4); }
+        const dx = base.x + o.off[0] - o.x, dy = base.y + o.off[1] - o.y, d = Math.hypot(dx, dy);
+        if (d > 0.15) { const sp = Math.min(o.cat ? 1.2 : o.speed, d * 2.5) * (o.flee > 0 ? 2 : 1); o.x += (dx / d) * sp * dt; o.y += (dy / d) * sp * dt; o.dir = Math.atan2(dy, dx); o.phase += dt * sp * 5; }
+      } else if (o.hidden) {
+        if (!o.g.packing && night < 0.2 && Math.random() < dt / 6) { o.hidden = false; o.wait = rand(1, 10); }   // morning
+        continue;
+      } else if (o.wait > 0) {
+        o.wait -= dt;
+        if (o.wait > 3 && bedtime(o)) o.wait = rand(0.5, 3);   // no lingering once it is time to go in
+        if (o.wait <= 0) decide(o);
+      } else if (!o.path.length) decide(o);
+      else {
+        const [tx, ty] = o.path[0], dx = tx - o.x, dy = ty - o.y, d = Math.hypot(dx, dy);
+        let sp = o.speed * (o.flee > 0 ? 1.8 : 1);
+        if (moving && o.kind === 'adult' && o.flee <= 0) {   // grown-ups look before they cross; children do not
+          const cx = o.x - car.x, cy = o.y - car.y, cd = Math.hypot(cx, cy), fx = Math.cos(car.th) * Math.sign(car.v), fy = Math.sin(car.th) * Math.sign(car.v);
+          const ahead = cx * fx + cy * fy, side = Math.abs(cx * fy - cy * fx);
+          if (cd < 11 && ahead > 0) sp = side > 1.8 && side < 4.5 ? 0 : side <= 1.8 ? sp * 1.7 : sp;
+        }
+        if (sp > 0) {
+          if (d < sp * dt + 0.05) {
+            o.x = tx; o.y = ty; o.path.shift();
+            if (!o.path.length) { if (o.dest) o.at = o.dest; o.wait = o.kind === 'kid' ? rand(0.05, 1.5) : o.at === o.home ? rand(6, 25) : rand(4, 15); }
+          } else { o.x += (dx / d) * sp * dt; o.y += (dy / d) * sp * dt; o.dir = Math.atan2(dy, dx); o.phase += dt * sp * 4; }
+        }
+      }
+      if (!car || o.hidden || Math.abs(o.x - car.x) > 14 || Math.abs(o.y - car.y) > 14) continue;
+      for (const r of rects) {
+        if (!rectCircle(r, o.x, o.y, 0.4)) continue;
+        if (moving && o.cool <= 0) { startle(o); break; }
+        const c = Math.cos(r.a), s = Math.sin(r.a), w = -(o.x - r.cx) * s + (o.y - r.cy) * c, push = (w < 0 ? -1 : 1) * (r.hw + 0.42) - w;   // step out from under a standing car
+        o.x += -s * push; o.y += c * push;
+      }
+    }
+  }
+
+  function drawPeople() {
+    for (const o of people) {
+      if (o.hidden) continue;
+      const [gx, gy] = P(o.x, o.y);
+      if (gx < -30 || gx > vw + 30 || gy < -30 || gy > vh + 30) continue;
+      const u = cam.s * o.size * 1.7, walking   // drawn larger than life, or nobody would see them
+      = o.wait <= 0 || o.kind === 'pet', sw = walking ? Math.sin(o.phase) : 0;
+      ctx.fillStyle = 'rgba(15,30,20,0.25)'; ctx.beginPath(); ctx.arc(gx + cam.s * 0.18, gy + cam.s * 0.18, u * 0.24, 0, TAU); ctx.fill();
+      ctx.save();
+      if (o.kind === 'pet') {
+        const k = cam.s * (o.cat ? 1.1 : 1.6);
+        ctx.translate(...P(o.x, o.y, 0.3)); ctx.rotate(o.dir);
+        ctx.strokeStyle = o.hair; ctx.lineWidth = k * 0.07; ctx.lineCap = 'round';
+        ctx.beginPath(); ctx.moveTo(-k * 0.3, 0); ctx.lineTo(-k * 0.5, k * 0.12 * sw); ctx.stroke();                      // tail
+        ctx.fillStyle = o.hair; ctx.beginPath(); ctx.ellipse(0, 0, k * 0.32, k * 0.13, 0, 0, TAU); ctx.fill();
+        ctx.fillStyle = shade(o.hair, 0.8); ctx.beginPath(); ctx.arc(k * 0.34, 0, k * 0.13, 0, TAU); ctx.fill();
+      } else {
+        ctx.translate(gx, gy); ctx.rotate(o.dir);
+        ctx.fillStyle = '#2c2f36';                                                                                          // feet
+        ctx.beginPath(); ctx.ellipse(u * 0.14 * sw, -u * 0.1, u * 0.11, u * 0.07, 0, 0, TAU); ctx.ellipse(-u * 0.14 * sw, u * 0.1, u * 0.11, u * 0.07, 0, 0, TAU); ctx.fill();
+        ctx.restore(); ctx.save();
+        ctx.translate(...P(o.x, o.y, 0.5 * o.size)); ctx.rotate(o.dir);
+        ctx.fillStyle = o.shirt; ctx.beginPath(); ctx.ellipse(0, 0, u * 0.15, u * 0.27, 0, 0, TAU); ctx.fill();            // shoulders
+        ctx.restore(); ctx.save();
+        ctx.translate(...P(o.x, o.y, 0.9 * o.size));
+        ctx.fillStyle = o.hair; ctx.beginPath(); ctx.arc(0, 0, u * 0.13, 0, TAU); ctx.fill();                              // head
+      }
+      ctx.restore();
+    }
+  }
+
+  // ---------- skid marks ----------
+  const skids = [];
+  function wheelPoints(v) {
+    const c = Math.cos(v.th), s = Math.sin(v.th), hw = v.t.Wd / 2 - 0.2, out = [];
+    for (const l of [0, v.t.wb]) for (const w of [-hw, hw]) out.push([v.x + c * l - s * w, v.y + s * l + c * w]);
+    if (v.t.trailer) {
+      const tr = v.t.trailer, hp = hitchPoint(v), pc = Math.cos(v.ph), ps = Math.sin(v.ph), tw = tr.Wd / 2 - 0.15;
+      for (const w of [-tw, tw]) out.push([hp.x - pc * tr.axle - ps * w, hp.y - ps * tr.axle + pc * w]);
+    }
+    return out;
+  }
+  function drawSkids() {
+    while (skids.length && clock - skids[0].t > 90) skids.shift();
+    ctx.strokeStyle = '#2b251d'; ctx.lineWidth = Math.max(1.5, cam.s * 0.2); ctx.lineCap = 'butt';
+    for (const k of skids) {
+      ctx.globalAlpha = 0.6 * (1 - (clock - k.t) / 90);
+      ctx.beginPath(); ctx.moveTo(...P(k.a[0], k.a[1])); ctx.lineTo(...P(k.b[0], k.b[1])); ctx.stroke();
+    }
+    ctx.globalAlpha = 1;
   }
 
   // ---------- camera and projection ----------
@@ -630,7 +846,7 @@
   function drawCampLife(v) {
     const r = livingRect(v), z = (v.t.trailer ? v.t.trailer.z : v.t.z) - 0.2, side = v.side;
     const w0 = side * r.hw, w1 = side * (r.hw + 2.1);
-    const open = clamp((clock - v.parked.t) / 0.8, 0, 1), wm = lerp(w0, w1, open);
+    const open = clamp((clock - v.parked.t) / 0.8, 0, 1) * (v.packing ? 1 - clamp((clock - v.packing - 2.5) / 1.5, 0, 1) : 1), wm = lerp(w0, w1, open);
     for (let i = 0; i < 6; i++) {
       const l0 = -1.6 + i * 0.55;
       poly([RP(r, l0, w0, z), RP(r, l0 + 0.55, w0, z), RP(r, l0 + 0.55, wm, z - 0.35), RP(r, l0, wm, z - 0.35)], i % 2 ? '#f6f1df' : shade(v.paint === '#f2efe6' ? '#d5503c' : v.paint, 0.95));
@@ -658,6 +874,7 @@
     ctx.translate(sx, sy);
     const [gx, gy] = P(0, 0);
     ctx.drawImage(ground, gx, gy, W * cam.s, H * cam.s);
+    drawSkids();
 
     // the pitch to park on
     if (mode === 'play' && target && car) {
@@ -683,6 +900,7 @@
     { const [x, y] = P(fire.x, fire.y); ctx.fillStyle = '#e8792c'; ctx.beginPath(); ctx.arc(x, y, cam.s * (0.5 + 0.08 * Math.sin(clock * 9)), 0, TAU); ctx.fill(); ctx.fillStyle = '#f9d34c'; ctx.beginPath(); ctx.arc(x, y, cam.s * 0.25, 0, TAU); ctx.fill(); }
 
     for (const v of all) drawVehicle(v);
+    drawPeople();
 
     // tents
     for (const t of tents) {
@@ -762,8 +980,6 @@
     const dt = Math.min(0.05, (now - last) / 1000); last = now;
     step(dt);
     updateCamera(dt);
-    const cycle = (clock % 200) / 200;                                     // a day lasts a little over three minutes
-    const night = clamp((Math.cos(cycle * TAU + Math.PI) - 0.25) / 0.5, 0, 1);   // 0 by day, 1 at night
     frame(night);
     requestAnimationFrame(tick);
   }
@@ -771,5 +987,5 @@
   requestAnimationFrame(tick);
 
   // For automated checks only: /?debug exposes the state.
-  if (location.search.includes('debug')) window.camp = { get car() { return car; }, get target() { return target; }, get parked() { return parkedCount; }, guests, pitches, keys, blocked, livingRect, corners, setClock: (t) => { clock = t; }, give: (kind) => { car = makeVehicle(kind, 60, 80.5, -Math.PI / 2); } };
+  if (location.search.includes('debug')) window.camp = { get car() { return car; }, get target() { return target; }, get parked() { return parkedCount; }, get score() { return score(); }, get night() { return night; }, people, skids, packUp, guests, pitches, keys, blocked, livingRect, corners, setClock: (t) => { clock = t; }, give: (kind) => { car = makeVehicle(kind, 60, 80.5, -Math.PI / 2); } };
 })();

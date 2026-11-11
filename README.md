@@ -4,6 +4,10 @@ The coming-soon page for Camping Sofia. The page is a small game: an invented ca
 guests arrive at the gate one after another and you drive each to the pitch that lights up. It never ends; when
 the camp fills, the longest-staying guests check out.
 
+Each parking scores up to 100 for accuracy and 100 for speed. The score shown is the total for the guests on site
+now, less every bump: guests pack up and leave after a while and take their points with them. Every guest brings a
+family (adults, children who run about on the lanes, sometimes a dog or a cat) who turn in at night.
+
 ## Files
 
 - `index.html`: the page and all its text (title, the start card, the footer note).
