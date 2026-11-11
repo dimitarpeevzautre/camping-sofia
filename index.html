@@ -1,158 +1,65 @@
----
-layout: home
-main-title: "Camping Sofia"
-subtitle: "Your base to enjoy Sofia"
-description: "A place to stop and enjoy the beauty"
-images:
- - image_path: /img/slider/camp1.webp
-   gallery-folder: /img/slider/
- - image_path: /img/slider/camp2.webp
-   gallery-folder: /img/slider/
- - image_path: /img/slider/camp3.webp
-   gallery-folder: /img/slider/
----
-
-
-<html class="no-js" lang="en">
+<!doctype html>
+<html lang="en">
 <head>
-	<meta content="charset=utf-8">
-
-<!-- CSS -->
-     <link href="//maxcdn.bootstrapcdn.com/font-awesome/4.3.0/css/font-awesome.min.css" rel="stylesheet" type="text/css">
-     <link rel="stylesheet" href="{{ site.baseurl }}/css/main.css" type="text/css" media="screen" />
-      <link rel="stylesheet" href="{{ site.baseurl }}/css/galleries.css" media="screen" />
-<link rel="stylesheet" href="{{ site.baseurl }}/css/WYSIWYG.css" media="screen" />
-
-
-
-	<!-- Modernizr -->
-  <script src="{{ site.baseurl }}/js/modernizr.js"></script>
-
-
-
-  
-
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Camping Sofia: coming soon</title>
+<meta name="description" content="Camping Sofia is on its way: your base to enjoy Sofia. While you wait, park the guests in our little camp game.">
+<link rel="canonical" href="https://camping-sofia.com/">
+<meta property="og:title" content="Camping Sofia: coming soon">
+<meta property="og:description" content="Your base to enjoy Sofia. While you wait, park the guests.">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://camping-sofia.com/">
+<meta property="og:image" content="https://camping-sofia.com/og.jpg">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="theme-color" content="#1c3327">
+<link rel="icon" href="/favicon.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Overpass:wght@400;600;800;900&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/css/site.css">
 </head>
+<body>
+<canvas id="camp" aria-label="A top-down view of a campsite. Drive each arriving camper to its pitch."></canvas>
 
-<body class="fullscreen">
+<header class="sign">
+  <img src="/logo.webp" width="56" height="56" alt="">
+  <div>
+    <h1>Camping Sofia</h1>
+    <p>Coming soon. Your base to enjoy Sofia.</p>
+  </div>
+</header>
 
-<!-- MAIN CONTENT SECTION  _____________________________________________-->
-	<section id="content" role="main">
-		<div class="wrapper">
+<section class="hud" id="hud" hidden aria-live="polite">
+  <div class="plate"><span class="k">Pitch</span><span class="v" id="hud-pitch">–</span></div>
+  <div class="plate"><span class="k">Parked</span><span class="v" id="hud-parked">0</span></div>
+  <div class="plate"><span class="k">Best</span><span class="v" id="hud-best">0</span></div>
+  <div class="patience" title="How long this guest will wait"><i id="hud-patience"></i></div>
+</section>
 
-			<!-- WYSIWYG -->
+<div class="toast" id="toast" role="status"></div>
 
-		<div class="position-absolute">
-				<h2 class="big no-margin"><strong>{{ page.main-title }}</strong></h2>
-				<h2>{{ page.subtitle }}</h2> 
-                     <div class="entry-summary">
-							<p>{{ page.description }}</p>
-						</div><br />
-			</div>
-			
-			<div class="gallery fullscreen-gallery kenburns-gallery">
+<section class="start" id="start">
+  <h2>We're still building the real camp.</h2>
+  <p>Until it opens, the guests keep coming to this one. Drive each of them to the pitch that lights up, and mind the trees.</p>
+  <button id="play" type="button">Start parking</button>
+  <p class="keys" id="keys">Arrow keys or WASD to drive. Space to brake.</p>
+</section>
 
-				<canvas id="kenburns"></canvas>
-				
-{% for image in page.images %}  	
+<nav class="pad" id="pad" hidden aria-label="Driving controls">
+  <div class="steer">
+    <button type="button" data-k="left" aria-label="Steer left">&#9664;</button>
+    <button type="button" data-k="right" aria-label="Steer right">&#9654;</button>
+  </div>
+  <div class="pedals">
+    <button type="button" data-k="down" aria-label="Reverse">R</button>
+    <button type="button" data-k="up" aria-label="Drive">D</button>
+  </div>
+</nav>
 
-				<figure class="gallery-item">
-					<header class='gallery-icon'>
+<footer class="note">This camp is made up. The real one is on its way to Sofia.</footer>
 
-<a href="{{ site.url }}{{ site.baseurl }}{{ image.gallery-folder }}">
-<img src="{{ site.url }}{{ site.baseurl }}{{ image.image_path }}"></a>
-	
-				</header>	
-				</figure>
-
-{% endfor %}
-
-				</div>
-			<!-- END WYSIWYG -->
-			
-	
-		</div><!-- END .wrapper -->
-		
-	</section>
-
-<div id="footer" role="contentinfo">
-		<ul class="soc-icons">
-
-                 {% if site.facebook_username %}
-			<li>
-   <a href="https://facebook.com/{{ site.facebook_username }}" style="
-color:#dddddd; target="_blank" title="Facebook">
-                       <i class="fa fa-facebook"></i>
-                     </span>
-</a></li>
-    {% endif %}
- {% if site.twitter_username %}
-			<li>
-   <a href="https://twitter.com/{{ site.twitter_username }}" style="
-color:#dddddd; target="_blank" title="Twitter">
-                       <i class="fa fa-twitter"></i>
-                     </span>
-</a></li>
-    {% endif %}
-                {% if site.instagram_username %}
-			<li>
-   <a href="https://instagram.com/{{ site.instagram_username }}" style="
-color:#dddddd; target="_blank" title="Instagram">
-                       <i class="fa fa-instagram"></i>
-                     </span>
-</a></li>
-    {% endif %}
-                    {% if site.flickr_username %}
-						<li>
-   <a href="https://flickr.com/photos/{{ site.flickr_username }}" style="
-color:#dddddd; target="_blank" title="Flickr">
-              <i class="fa fa-flickr"></i>
-                     </span>
- </a></li>	
-     {% endif %}
-                    {% if site.deviantart_username %}
-			<li>
-   <a href="http://{{ site.deviantart_username }}.deviantart.com" style="
-color:#dddddd; target="_blank" title="DeviantArt">
-<i class="fa fa-deviantart"></i> </span>
-</a></li>	
-    {% endif %}
-                    {% if site.github_username %}
-                <li>
-   <a href="https://github.com/{{ site.github_username }}" style="
-color:#dddddd; target="_blank" title="Github">
-              <i class="fa fa-github"></i>
-                     </span>
-                   {% endif %}
-{% if site.email %}<li>
-    <a href="mailto:{{ site.email }}" style="
-color:#dddddd; target="_blank" title="Email">
-              <i class="fa fa-envelope-o"></i></span>
-          </a> </li>{% endif %}
-	
-					
-		</ul>	
-	</div>
-
-  
-<!-- jQuery -->
-  <script src="//code.jquery.com/jquery-2.1.3.min.js"></script>
-      <script src="//maxcdn.bootstrapcdn.com/bootstrap/3.3.6/js/bootstrap.min.js"></script>
-
-  <script src="{{ site.baseurl }}/js/retina.min.js"></script> 
-
-<!-- include mousewheel plugins -->
-<script src="{{ site.baseurl }}/js/jquery.mousewheel.min.js"></script>
-<!-- include gallery cycle plugin -->
-<script src="{{ site.baseurl }}/js/jquery.cycle.min.js"></script>
-<!-- include kenburns plugins -->
-<script src="{{ site.baseurl }}/js/kenburns.min.js"></script>
-<!-- include svg line drawing plugin -->
-<script src="{{ site.baseurl }}/js/jquery.lazylinepainter.min.js"></script>
-<!-- include custom script -->
-<script src="{{ site.baseurl }}/js/scripts.js"></script>
-
-
-       </body>
-    </html>
-
+<noscript><p class="noscript">Camping Sofia is coming soon. Your base to enjoy Sofia.</p></noscript>
+<script src="/js/game.js" defer></script>
+</body>
+</html>
