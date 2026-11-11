@@ -6,7 +6,7 @@ the camp fills, the longest-staying guests check out.
 
 Each parking scores up to 100 for accuracy and 100 for speed. The score shown is the total for the guests on site
 now, less every bump: guests pack up after a while, drive out by the gate and take their points with them. Every guest brings a
-family (adults, children who run about on the lanes, sometimes a dog or a cat) who turn in at night.
+small family (one or two adults, sometimes a child who runs about on the lanes, now and then a dog or a cat) who turn in at night.
 
 ## Files
 

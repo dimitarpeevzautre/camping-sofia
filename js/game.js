@@ -214,13 +214,19 @@
   }
   [3, 12, 20, 27, 34, 40].forEach((i, n) => settle(makeVehicle(['van', 'caravan', 'motorhome'][n % 3], 0, 0, 0), pitches[i]));
 
-  function nextGuest() {
+  function nextGuest(now) {
     const free = freePitches();
     if (free.length < 8 && !guests.some((g) => g.packing)) checkout();
     const roll = rnd();
     // The second guest always tows a caravan, so everyone meets one early.
     const kind = parkedCount === 0 ? 'van' : parkedCount === 1 ? 'combo' : roll < 0.4 ? 'van' : roll < 0.65 ? 'motorhome' : 'combo';
     car = makeVehicle(kind, 61.8, 80.5, -Math.PI / 2);   // on the right, clear of guests driving out
+    const room = rectsOf(car).map((r) => ({ ...r, hl: r.hl + 1.5, hw: r.hw + 0.8 }));
+    if (!now && (guests.some((o) => o.leave && rectsOf(o).some((q) => room.some((r) => rectRect(r, q)))) ||
+      people.some((o) => !o.hidden && room.some((r) => rectCircle(r, o.x, o.y, 0.8))))) {   // someone is in the gateway: wait for them
+      car = null; setTimeout(() => { if (mode === 'play' && !car) nextGuest(); }, 400); return;
+    }
+    car.born = clock;
     const options = freePitches();
     target = options[(rnd() * options.length) | 0];
     bumps = 0; holdT = 0;
@@ -243,7 +249,7 @@
     $('start').hidden = true; $('hud').hidden = false;
     if (matchMedia('(pointer: coarse)').matches) $('pad').hidden = false;
     parkedCount = 0; damage = 0;
-    nextGuest();
+    nextGuest(true);
     setTimeout(() => document.body.classList.add('sign-away'), 5000);   // the name plate steps aside once the driving starts
     toast(`First guest: pitch ${target.n}`, 2200);
     cv.focus();
@@ -424,10 +430,10 @@
       people.push(o); return o;
     };
     const adults = [mk('adult')], kids = [];
-    if (Math.random() < 0.8) adults.push(mk('adult'));
-    const nk = Math.random() < 0.25 ? 0 : 1 + ((Math.random() * 2.2) | 0);
+    if (Math.random() < 0.5) adults.push(mk('adult'));
+    const nk = Math.random() < 0.55 ? 0 : Math.random() < 0.8 ? 1 : 2;
     for (let i = 0; i < nk; i++) kids.push(mk('kid'));
-    if (Math.random() < 0.4) { const pet = mk('pet'); pet.cat = Math.random() < 0.3; pet.owner = pick(kids.length ? kids : adults); }
+    if (Math.random() < 0.25) { const pet = mk('pet'); pet.cat = Math.random() < 0.3; pet.owner = pick(kids.length ? kids : adults); }
   }
   function dismissFamily(g) { for (let i = people.length - 1; i >= 0; i--) if (people[i].g === g) people.splice(i, 1); }
 
@@ -444,16 +450,16 @@
     const dusk = night > 0.15;
     if (kid) {
       const roll = Math.random();
-      if (roll < 0.5) {
+      if (roll < 0.3) {
         const band = LANE_BAND[o.home.lane], y = rand(band[0], band[1]);
         return routeTo(o, { x: clamp(o.home.x + rand(-10, 10), 9.5, 110.5), y, ly: y, lane: o.home.lane });
       }
-      if (roll < 0.72) return routeTo(o, atHome ? placeTo(pick(['pond', 'fire', 'meadow', 'meadow', 'wc'])) : o.home);
-      o.wait = rand(0.3, 2.5); return;
+      if (roll < 0.45) return routeTo(o, atHome ? placeTo(pick(['pond', 'fire', 'meadow', 'meadow', 'wc'])) : o.home);
+      o.wait = rand(2, 9); return;
     }
     if (atHome) {
-      if (Math.random() < (dusk ? 0.3 : 0.55)) return routeTo(o, placeTo(dusk && o.owl ? 'fire' : pick(['wc', 'wc', 'pond', 'fire', 'reception', 'meadow'])));
-      o.wait = rand(8, 30); return;
+      if (Math.random() < (dusk ? 0.2 : 0.35)) return routeTo(o, placeTo(dusk && o.owl ? 'fire' : pick(['wc', 'wc', 'pond', 'fire', 'reception', 'meadow'])));
+      o.wait = rand(15, 50); return;
     }
     routeTo(o, Math.random() < 0.75 ? o.home : placeTo(pick(['pond', 'fire', 'meadow'])));
   }
@@ -499,16 +505,26 @@
         if (sp > 0) {
           if (d < sp * dt + 0.05) {
             o.x = tx; o.y = ty; o.path.shift();
-            if (!o.path.length) { if (o.dest) o.at = o.dest; o.wait = o.kind === 'kid' ? rand(0.05, 1.5) : o.at === o.home ? rand(6, 25) : rand(4, 15); }
+            if (!o.path.length) { if (o.dest) o.at = o.dest; o.wait = o.kind === 'kid' ? rand(1, 6) : o.at === o.home ? rand(12, 40) : rand(5, 18); }
           } else { o.x += (dx / d) * sp * dt; o.y += (dy / d) * sp * dt; o.dir = Math.atan2(dy, dx); o.phase += dt * sp * 4; }
         }
       }
       if (!car || o.hidden || Math.abs(o.x - car.x) > 14 || Math.abs(o.y - car.y) > 14) continue;
       for (const r of rects) {
         if (!rectCircle(r, o.x, o.y, 0.4)) continue;
-        if (moving && o.cool <= 0) { startle(o); break; }
-        const c = Math.cos(r.a), s = Math.sin(r.a), w = -(o.x - r.cx) * s + (o.y - r.cy) * c, push = (w < 0 ? -1 : 1) * (r.hw + 0.42) - w;   // step out from under a standing car
+        const c = Math.cos(r.a), s = Math.sin(r.a), u = (o.x - r.cx) * c + (o.y - r.cy) * s, w = -(o.x - r.cx) * s + (o.y - r.cy) * c;
+        // It only counts as running someone over if the end that is leading caught them. Someone who walks into
+        // the side, or was already against it when the vehicle set off, just steps clear.
+        if (moving && o.cool <= 0 && clock - car.born > 2 && u * Math.sign(car.v) > r.hl - 0.35) { startle(o); break; }
+        const push = (w < 0 ? -1 : 1) * (r.hw + 0.45) - w;
         o.x += -s * push; o.y += c * push;
+        if (o.path.length && o.kind !== 'pet' && !(o.detour > clock)) {   // and walks round the nearer end instead of leaning on the bodywork
+          const tx = o.path[0][0] - r.cx, ty = o.path[0][1] - r.cy, tu = tx * c + ty * s, tw = -tx * s + ty * c, side = w < 0 ? -1 : 1;
+          if (tw * side < r.hw + 0.5) {   // where they are going is on the far side
+            const U = (u + tu < 0 ? -1 : 1) * (r.hl + 1), W = side * (r.hw + 1), at = (U, W) => [r.cx + c * U - s * W, r.cy + s * U + c * W];
+            o.path.unshift(at(U, W), at(U, -W)); o.detour = clock + 4;
+          }
+        }
       }
     }
   }
@@ -1077,5 +1093,5 @@
   requestAnimationFrame(tick);
 
   // For automated checks only: /?debug exposes the state.
-  if (location.search.includes('debug')) window.camp = { get car() { return car; }, get target() { return target; }, get parked() { return parkedCount; }, get score() { return score(); }, get night() { return night; }, people, skids, packUp, guests, pitches, rectsOf, rectRect, keys, blocked, livingRect, corners, setClock: (t) => { clock = t; }, give: (kind) => { car = makeVehicle(kind, 61.8, 80.5, -Math.PI / 2); } };
+  if (location.search.includes('debug')) window.camp = { get car() { return car; }, get target() { return target; }, get parked() { return parkedCount; }, get score() { return score(); }, get night() { return night; }, people, skids, packUp, guests, pitches, rectsOf, rectRect, keys, blocked, livingRect, corners, setClock: (t) => { clock = t; }, give: (kind) => { car = makeVehicle(kind, 61.8, 80.5, -Math.PI / 2); car.born = -9; }, next: () => { car = null; nextGuest(); } };
 })();
