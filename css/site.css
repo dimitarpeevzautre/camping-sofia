@@ -27,7 +27,7 @@ canvas#camp { position: fixed; inset: 0; width: 100%; height: 100%; display: blo
 }
 /* A few seconds into a game the name plate slides away and leaves the camp to the player. */
 body.sign-away .sign { opacity: 0; transform: translateY(-150%); pointer-events: none; }
-.sign img { border-radius: 8px; display: block; flex: none; }
+.sign img { display: block; flex: none; }
 .sign h1 { font-size: 1.5rem; font-weight: 900; line-height: 1; margin: 0; letter-spacing: -0.01em; }
 .sign p { margin: 4px 0 0; font-size: 0.875rem; font-weight: 600; line-height: 1.25; }
 
