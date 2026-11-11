@@ -220,7 +220,7 @@
     const roll = rnd();
     // The second guest always tows a caravan, so everyone meets one early.
     const kind = parkedCount === 0 ? 'van' : parkedCount === 1 ? 'combo' : roll < 0.4 ? 'van' : roll < 0.65 ? 'motorhome' : 'combo';
-    car = makeVehicle(kind, 60, 80.5, -Math.PI / 2);
+    car = makeVehicle(kind, 61.8, 80.5, -Math.PI / 2);   // on the right, clear of guests driving out
     const options = freePitches();
     target = options[(rnd() * options.length) | 0];
     bumps = 0; holdT = 0;
@@ -230,12 +230,12 @@
     if (kind === 'combo' && !metCaravan) { metCaravan = true; toast(`A car and caravan for pitch ${target.n}. Get the caravan onto the pitch`, 3800); }
     else if (parkedCount > 0) toast(`Next: a ${car.t.name} for pitch ${target.n}`, 1500);
   }
-  function packUp(g) {   // roll in the awning, call the family back, then drive off
-    g.packing = clock;
+  function packUp(g, delay = 0) {   // roll in the awning, call the family back, then drive off
+    g.packing = clock + delay;
     if (mode === 'play' && g.points) toast(`Pitch ${g.parked.pitch.n} packed up and left: \u2212${g.points}`, 2200);
     hud();
   }
-  function checkout() { guests.filter((g) => !g.packing && !g.leaving).slice(0, 3).forEach(packUp); }
+  function checkout() { guests.filter((g) => !g.packing && !g.leaving).slice(0, 3).forEach((g, i) => packUp(g, i * 5)); }
 
   function start() {
     mode = 'play';
@@ -259,8 +259,14 @@
       const g = guests[i];
       if (!g.family && clock > g.parked.t + 1) spawnFamily(g);
       if (mode === 'play' && !g.packing && night < 0.3 && clock > g.parked.t + g.stay) packUp(g);
-      if (g.packing && !g.leaving && clock - g.packing > 6) { g.leaving = true; dismissFamily(g); }
-      if (g.leaving) { g.alpha -= dt / 1.4; if (g.alpha <= 0) { g.parked.pitch.guest = null; guests.splice(i, 1); } }
+      if (g.packing && !g.leaving && g.kind === 'caravan' && clock - g.packing > 3) {   // turn the caravan to face the lane
+        const b = bodyRect(g), off = g.t.L / 2 - g.t.rear, e = wrap((g.parked.pitch.laneBelow ? 1 : -1) * Math.PI / 2 - g.th);
+        g.slide = null;
+        g.th = wrap(g.th + clamp(e, -1.3 * dt, 1.3 * dt));
+        g.x = b.cx - Math.cos(g.th) * off; g.y = b.cy - Math.sin(g.th) * off;
+      }
+      if (g.packing && !g.leaving && clock - g.packing > 6) startLeaving(g);
+      if (g.leaving && stepLeaver(g, dt)) { if (g.parked.pitch.guest === g) g.parked.pitch.guest = null; guests.splice(i, 1); continue; }
       if (g.slide) {   // a caravan being pushed the last metre onto its pitch
         const k = 1 - Math.exp(-dt * 3);
         g.x = lerp(g.x, g.slide.x, k); g.y = lerp(g.y, g.slide.y, k); g.th = wrap(g.th + wrap(g.slide.th - g.th) * k);
@@ -536,6 +542,69 @@
       }
       ctx.restore();
     }
+  }
+
+  // ---------- driving off ----------
+  // A guest who has packed up drives out by the gate under its own steam: campervans and motorhomes reverse off
+  // the pitch and swing round, a caravan is turned on the spot and its car comes back for it. They keep to the
+  // right, stop for the player, for people and for each other, and are not checked against anything else.
+  function startLeaving(g) {
+    const p = g.parked.pitch, ls = p.laneBelow ? 1 : -1, cx = p.x + p.w / 2, dir = cx < 58 ? 1 : -1;
+    const yl = (p.y < 39 ? 20 : 50) + (dir > 0 ? 6 : 2);
+    g.leaving = true; g.slide = null; g.v = 0; g.steer = 0;
+    dismissFamily(g);
+    g.leave = {
+      phase: 'back', ls, edge: p.laneBelow ? p.y + p.d : p.y, head: dir > 0 ? 0 : Math.PI, start: clock, age: 0, stuck: 0, hold: 0, i: 0,
+      pts: [[dir > 0 ? 54.5 : 62.5, yl], [58.1, yl + (dir > 0 ? 4.5 : 5.5)], [58.1, H + 20]],
+    };
+    if (g.kind === 'caravan') {   // by now it has been turned to face the lane; hitch the car on in front
+      const b = bodyRect(g), th = ls * Math.PI / 2, reach = b.hl + TYPES.combo.trailer.bar + TYPES.combo.trailer.hitch;
+      g.kind = 'combo'; g.t = TYPES.combo; g.th = th; g.ph = th;
+      g.x = b.cx + Math.cos(th) * reach; g.y = b.cy + Math.sin(th) * reach;
+      g.hitched = clock; g.leave.hold = 1.4; g.leave.phase = 'go';
+    } else if (Math.sin(g.th) * ls > 0.3) g.leave.phase = 'go';   // parked facing the lane already
+  }
+
+  function stepLeaver(g, dt) {
+    const L = g.leave, t = g.t;
+    L.age += dt; L.hold -= dt;
+    if (L.age > 90 || L.stuck > 20) {   // hopelessly boxed in: give up and vanish
+      g.alpha -= dt / 1.4;
+      return g.alpha <= 0;
+    }
+    let want = 0, steer = 0;
+    if (L.phase === 'back') {
+      want = -2.2;
+      if ((g.y - L.edge) * L.ls > 1.2) {   // rear axle is out on the lane: swing the nose round
+        const e = wrap(L.head - g.th);
+        if (Math.abs(e) < 0.1) L.phase = 'go'; else steer = -Math.sign(e) * 0.6;
+      }
+    }
+    if (L.phase === 'go') {
+      const fx = g.x + Math.cos(g.th) * t.wb, fy = g.y + Math.sin(g.th) * t.wb;
+      if (L.i < L.pts.length - 1 && Math.hypot(L.pts[L.i][0] - fx, L.pts[L.i][1] - fy) < 3) L.i++;
+      steer = clamp(wrap(Math.atan2(L.pts[L.i][1] - fy, L.pts[L.i][0] - fx) - g.th) * 1.6, -0.6, 0.6);
+      want = 4.6 * (1 - 0.55 * Math.abs(steer) / 0.6);
+    }
+    if (L.hold > 0) want = 0;
+    if (want) {   // look where it is about to go, and wait if someone is there
+      const b = bodyRect(g), sg = Math.sign(want), c = Math.cos(g.th) * sg, s = Math.sin(g.th) * sg;
+      const probe = { cx: b.cx + c * 2.6, cy: b.cy + s * 2.6, hl: b.hl, hw: b.hw + 0.25, a: b.a };
+      const px = b.cx + c * (b.hl + 1.6), py = b.cy + s * (b.hl + 1.6);
+      const inWay = (car && rectsOf(car).some((q) => rectRect(probe, q))) ||
+        guests.some((o) => o !== g && o.leave && o.leave.start < L.start && rectsOf(o).some((q) => rectRect(probe, q))) ||
+        people.some((o) => !o.hidden && Math.hypot(o.x - px, o.y - py) < 2.2);
+      if (inWay) { want = 0; L.stuck += dt; } else L.stuck = Math.max(0, L.stuck - dt);
+    }
+    const dv = want - g.v, rate = Math.abs(want) < Math.abs(g.v) ? 9 : 3;
+    g.v += clamp(dv, -rate * dt, rate * dt);
+    g.steer += clamp(steer - g.steer, -2.5 * dt, 2.5 * dt);
+    const dth = (g.v / t.wb) * Math.tan(g.steer) * dt;
+    g.th = wrap(g.th + dth);
+    g.x += Math.cos(g.th) * g.v * dt; g.y += Math.sin(g.th) * g.v * dt;
+    if (t.trailer) { const d = g.th - g.ph, tr = t.trailer; g.ph = wrap(g.ph + (g.v * dt / tr.axle) * Math.sin(d) - (tr.hitch / tr.axle) * dth * Math.cos(d)); }
+    if (g.parked.pitch.guest === g && L.phase === 'go' && L.hold <= 0) g.parked.pitch.guest = null;   // the pitch is free once they are rolling
+    return g.y > H + 14;   // out through the gate and gone
   }
 
   // ---------- skid marks ----------
@@ -836,7 +905,12 @@
     if (v.kind === 'van') drawVan(b, v);
     else if (v.kind === 'motorhome') drawMotorhome(b, v);
     else if (v.kind === 'caravan') drawCaravan(b, v);
-    else { drawCar(b, v); if (v.t.trailer) drawCaravan(trailerRect(v), v); }
+    else {
+      if (v.hitched) ctx.globalAlpha *= clamp((clock - v.hitched) / 1.2, 0, 1);   // the tow car, back from town
+      drawCar(b, v);
+      ctx.globalAlpha = clamp(v.alpha, 0, 1);
+      if (v.t.trailer) drawCaravan(trailerRect(v), v);
+    }
     if (v.parked && v.alpha > 0.9) drawCampLife(v);
     ctx.globalAlpha = 1;
     if (!v.parked) v._lights = [RP(b, b.hl, -b.hw * 0.6, 0.7), RP(b, b.hl, b.hw * 0.6, 0.7)];
@@ -987,5 +1061,5 @@
   requestAnimationFrame(tick);
 
   // For automated checks only: /?debug exposes the state.
-  if (location.search.includes('debug')) window.camp = { get car() { return car; }, get target() { return target; }, get parked() { return parkedCount; }, get score() { return score(); }, get night() { return night; }, people, skids, packUp, guests, pitches, keys, blocked, livingRect, corners, setClock: (t) => { clock = t; }, give: (kind) => { car = makeVehicle(kind, 60, 80.5, -Math.PI / 2); } };
+  if (location.search.includes('debug')) window.camp = { get car() { return car; }, get target() { return target; }, get parked() { return parkedCount; }, get score() { return score(); }, get night() { return night; }, people, skids, packUp, guests, pitches, keys, blocked, livingRect, corners, setClock: (t) => { clock = t; }, give: (kind) => { car = makeVehicle(kind, 61.8, 80.5, -Math.PI / 2); } };
 })();
