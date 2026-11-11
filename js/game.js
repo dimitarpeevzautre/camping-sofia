@@ -551,10 +551,15 @@
   function startLeaving(g) {
     const p = g.parked.pitch, ls = p.laneBelow ? 1 : -1, cx = p.x + p.w / 2, dir = cx < 58 ? 1 : -1;
     const yl = (p.y < 39 ? 20 : 50) + (dir > 0 ? 6 : 2);
+    if (g.kind === 'caravan') {
+      const b = bodyRect(g), th = ls * Math.PI / 2, reach = b.hl + TYPES.combo.trailer.bar + TYPES.combo.trailer.hitch + TYPES.car.L / 2 - TYPES.car.rear;
+      const spot = { cx: b.cx + Math.cos(th) * reach, cy: b.cy + Math.sin(th) * reach, hl: TYPES.car.L / 2 + 1.5, hw: TYPES.car.Wd / 2 + 0.4, a: th };
+      if ([...guests.filter((o) => o.leave), ...(car ? [car] : [])].some((o) => rectsOf(o).some((q) => rectRect(spot, q)))) return;   // try again next frame
+    }
     g.leaving = true; g.slide = null; g.v = 0; g.steer = 0;
     dismissFamily(g);
     g.leave = {
-      phase: 'back', ls, edge: p.laneBelow ? p.y + p.d : p.y, head: dir > 0 ? 0 : Math.PI, start: clock, age: 0, stuck: 0, hold: 0, i: 0,
+      phase: 'back', ls, edge: p.laneBelow ? p.y + p.d : p.y, head: dir > 0 ? 0 : Math.PI, start: clock, n: p.n, age: 0, stuck: 0, hold: 0, i: 0,
       pts: [[dir > 0 ? 54.5 : 62.5, yl], [58.1, yl + (dir > 0 ? 4.5 : 5.5)], [58.1, H + 20]],
     };
     if (g.kind === 'caravan') {   // by now it has been turned to face the lane; hitch the car on in front
@@ -572,7 +577,9 @@
       g.alpha -= dt / 1.4;
       return g.alpha <= 0;
     }
+    const others = guests.filter((o) => o !== g && o.leave);
     let want = 0, steer = 0;
+    L.wait = null;
     if (L.phase === 'back') {
       want = -2.2;
       if ((g.y - L.edge) * L.ls > 1.2) {   // rear axle is out on the lane: swing the nose round
@@ -583,7 +590,8 @@
     if (L.phase === 'go') {
       const fx = g.x + Math.cos(g.th) * t.wb, fy = g.y + Math.sin(g.th) * t.wb;
       if (L.i < L.pts.length - 1 && Math.hypot(L.pts[L.i][0] - fx, L.pts[L.i][1] - fy) < 3) L.i++;
-      steer = clamp(wrap(Math.atan2(L.pts[L.i][1] - fy, L.pts[L.i][0] - fx) - g.th) * 1.6, -0.6, 0.6);
+      const last = L.i === L.pts.length - 1, tx = L.pts[L.i][0], ty = last ? fy + 5 : L.pts[L.i][1];   // on the way out, hold the right-hand line rather than drift towards the gate
+      steer = clamp(wrap(Math.atan2(ty - fy, tx - fx) - g.th) * 1.6, -0.6, 0.6);
       want = 4.6 * (1 - 0.55 * Math.abs(steer) / 0.6);
     }
     if (L.hold > 0) want = 0;
@@ -591,18 +599,26 @@
       const b = bodyRect(g), sg = Math.sign(want), c = Math.cos(g.th) * sg, s = Math.sin(g.th) * sg;
       const probe = { cx: b.cx + c * 2.6, cy: b.cy + s * 2.6, hl: b.hl, hw: b.hw + 0.25, a: b.a };
       const px = b.cx + c * (b.hl + 1.6), py = b.cy + s * (b.hl + 1.6);
-      const inWay = (car && rectsOf(car).some((q) => rectRect(probe, q))) ||
-        guests.some((o) => o !== g && o.leave && o.leave.start < L.start && rectsOf(o).some((q) => rectRect(probe, q))) ||
+      // Give way to any other leaver in front. If two are in each other's way, the one already rolling along
+      // the lane goes first, or else the one that set off first (lower pitch number on a tie).
+      const first = (a, b) => (a.phase === 'go') !== (b.phase === 'go') ? a.phase === 'go' : a.start !== b.start ? a.start < b.start : a.n < b.n;
+      L.wait = others.find((o) => rectsOf(o).some((q) => rectRect(probe, q)) && !(o.leave.wait === g && first(L, o.leave))) || null;
+      const inWay = L.wait || (car && rectsOf(car).some((q) => rectRect(probe, q))) ||
         people.some((o) => !o.hidden && Math.hypot(o.x - px, o.y - py) < 2.2);
       if (inWay) { want = 0; L.stuck += dt; } else L.stuck = Math.max(0, L.stuck - dt);
     }
     const dv = want - g.v, rate = Math.abs(want) < Math.abs(g.v) ? 9 : 3;
     g.v += clamp(dv, -rate * dt, rate * dt);
     g.steer += clamp(steer - g.steer, -2.5 * dt, 2.5 * dt);
+    const solid = car ? [...others, car] : others, touches = (o) => rectsOf(g).some((r) => rectsOf(o).some((q) => rectRect(r, q)));
+    const was = solid.filter(touches), ox = g.x, oy = g.y, oth = g.th, oph = g.ph;
     const dth = (g.v / t.wb) * Math.tan(g.steer) * dt;
     g.th = wrap(g.th + dth);
     g.x += Math.cos(g.th) * g.v * dt; g.y += Math.sin(g.th) * g.v * dt;
     if (t.trailer) { const d = g.th - g.ph, tr = t.trailer; g.ph = wrap(g.ph + (g.v * dt / tr.axle) * Math.sin(d) - (tr.hitch / tr.axle) * dth * Math.cos(d)); }
+    if (solid.some((o) => !was.includes(o) && touches(o))) {   // that step would run into someone: stay put
+      g.x = ox; g.y = oy; g.th = oth; g.ph = oph; g.v = 0; L.stuck += dt;
+    }
     if (g.parked.pitch.guest === g && L.phase === 'go' && L.hold <= 0) g.parked.pitch.guest = null;   // the pitch is free once they are rolling
     return g.y > H + 14;   // out through the gate and gone
   }
@@ -1061,5 +1077,5 @@
   requestAnimationFrame(tick);
 
   // For automated checks only: /?debug exposes the state.
-  if (location.search.includes('debug')) window.camp = { get car() { return car; }, get target() { return target; }, get parked() { return parkedCount; }, get score() { return score(); }, get night() { return night; }, people, skids, packUp, guests, pitches, keys, blocked, livingRect, corners, setClock: (t) => { clock = t; }, give: (kind) => { car = makeVehicle(kind, 61.8, 80.5, -Math.PI / 2); } };
+  if (location.search.includes('debug')) window.camp = { get car() { return car; }, get target() { return target; }, get parked() { return parkedCount; }, get score() { return score(); }, get night() { return night; }, people, skids, packUp, guests, pitches, rectsOf, rectRect, keys, blocked, livingRect, corners, setClock: (t) => { clock = t; }, give: (kind) => { car = makeVehicle(kind, 61.8, 80.5, -Math.PI / 2); } };
 })();
