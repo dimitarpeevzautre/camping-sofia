@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128" width="128" height="128">
+  <title>Camping Sofia</title>
+  <!-- A pitch-marker plate: Vitosha, the mountain over Sofia, with a tent pitched at its foot. -->
+  <defs><clipPath id="p"><rect x="8" y="8" width="112" height="112" rx="20"/></clipPath></defs>
+  <rect x="4" y="4" width="120" height="120" rx="24" fill="#12211a"/>
+  <rect x="10" y="10" width="108" height="108" rx="18" fill="#f4c531"/>
+  <g clip-path="url(#p)">
+    <circle cx="35" cy="38" r="10" fill="#f6f1df"/>
+    <path d="M4 90 C24 84 38 62 54 50 C62 44 68 40 75 43 C88 48 98 68 124 82 L124 124 L4 124 Z" fill="#12211a"/>
+    <path d="M38 101 L64 60 L90 101 Z" fill="#f6f1df" stroke="#12211a" stroke-width="6" stroke-linejoin="round"/>
+    <path d="M64 77 L76 101 L52 101 Z" fill="#12211a"/>
+    <rect x="10" y="100" width="108" height="18" fill="#12211a"/>
+  </g>
+</svg>
