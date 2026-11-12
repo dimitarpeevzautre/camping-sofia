@@ -10,7 +10,7 @@
   'use strict';
 
   const cv = document.getElementById('camp');
-  const ctx = cv.getContext('2d');
+  let ctx = cv.getContext('2d');   // swapped for a moment when a parked vehicle is drawn onto its own small canvas
   const $ = (id) => document.getElementById(id);
   const reduceMotion = matchMedia('(prefers-reduced-motion: reduce)').matches;
 
@@ -1242,6 +1242,9 @@
   }
   function drawIce() {
     if (!ice) return;
+    viaSprite(ice, ice.x, ice.y, Math.round(ice.th * 50), drawIceNow, 5);
+  }
+  function drawIceNow() {
     const r = iceRect();
     drawVan(r, ICE_SKIN);
     const [x, y] = P(ice.x, ice.y, 3.1), k = cam.s;   // the cone on the roof
@@ -1281,8 +1284,8 @@
     for (const t of roamers) {
       const r = roamRect(t), [qx, qy] = P(t.x, t.y);
       if (qx < -90 || qx > vw + 90 || qy < -90 || qy > vh + 90) continue;
-      if (t.kind === 'tractor') drawTractor(r);
-      else if (t.kind === 'biker') drawBiker(r, t);
+      if (t.kind === 'tractor') viaSprite(t, t.x, t.y, Math.round(t.th * 50), () => drawTractor(r), 5);
+      else if (t.kind === 'biker') viaSprite(t, t.x, t.y, Math.round(t.th * 50), () => drawBiker(r, t), 3);
       else if (t.kind === 'cyclist') drawCyclist(r, t);
       else drawHikers(r, t);
     }
@@ -1830,6 +1833,7 @@
       if (g.slide) {   // a caravan being pushed the last metre onto its pitch
         const k = 1 - Math.exp(-dt * 3);
         g.x = lerp(g.x, g.slide.x, k); g.y = lerp(g.y, g.slide.y, k); g.th = wrap(g.th + wrap(g.slide.th - g.th) * k);
+        if (Math.hypot(g.x - g.slide.x, g.y - g.slide.y) < 0.02 && Math.abs(wrap(g.slide.th - g.th)) < 0.01) { g.x = g.slide.x; g.y = g.slide.y; g.th = g.slide.th; g.slide = null; }
       }
     }
     for (let i = ghosts.length - 1; i >= 0; i--) { ghosts[i].alpha -= dt / 1.2; if (ghosts[i].alpha <= 0) ghosts.splice(i, 1); }
@@ -2382,7 +2386,16 @@
     if (fill) { ctx.fillStyle = fill; ctx.fill(); }
     if (stroke) { ctx.strokeStyle = stroke; ctx.stroke(); }
   };
-  const shade = (hex, f) => {
+  const SHADES = new Map();
+  const shade = (hex, f0) => {
+    const q = Math.round(f0 * 40), key = hex + '|' + q, hit = SHADES.get(key);   // remembered, in steps of a fortieth
+    if (hit !== undefined) return hit;
+    if (SHADES.size > 6000) SHADES.clear();
+    const out = shadeRaw(hex, q / 40);
+    SHADES.set(key, out);
+    return out;
+  };
+  const shadeRaw = (hex, f) => {
     const c = (v) => clamp(Math.round(v * f), 0, 255);
     if (hex[0] !== '#') { const m = hex.match(/\d+/g); return `rgb(${c(+m[0])},${c(+m[1])},${c(+m[2])})`; }   // already an rgb() string
     const n = parseInt(hex.slice(1), 16);
@@ -2406,7 +2419,16 @@
   const SUN = [-0.55, -0.83];   // where the light comes from, for shading walls
 
   // Outline of a rounded rectangle, front-left corner first, going round by the right-hand side.
-  function hull(l0, l1, hw, rf, rb = rf) {
+  const HULLS = new Map();
+  function hull(l0, l1, hw, rf, rb = rf) {   // remembered: callers only read the points
+    const key = l0 + ',' + l1 + ',' + hw + ',' + rf + ',' + rb, hit = HULLS.get(key);
+    if (hit) return hit;
+    if (HULLS.size > 3000) HULLS.clear();
+    const made = hullRaw(l0, l1, hw, rf, rb);
+    HULLS.set(key, made);
+    return made;
+  }
+  function hullRaw(l0, l1, hw, rf, rb) {
     const pts = [];
     for (const [cl, cw, rad, a0] of [[l1 - rf, -hw + rf, rf, -Math.PI / 2], [l1 - rf, hw - rf, rf, 0], [l0 + rb, hw - rb, rb, Math.PI / 2], [l0 + rb, -hw + rb, rb, Math.PI]]) {
       for (let k = 0; k <= 3; k++) { const a = a0 + (k / 3) * Math.PI / 2; pts.push([cl + Math.cos(a) * rad, cw + Math.sin(a) * rad]); }
@@ -2419,13 +2441,23 @@
   // outward direction (nl forward, nw sideways) returning one. `top` may be left out when something sits on it.
   function solid(r, lo, z0, hi, z1, wall, top) {
     const c = Math.cos(r.a), s = Math.sin(r.a), n = lo.length;
-    const A = lo.map(([l, w]) => RP(r, l, w, z0)), B = hi.map(([l, w]) => RP(r, l, w, z1));
+    const k0 = cam.s * (1 + z0 * LEAN), k1 = cam.s * (1 + z1 * LEAN), ox = r.cx - cam.x, oy = r.cy - cam.y, hx = vw / 2, hy = vh / 2;
+    const A = new Array(n), B = new Array(n), upright = lo === hi;
+    for (let i = 0; i < n; i++) {
+      const a = lo[i], b = hi[i];
+      A[i] = [(ox + c * a[0] - s * a[1]) * k0 + hx, (oy + s * a[0] + c * a[1]) * k0 + hy];
+      B[i] = [(ox + c * b[0] - s * b[1]) * k1 + hx, (oy + s * b[0] + c * b[1]) * k1 + hy];
+    }
     for (let i = 0; i < n; i++) {
       const j = (i + 1) % n;
       let nl = lo[j][1] - lo[i][1], nw = lo[i][0] - lo[j][0];
       const len = Math.hypot(nl, nw);
       if (len < 1e-6) continue;
       nl /= len; nw /= len;
+      if (upright) {   // an upright wall that faces the middle of the screen is hidden under its own roof
+        const ml = (lo[i][0] + lo[j][0]) / 2, mw = (lo[i][1] + lo[j][1]) / 2;
+        if ((c * nl - s * nw) * (ox + c * ml - s * mw) + (s * nl + c * nw) * (oy + s * ml + c * mw) < 0) continue;
+      }
       const raw = typeof wall === 'function' ? wall(nl, nw) : wall;
       const col = raw === GLASS ? GLASS : shade(raw, 0.84 + 0.2 * ((c * nl - s * nw) * SUN[0] + (s * nl + c * nw) * SUN[1]));
       poly([A[i], A[j], B[j], B[i]], col, cam.s > 22 ? col : null);
@@ -2569,6 +2601,34 @@
     awningCase(r, v, -1.9, 1.5, 2.6);
   }
 
+  // A parked camper does not change, so it is drawn once onto a small canvas of its own and that picture is put
+  // on screen each frame. Because tall things lean away from the middle of the screen, the picture is made again
+  // when the camera has moved a metre and a half relative to it, or zoomed noticeably.
+  const sprites = new WeakMap();
+  // Draws `o` (centred on wx, wy; `tag` changes when its look does, e.g. its heading) through its own small canvas.
+  function viaSprite(o, wx, wy, tag, draw, reach = 8.5) {
+    const [sx, sy] = P(wx, wy), far = cam.s * reach;
+    if (sx < -far || sx > vw + far || sy < -far || sy > vh + far) return;   // off screen
+    const rx = wx - cam.x, ry = wy - cam.y;
+    let sp = sprites.get(o);
+    if (!sp || sp.tag !== tag || Math.abs(rx - sp.rx) > 1.5 || Math.abs(ry - sp.ry) > 1.5 || Math.abs(cam.s / sp.s - 1) > 0.07 || sp.dpr !== dpr) {
+      const half = Math.ceil(cam.s * reach), px = Math.round(half * 2 * dpr);
+      if (!sp) { sp = { cv: document.createElement('canvas') }; sp.cx = sp.cv.getContext('2d'); sprites.set(o, sp); }
+      if (sp.cv.width !== px) { sp.cv.width = px; sp.cv.height = px; } else { sp.cx.setTransform(1, 0, 0, 1, 0, 0); sp.cx.clearRect(0, 0, px, px); }
+      const main = ctx;
+      ctx = sp.cx;
+      try { ctx.setTransform(dpr, 0, 0, dpr, (half - sx) * dpr, (half - sy) * dpr); ctx.lineWidth = 1; ctx.lineJoin = 'round'; draw(); } finally { ctx = main; }
+      sp.rx = rx; sp.ry = ry; sp.s = cam.s; sp.dpr = dpr; sp.half = half; sp.tag = tag;
+    }
+    const k = cam.s / sp.s;
+    ctx.drawImage(sp.cv, sx - sp.half * k, sy - sp.half * k, sp.half * 2 * k, sp.half * 2 * k);
+  }
+  function drawParked(v) {
+    if (!v.parked || v.packing || v.leaving || v.slide || v.alpha < 1 || clock - v.parked.t < 2.4) return false;
+    const b = bodyRect(v);
+    viaSprite(v, b.cx, b.cy, 0, () => drawVehicle(v), 7.5);
+    return true;
+  }
   function drawVehicle(v) {
     const b = bodyRect(v);
     const [sx, sy] = P(b.cx, b.cy), far = cam.s * (v.t.trailer ? 11 : 7.5);
@@ -2669,7 +2729,7 @@
       if (v === car && car.air) {   // in the air: nearer the camera, so larger, and lifted off its shadow
         const h = Math.sin(Math.PI * clamp(car.air.t / car.air.T, 0, 1)), [sx, sy] = P(car.x, car.y);
         ctx.save(); ctx.translate(sx, sy - h * cam.s * 1.4); ctx.scale(1 + 0.32 * h, 1 + 0.32 * h); ctx.translate(-sx, -sy); drawVehicle(v); ctx.restore();
-      } else drawVehicle(v);
+      } else if (!drawParked(v)) drawVehicle(v);
     }
     drawPeople();
     drawAmbient(true); drawFireside(true);
