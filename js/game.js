@@ -1727,6 +1727,41 @@
   const lilies = Array.from({ length: 9 }, (_, i) => { const a = i * 2.4 + 0.5, r = 0.45 + ((i * 37) % 40) / 100; return { x: pond.x + Math.cos(a) * pond.rx * r, y: pond.y + Math.sin(a) * pond.ry * r, s: 0.38 + (i % 3) * 0.1, a: i * 1.3, bloom: i % 3 === 0 }; });
   const reeds = Array.from({ length: 22 }, (_, i) => { const a = Math.PI * 0.95 + (i / 21) * Math.PI * 0.9; return { x: pond.x + Math.cos(a) * pond.rx * 0.97, y: pond.y + Math.sin(a) * pond.ry * 0.97, h: 0.9 + (i % 4) * 0.25, p: i * 0.7 }; });
   const tubs = [[65.6, 73.2], [65.6, 77.8]];
+  const PLAY = {}, TABLES = [[25, 79, 0.3], [38.5, 83, -0.5], [45, 71.5, 1.2], [94, 81, 0.1]].map(([x, y, a]) => ({ x, y, a })), BENCHES = [[89.5, 20.3], [98.5, 20.3]].map(([x, y]) => ({ x, y }));
+  function drawPlayground() {
+    const k = cam.s;
+  {   // a small playground beyond the reception: a sandpit, a swing and a seesaw
+    const [ox, oy] = P(86, 78.5);
+    if (ox > -200 && ox < vw + 200 && oy > -200 && oy < vh + 200) {
+      const sand = { cx: 84, cy: 79.5, hl: 2.2, hw: 1.7, a: 0.15 };
+      poly(quad(sand, -2.2, 2.2, -1.7, 1.7, 0), '#e8d49a', 'rgba(18,33,26,0.35)');
+      poly(quad(sand, -2.35, 2.35, -1.85, -1.65, 0.25), '#b98a55'); poly(quad(sand, -2.35, 2.35, 1.65, 1.85, 0.25), '#b98a55');
+      poly(quad(sand, -2.35, -2.15, -1.85, 1.85, 0.25), '#a97a48'); poly(quad(sand, 2.15, 2.35, -1.85, 1.85, 0.25), '#a97a48');
+      const [bx, by] = RP(sand, 0.6, -0.4, 0.3); ctx.fillStyle = '#d5503c'; ctx.beginPath(); ctx.arc(bx, by, 0.28 * k, 0, TAU); ctx.fill();          // a bucket
+      const [mx, my] = RP(sand, -0.7, 0.5, 0.15); ctx.fillStyle = '#d9c183'; ctx.beginPath(); ctx.arc(mx, my, 0.5 * k, 0, TAU); ctx.fill();          // a sandcastle
+      const sw = { cx: 89.5, cy: 77, hl: 1.6, hw: 0.9, a: -0.2 }, swing = reduceMotion ? 0 : Math.sin(clock * 1.6) * 0.55;
+      ctx.strokeStyle = '#8a6a45'; ctx.lineWidth = Math.max(2, k * 0.14); ctx.lineCap = 'round';
+      for (const l of [-1.6, 1.6]) { ctx.beginPath(); ctx.moveTo(...RP(sw, l, -0.9, 0)); ctx.lineTo(...RP(sw, l, 0, 2.3)); ctx.lineTo(...RP(sw, l, 0.9, 0)); ctx.stroke(); }
+      ctx.beginPath(); ctx.moveTo(...RP(sw, -1.6, 0, 2.3)); ctx.lineTo(...RP(sw, 1.6, 0, 2.3)); ctx.stroke();
+      ctx.strokeStyle = '#22262a'; ctx.lineWidth = 1.5;
+      for (const [l, ph] of [[-0.6, swing], [0.6, -swing * 0.7]]) { const seat = RP(sw, l, ph, 0.6); ctx.beginPath(); ctx.moveTo(...RP(sw, l, 0, 2.3)); ctx.lineTo(...seat); ctx.stroke(); ctx.fillStyle = l < 0 ? '#3f7fa6' : '#f0b83a'; ctx.beginPath(); ctx.arc(seat[0], seat[1], 0.26 * k, 0, TAU); ctx.fill(); }
+      const see = { cx: 88, cy: 81.5, hl: 2, hw: 0.2, a: 0.5 }, tip = reduceMotion ? 0 : Math.sin(clock * 1.1) * 0.35;
+      ctx.strokeStyle = '#d5503c'; ctx.lineWidth = Math.max(3, k * 0.2);
+      ctx.beginPath(); ctx.moveTo(...RP(see, -2, 0, 0.6 + tip)); ctx.lineTo(...RP(see, 2, 0, 0.6 - tip)); ctx.stroke();
+      ctx.fillStyle = '#8a6a45'; const [cx0, cy0] = RP(see, 0, 0, 0.3); ctx.beginPath(); ctx.arc(cx0, cy0, 0.25 * k, 0, TAU); ctx.fill();
+      ctx.lineCap = 'butt'; ctx.lineWidth = 1;
+    }
+  }
+  }
+  function drawTable(t) {
+    const r = { cx: t.x, cy: t.y, hl: 1.1, hw: 0.9, a: t.a }, top = box(-1.1, 1.1, -0.4, 0.4);
+    for (const w of [-0.75, 0.75]) { const seat = box(-1.1, 1.1, w - 0.16, w + 0.16); solid(r, seat, 0.3, seat, 0.42, '#8a6a45', '#a98458'); }
+    solid(r, top, 0.55, top, 0.72, '#8a6a45', '#b98a55');
+  }
+  function drawBench(t) {
+    const r = { cx: t.x, cy: t.y, hl: 0.9, hw: 0.3, a: 0 }, seat = box(-0.9, 0.9, -0.25, 0.25), back = box(-0.9, 0.9, 0.2, 0.3);
+    solid(r, seat, 0.3, seat, 0.45, '#8a6a45', '#a98458'); solid(r, back, 0.45, back, 0.95, '#7a5c3c', '#8a6a45');
+  }
   function drawPondLife() {
     const k = cam.s, [px, py] = P(pond.x, pond.y);
     if (px > -pond.rx * k - 60 && px < vw + pond.rx * k + 60 && py > -pond.ry * k - 60 && py < vh + pond.ry * k + 60) {
@@ -1744,42 +1779,11 @@
       }
       ctx.lineCap = 'butt'; ctx.lineWidth = 1;
     }
-    {   // a small playground beyond the reception: a sandpit, a swing and a seesaw
-      const [ox, oy] = P(86, 78.5);
-      if (ox > -200 && ox < vw + 200 && oy > -200 && oy < vh + 200) {
-        const sand = { cx: 84, cy: 79.5, hl: 2.2, hw: 1.7, a: 0.15 };
-        poly(quad(sand, -2.2, 2.2, -1.7, 1.7, 0), '#e8d49a', 'rgba(18,33,26,0.35)');
-        poly(quad(sand, -2.35, 2.35, -1.85, -1.65, 0.25), '#b98a55'); poly(quad(sand, -2.35, 2.35, 1.65, 1.85, 0.25), '#b98a55');
-        poly(quad(sand, -2.35, -2.15, -1.85, 1.85, 0.25), '#a97a48'); poly(quad(sand, 2.15, 2.35, -1.85, 1.85, 0.25), '#a97a48');
-        const [bx, by] = RP(sand, 0.6, -0.4, 0.3); ctx.fillStyle = '#d5503c'; ctx.beginPath(); ctx.arc(bx, by, 0.28 * k, 0, TAU); ctx.fill();          // a bucket
-        const [mx, my] = RP(sand, -0.7, 0.5, 0.15); ctx.fillStyle = '#d9c183'; ctx.beginPath(); ctx.arc(mx, my, 0.5 * k, 0, TAU); ctx.fill();          // a sandcastle
-        const sw = { cx: 89.5, cy: 77, hl: 1.6, hw: 0.9, a: -0.2 }, swing = reduceMotion ? 0 : Math.sin(clock * 1.6) * 0.55;
-        ctx.strokeStyle = '#8a6a45'; ctx.lineWidth = Math.max(2, k * 0.14); ctx.lineCap = 'round';
-        for (const l of [-1.6, 1.6]) { ctx.beginPath(); ctx.moveTo(...RP(sw, l, -0.9, 0)); ctx.lineTo(...RP(sw, l, 0, 2.3)); ctx.lineTo(...RP(sw, l, 0.9, 0)); ctx.stroke(); }
-        ctx.beginPath(); ctx.moveTo(...RP(sw, -1.6, 0, 2.3)); ctx.lineTo(...RP(sw, 1.6, 0, 2.3)); ctx.stroke();
-        ctx.strokeStyle = '#22262a'; ctx.lineWidth = 1.5;
-        for (const [l, ph] of [[-0.6, swing], [0.6, -swing * 0.7]]) { const seat = RP(sw, l, ph, 0.6); ctx.beginPath(); ctx.moveTo(...RP(sw, l, 0, 2.3)); ctx.lineTo(...seat); ctx.stroke(); ctx.fillStyle = l < 0 ? '#3f7fa6' : '#f0b83a'; ctx.beginPath(); ctx.arc(seat[0], seat[1], 0.26 * k, 0, TAU); ctx.fill(); }
-        const see = { cx: 88, cy: 81.5, hl: 2, hw: 0.2, a: 0.5 }, tip = reduceMotion ? 0 : Math.sin(clock * 1.1) * 0.35;
-        ctx.strokeStyle = '#d5503c'; ctx.lineWidth = Math.max(3, k * 0.2);
-        ctx.beginPath(); ctx.moveTo(...RP(see, -2, 0, 0.6 + tip)); ctx.lineTo(...RP(see, 2, 0, 0.6 - tip)); ctx.stroke();
-        ctx.fillStyle = '#8a6a45'; const [cx0, cy0] = RP(see, 0, 0, 0.3); ctx.beginPath(); ctx.arc(cx0, cy0, 0.25 * k, 0, TAU); ctx.fill();
-        ctx.lineCap = 'butt'; ctx.lineWidth = 1;
-      }
-    }
-    // picnic tables on the meadow and two benches facing the pond
-    for (const [x, y, a] of [[25, 79, 0.3], [38.5, 83, -0.5], [45, 71.5, 1.2], [94, 81, 0.1]]) {
-      const [sx, sy] = P(x, y);
-      if (sx < -60 || sx > vw + 60 || sy < -60 || sy > vh + 60) continue;
-      const r = { cx: x, cy: y, hl: 1.1, hw: 0.9, a }, top = box(-1.1, 1.1, -0.4, 0.4);
-      for (const w of [-0.75, 0.75]) { const seat = box(-1.1, 1.1, w - 0.16, w + 0.16); solid(r, seat, 0.3, seat, 0.42, '#8a6a45', '#a98458'); }
-      solid(r, top, 0.55, top, 0.72, '#8a6a45', '#b98a55');
-    }
-    for (const [x, y] of [[89.5, 20.3], [98.5, 20.3]]) {
-      const [sx, sy] = P(x, y);
-      if (sx < -60 || sx > vw + 60 || sy < -60 || sy > vh + 60) continue;
-      const r = { cx: x, cy: y, hl: 0.9, hw: 0.3, a: 0 }, seat = box(-0.9, 0.9, -0.25, 0.25), back = box(-0.9, 0.9, 0.2, 0.3);
-      solid(r, seat, 0.3, seat, 0.45, '#8a6a45', '#a98458'); solid(r, back, 0.45, back, 0.95, '#7a5c3c', '#8a6a45');
-    }
+    // the playground, the picnic tables and the benches are drawn once and reused; the playground a few times a
+    // second, because its swing and seesaw move
+    viaSprite(PLAY, 86.5, 79.5, reduceMotion ? 0 : Math.floor(clock * 6), drawPlayground, 6.5);
+    for (const t of TABLES) viaSprite(t, t.x, t.y, 0, () => drawTable(t), 2.4);
+    for (const t of BENCHES) viaSprite(t, t.x, t.y, 0, () => drawBench(t), 1.8);
     for (const [tx, ty] of tubs) {
       const [x, y] = P(tx, ty, 0.5);
       if (x < -30 || x > vw + 30 || y < -30 || y > vh + 30) continue;
@@ -2374,31 +2378,37 @@
       const u = cam.s * o.size * 1.7 * (o.waveT > clock + 23 ? 1 + 0.25 * Math.abs(Math.sin(clock * 9)) : 1), walking   // drawn larger than life, or nobody would see them
       = o.wait <= 0 || o.kind === 'pet', sw = walking ? Math.sin(o.phase) : 0;
       ctx.fillStyle = 'rgba(15,30,20,0.25)'; ctx.beginPath(); ctx.arc(gx + cam.s * 0.18, gy + cam.s * 0.18, u * 0.24, 0, TAU); ctx.fill();
-      ctx.save();
       if (o.kind === 'pet') {
+        ctx.save();
         const k = cam.s * (o.cat ? 1.1 : 1.6);
         ctx.translate(...P(o.x, o.y, 0.3)); ctx.rotate(o.dir);
         ctx.strokeStyle = o.hair; ctx.lineWidth = k * 0.07; ctx.lineCap = 'round';
         ctx.beginPath(); ctx.moveTo(-k * 0.3, 0); ctx.lineTo(-k * 0.5, k * 0.12 * sw); ctx.stroke();                      // tail
         ctx.fillStyle = o.hair; ctx.beginPath(); ctx.ellipse(0, 0, k * 0.32, k * 0.13, 0, 0, TAU); ctx.fill();
         ctx.fillStyle = shade(o.hair, 0.8); ctx.beginPath(); ctx.arc(k * 0.34, 0, k * 0.13, 0, TAU); ctx.fill();
+        ctx.restore();
       } else {
-        ctx.translate(gx, gy); ctx.rotate(o.dir);
-        ctx.fillStyle = '#2c2f36';                                                                                          // feet
-        ctx.beginPath(); ctx.ellipse(u * 0.14 * sw, -u * 0.1, u * 0.11, u * 0.07, 0, 0, TAU); ctx.ellipse(-u * 0.14 * sw, u * 0.1, u * 0.11, u * 0.07, 0, 0, TAU); ctx.fill();
-        ctx.restore(); ctx.save();
-        ctx.translate(...P(o.x, o.y, 0.5 * o.size)); ctx.rotate(o.dir);
-        ctx.fillStyle = '#e2b48c';                                                                                          // hands, swinging as they walk
-        ctx.beginPath(); ctx.arc(-u * 0.12 * sw, -u * 0.3, u * 0.06, 0, TAU); ctx.arc(u * 0.12 * sw, u * 0.3, u * 0.06, 0, TAU); ctx.fill();
-        ctx.fillStyle = o.shirt; ctx.strokeStyle = 'rgba(18,33,26,0.35)'; ctx.lineWidth = 1;
-        ctx.beginPath(); ctx.ellipse(0, 0, u * 0.15, u * 0.27, 0, 0, TAU); ctx.fill(); ctx.stroke();                         // shoulders
-        ctx.restore(); ctx.save();
-        ctx.translate(...P(o.x, o.y, 0.9 * o.size));
-        const hat = o.shirt.charCodeAt(3) % 3 === 0;                                                                       // one in three wears a sun hat
-        if (hat) { ctx.fillStyle = o.kind === 'kid' ? '#f6f1df' : '#e6cf8a'; ctx.strokeStyle = 'rgba(18,33,26,0.35)'; ctx.lineWidth = 1; ctx.beginPath(); ctx.arc(0, 0, u * 0.2, 0, TAU); ctx.fill(); ctx.stroke(); }
-        ctx.fillStyle = hat ? (o.kind === 'kid' ? '#d5503c' : '#d9bd72') : o.hair; ctx.beginPath(); ctx.arc(0, 0, u * 0.13, 0, TAU); ctx.fill();   // head, or the crown of the hat
+        // a person is four or five small shapes; they are placed by hand here, without moving the canvas for each,
+        // because with forty people on site that was the costliest part of a frame
+        const cd = Math.cos(o.dir), sd = Math.sin(o.dir), big = cam.s > 15;
+        const lift = (z) => { const f = 1 + z * LEAN; return [(o.x - cam.x) * cam.s * f + vw / 2, (o.y - cam.y) * cam.s * f + vh / 2]; };
+        if (big) {                                                                                                          // feet (too small to see on a phone)
+          const a = u * 0.14 * sw, b = u * 0.1;
+          ctx.fillStyle = '#2c2f36'; ctx.beginPath();
+          ctx.arc(gx + cd * a + sd * b, gy + sd * a - cd * b, u * 0.085, 0, TAU); ctx.arc(gx - cd * a - sd * b, gy - sd * a + cd * b, u * 0.085, 0, TAU); ctx.fill();
+        }
+        const [bx, by] = lift(0.5 * o.size);
+        if (big) {                                                                                                          // hands, swinging as they walk
+          const a = u * 0.12 * sw, b = u * 0.3;
+          ctx.fillStyle = '#e2b48c'; ctx.beginPath();
+          ctx.arc(bx - cd * a + sd * b, by - sd * a - cd * b, u * 0.06, 0, TAU); ctx.arc(bx + cd * a - sd * b, by + sd * a + cd * b, u * 0.06, 0, TAU); ctx.fill();
+        }
+        ctx.fillStyle = o.shirt; ctx.beginPath(); ctx.ellipse(bx, by, u * 0.15, u * 0.27, o.dir, 0, TAU); ctx.fill();       // shoulders
+        if (big) { ctx.strokeStyle = 'rgba(18,33,26,0.35)'; ctx.lineWidth = 1; ctx.stroke(); }
+        const [hx, hy] = lift(0.9 * o.size), hat = o.shirt.charCodeAt(3) % 3 === 0;                                        // one in three wears a sun hat
+        if (hat) { ctx.fillStyle = o.kind === 'kid' ? '#f6f1df' : '#e6cf8a'; ctx.beginPath(); ctx.arc(hx, hy, u * 0.2, 0, TAU); ctx.fill(); if (big) { ctx.strokeStyle = 'rgba(18,33,26,0.35)'; ctx.lineWidth = 1; ctx.stroke(); } }
+        ctx.fillStyle = hat ? (o.kind === 'kid' ? '#d5503c' : '#d9bd72') : o.hair; ctx.beginPath(); ctx.arc(hx, hy, u * 0.13, 0, TAU); ctx.fill();   // head, or the crown of the hat
       }
-      ctx.restore();
     }
   }
 
@@ -2924,6 +2934,38 @@
     ctx.globalAlpha = 1;
   }
 
+  const GATE = {};
+  function drawBuilding(b) {
+    const r = { cx: b.x + b.w / 2, cy: b.y + b.h / 2, hl: b.w / 2, hw: b.h / 2, a: 0 };
+    const top = drawBox(r, b.z, b.wall, b.roof);
+    if (b.label) {
+      poly([RP(r, -r.hl, 0, b.z + 0.9), RP(r, r.hl, 0, b.z + 0.9), top[2], top[3]], shade(b.roof, 1.12));     // sunny side of a pitched roof
+      poly([RP(r, -r.hl, 0, b.z + 0.9), RP(r, r.hl, 0, b.z + 0.9), top[1], top[0]], shade(b.roof, 0.9));
+      // courses of tiles, a ridge, and the two gable ends closing the roof
+      ctx.strokeStyle = 'rgba(18,33,26,0.16)'; ctx.lineWidth = 1;
+      for (const side of [-1, 1]) for (let i = 1; i < 4; i++) { const w = side * r.hw * (i / 4), z = b.z + 0.9 * (1 - i / 4); ctx.beginPath(); ctx.moveTo(...RP(r, -r.hl, w, z)); ctx.lineTo(...RP(r, r.hl, w, z)); ctx.stroke(); }
+      for (const end of [-1, 1]) poly([RP(r, end * r.hl, -r.hw, b.z), RP(r, end * r.hl, r.hw, b.z), RP(r, end * r.hl, 0, b.z + 0.9)], shade(b.wall, end > 0 ? 0.95 : 0.8));
+      ctx.strokeStyle = shade(b.roof, 0.7); ctx.lineWidth = Math.max(1.5, cam.s * 0.1); ctx.beginPath(); ctx.moveTo(...RP(r, -r.hl, 0, b.z + 0.9)); ctx.lineTo(...RP(r, r.hl, 0, b.z + 0.9)); ctx.stroke(); ctx.lineWidth = 1;
+      const ch = { cx: r.cx + r.hl * 0.55, cy: r.cy - r.hw * 0.45, hl: 0.45, hw: 0.45, a: 0 }, co = box(-0.45, 0.45, -0.45, 0.45);
+      solid(ch, co, b.z + 0.3, co, b.z + 1.5, '#b98a70', '#8f6a55');                                // chimney
+      if (b.label === 'Reception') {   // a striped canopy over the door, on the side that faces the road
+        for (let i = 0; i < 8; i++) { const w0 = -r.hw * 0.7 + i * (r.hw * 1.4 / 8), w1 = w0 + r.hw * 1.4 / 8; poly([RP(r, -r.hl, w0, 2.5), RP(r, -r.hl, w1, 2.5), RP(r, -r.hl - 1.7, w1, 2.05), RP(r, -r.hl - 1.7, w0, 2.05)], i % 2 ? '#f6f1df' : '#f4c531', EDGE); }
+      }
+      const [x, y] = RP(r, 0, r.hw * 0.5, b.z + 0.45);
+      ctx.fillStyle = '#f6f1df'; ctx.font = `800 ${Math.round(cam.s * 1.15)}px Overpass, sans-serif`; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+      ctx.fillText(L.labels[b.label] || b.label, x, y);
+    }
+  }
+  // the entrance: a timber beam across the two gate posts, carrying the name
+  function drawGate() {
+  {
+    const g = { cx: 60, cy: 85.8, hl: 5.4, hw: 0.5, a: 0 }, beam = box(-5.4, 5.4, -0.5, 0.5);
+    solid(g, beam, 2.9, beam, 3.5, '#8a6a45', '#a98458');
+    const [x, y] = RP(g, 0, 0, 3.52);
+    ctx.fillStyle = '#f4c531'; ctx.font = `900 ${Math.round(cam.s * 0.62)}px Overpass, sans-serif`; ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; ctx.fillText('CAMPING SOFIA', x, y);
+  }
+  }
+
   function frame(night) {
     ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
     ctx.fillStyle = '#1c3327'; ctx.fillRect(0, 0, vw, vh);
@@ -2982,35 +3024,9 @@
       poly([base[1], base[2], r1], shade(t.c, 0.62), EDGE);                                              // the end with the door
       poly([RP(r, hl, -hw * 0.28, 0), RP(r, hl, hw * 0.28, 0), RP(r, hl, 0, zt * 0.72)], '#26343d');
     }
-    // buildings
-    for (const b of buildings) {
-      const r = { cx: b.x + b.w / 2, cy: b.y + b.h / 2, hl: b.w / 2, hw: b.h / 2, a: 0 };
-      const top = drawBox(r, b.z, b.wall, b.roof);
-      if (b.label) {
-        poly([RP(r, -r.hl, 0, b.z + 0.9), RP(r, r.hl, 0, b.z + 0.9), top[2], top[3]], shade(b.roof, 1.12));     // sunny side of a pitched roof
-        poly([RP(r, -r.hl, 0, b.z + 0.9), RP(r, r.hl, 0, b.z + 0.9), top[1], top[0]], shade(b.roof, 0.9));
-        // courses of tiles, a ridge, and the two gable ends closing the roof
-        ctx.strokeStyle = 'rgba(18,33,26,0.16)'; ctx.lineWidth = 1;
-        for (const side of [-1, 1]) for (let i = 1; i < 4; i++) { const w = side * r.hw * (i / 4), z = b.z + 0.9 * (1 - i / 4); ctx.beginPath(); ctx.moveTo(...RP(r, -r.hl, w, z)); ctx.lineTo(...RP(r, r.hl, w, z)); ctx.stroke(); }
-        for (const end of [-1, 1]) poly([RP(r, end * r.hl, -r.hw, b.z), RP(r, end * r.hl, r.hw, b.z), RP(r, end * r.hl, 0, b.z + 0.9)], shade(b.wall, end > 0 ? 0.95 : 0.8));
-        ctx.strokeStyle = shade(b.roof, 0.7); ctx.lineWidth = Math.max(1.5, cam.s * 0.1); ctx.beginPath(); ctx.moveTo(...RP(r, -r.hl, 0, b.z + 0.9)); ctx.lineTo(...RP(r, r.hl, 0, b.z + 0.9)); ctx.stroke(); ctx.lineWidth = 1;
-        const ch = { cx: r.cx + r.hl * 0.55, cy: r.cy - r.hw * 0.45, hl: 0.45, hw: 0.45, a: 0 }, co = box(-0.45, 0.45, -0.45, 0.45);
-        solid(ch, co, b.z + 0.3, co, b.z + 1.5, '#b98a70', '#8f6a55');                                // chimney
-        if (b.label === 'Reception') {   // a striped canopy over the door, on the side that faces the road
-          for (let i = 0; i < 8; i++) { const w0 = -r.hw * 0.7 + i * (r.hw * 1.4 / 8), w1 = w0 + r.hw * 1.4 / 8; poly([RP(r, -r.hl, w0, 2.5), RP(r, -r.hl, w1, 2.5), RP(r, -r.hl - 1.7, w1, 2.05), RP(r, -r.hl - 1.7, w0, 2.05)], i % 2 ? '#f6f1df' : '#f4c531', EDGE); }
-        }
-        const [x, y] = RP(r, 0, r.hw * 0.5, b.z + 0.45);
-        ctx.fillStyle = '#f6f1df'; ctx.font = `800 ${Math.round(cam.s * 1.15)}px Overpass, sans-serif`; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
-        ctx.fillText(L.labels[b.label] || b.label, x, y);
-      }
-    }
-    // the entrance: a timber beam across the two gate posts, carrying the name
-    {
-      const g = { cx: 60, cy: 85.8, hl: 5.4, hw: 0.5, a: 0 }, beam = box(-5.4, 5.4, -0.5, 0.5);
-      solid(g, beam, 2.9, beam, 3.5, '#8a6a45', '#a98458');
-      const [x, y] = RP(g, 0, 0, 3.52);
-      ctx.fillStyle = '#f4c531'; ctx.font = `900 ${Math.round(cam.s * 0.62)}px Overpass, sans-serif`; ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; ctx.fillText('CAMPING SOFIA', x, y);
-    }
+    // buildings and the gate beam never change, so each is drawn once and reused like a parked camper
+    for (const b of buildings) viaSprite(b, b.x + b.w / 2, b.y + b.h / 2, 0, () => drawBuilding(b), Math.max(b.w, b.h) / 2 + 4.5);
+    viaSprite(GATE, 60, 85.8, 0, drawGate, 7.5);
     // lamp posts
     for (const l of lamps) {
       const [x0, y0] = P(l.x, l.y), [x1, y1] = P(l.x, l.y, 4.2);
