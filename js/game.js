@@ -44,7 +44,7 @@
         streak5: 'On a roll: five clean parkings in a row', streak9: 'Unstoppable: reach the ×3 multiplier', night: 'Night owl: a clean parking after dark',
         vip: 'Red carpet: a perfect parking for a VIP', tips: 'Pocket money: ten tips in one shift', gentle: 'Gentle driver: eight guests without a bump or a scare',
         ten: 'Full house: ten guests in one shift', twenty: 'Rush hour hero: twenty guests in one shift',
-        host: 'Camp host: 1500 points in one shift', legend: 'Legend of Vitosha: 8000 points in one shift',
+        errand: 'Room service: five errands in one shift', host: 'Camp host: 1500 points in one shift', legend: 'Legend of Vitosha: 8000 points in one shift',
       },
       quick: 'Lightning!', close2: 'Just in time!', wave: (n) => `${n} guests parked. The next ones are in more of a hurry`,
       boosts: {
@@ -78,6 +78,11 @@
       lbPlace: (n, w, a) => `${n}: #${w} this week, #${a} of all time`, lead: (n, s) => `This week\'s best: ${n} with ${s}`,
       wardenOn: 'The warden has heard about your driving. Keep clear of the cart', fined: (n) => `The warden caught you. Fine: −${n}`,
       bWarden: 'WARDEN!', bFined: 'FINED!', bPerfect: 'PERFECT!', bRoll: 'ON A ROLL!', bMax: '×3!', bOver: 'SHIFT OVER', bBest: 'NEW BEST!',
+      items: ['firewood', 'fresh bread', 'a gas bottle', 'clean laundry', 'ice cream', 'a lost ball'],
+      spots: { reception: 'the reception gate', wash: 'the wash house', pond: 'the pond', fire: 'the fire pit' },
+      jobAsk: (n, item, spot) => `Pitch ${n} would like ${item}. Pick it up at ${spot}`, jobCarry: (item, n) => `Got ${item}. Take it to pitch ${n}`,
+      jobLate: 'Too late: they sorted it out themselves', thanks: ['Thank you!', 'You are a star!', 'Just in time!', 'Service with a skid.'],
+      radioOff: 'Radio off',
       honk: 'Beep beep!', vip: 'A VIP guest: double points, less patience',
       ranks: ['Trainee', 'Gate keeper', 'Camp host', 'Site warden', 'Camp manager', 'Legend of Vitosha'],
       rankNext: (n, r) => `${n} more for ${r}`, short: (n) => `only ${n} short of your best`,
@@ -109,7 +114,7 @@
         streak5: 'В серия: пет чисти паркирания поред', streak9: 'Неудържим: стигнете множител ×3', night: 'Нощна птица: чисто паркиране по тъмно',
         vip: 'Червен килим: перфектно паркиране за VIP гост', tips: 'Джобни: десет бакшиша в една смяна', gentle: 'Внимателен шофьор: осем гости без удар и без стреснат човек',
         ten: 'Пълен къмпинг: десет гости в една смяна', twenty: 'Герой на пиковия час: двайсет гости в една смяна',
-        host: 'Домакин на къмпинга: 1500 точки в една смяна', legend: 'Легенда на Витоша: 8000 точки в една смяна',
+        errand: 'Рум сървис: пет поръчки в една смяна', host: 'Домакин на къмпинга: 1500 точки в една смяна', legend: 'Легенда на Витоша: 8000 точки в една смяна',
       },
       quick: 'Светкавично!', close2: 'В последната секунда!', wave: (n) => `${n} паркирани гости. Следващите бързат повече`,
       boosts: {
@@ -143,6 +148,11 @@
       lbPlace: (n, w, a) => `${n}: №${w} тази седмица, №${a} за всички времена`, lead: (n, s) => `Най-добър тази седмица: ${n} с ${s}`,
       wardenOn: 'Управителят чу как карате. Стойте далеч от количката', fined: (n) => `Управителят ви хвана. Глоба: −${n}`,
       bWarden: 'УПРАВИТЕЛЯТ!', bFined: 'ГЛОБА!', bPerfect: 'ПЕРФЕКТНО!', bRoll: 'В СЕРИЯ!', bMax: '×3!', bOver: 'КРАЙ НА СМЯНАТА', bBest: 'НОВ РЕКОРД!',
+      items: ['дърва за огрев', 'топъл хляб', 'газова бутилка', 'чисто пране', 'сладолед', 'изгубена топка'],
+      spots: { reception: 'портала на рецепцията', wash: 'банята', pond: 'езерцето', fire: 'огнището' },
+      jobAsk: (n, item, spot) => `Място ${n} моли за ${item}. Вземете от ${spot}`, jobCarry: (item, n) => `Взехте ${item}. Закарайте до място ${n}`,
+      jobLate: 'Късно: оправиха се сами', thanks: ['Благодаря!', 'Златен сте!', 'Точно навреме!', 'Обслужване с дрифт.'],
+      radioOff: 'Радиото е изключено',
       honk: 'Бийп-бийп!', vip: 'VIP гост: двойни точки, по-малко търпение',
       ranks: ['Стажант', 'Пазач на портала', 'Домакин на къмпинга', 'Управител на терена', 'Директор на къмпинга', 'Легенда на Витоша'],
       rankNext: (n, r) => `още ${n} до „${r}“`, short: (n) => `само ${n} до рекорда ви`,
@@ -160,18 +170,18 @@
         h2: 'Истинският къмпинг още се строи.',
         intro: 'Дотогава гостите идват в този. Закарайте всеки до мястото, което свети. Паркирайте право и бързо за точки; чистите паркирания поред ги умножават. Ударите струват скъпо, а трима гости, които се откажат да чакат, слагат край на смяната.',
         play: 'Започнете да паркирате',
-        keys: 'Стрелки или WASD за шофиране. Интервал е ръчната спирачка: на скорост завърта задницата. H е клаксон, M спира звука.',
+        keys: 'Стрелки или WASD за шофиране. Интервал е ръчната спирачка: на скорост завърта задницата. H е клаксон, M спира звука, R сменя радиото.',
         by: `Camping Sofia е проект на ${BY}`,
         note: `Този къмпинг е измислен. Истинският идва в София, от ${BY}.`,
         cardTitle: 'Вашият къмпинг дотук',
         stParked: 'Паркирани гости', stOnsite: 'В къмпинга сега', stAcc: 'Средна точност', stSpd: 'Средна бързина',
-        stTop: 'Най-добро паркиране', stStreak: 'Най-дълга чиста серия', stPerfect: 'Перфектни паркирания', stFines: 'Глоби от управителя', lbTitle: 'Най-добрите къмпингари', lbWeek: 'Тази седмица', lbAll: 'За всички времена', lbPost: 'Запиши резултата ми', stTips: 'Събрани бакшиши', stBumps: 'Удари', stScares: 'Стреснати хора', stGaveUp: 'Гости, които се отказаха да чакат',
+        stTop: 'Най-добро паркиране', stStreak: 'Най-дълга чиста серия', stPerfect: 'Перфектни паркирания', stErrands: 'Изпълнени поръчки', stFines: 'Глоби от управителя', lbTitle: 'Най-добрите къмпингари', lbWeek: 'Тази седмица', lbAll: 'За всички времена', lbPost: 'Запиши резултата ми', stTips: 'Събрани бакшиши', stBumps: 'Удари', stScares: 'Стреснати хора', stGaveUp: 'Гости, които се отказаха да чакат',
         stTime: 'Време зад волана', shareTitle: 'Споделете резултата', shareNative: 'Сподели', savePic: 'Запази картинката', close: 'Обратно към паркирането',
       },
       aria: {
         camp: 'Къмпинг, гледан отгоре. Закарайте всеки пристигащ гост до мястото му.',
         patience: 'Колко още ще чака този гост', lives: 'Колко гости още може да разочаровате', mute: 'Звук (M)', scoreBtn: 'Вашата статистика и споделяне',
-        horn: 'Клаксон', lbName: 'Вашият прякор', brake: 'Ръчна спирачка', left: 'Завий наляво', right: 'Завий надясно', down: 'Назад', up: 'Напред',
+        horn: 'Клаксон', radio: 'Радио (R)', lbName: 'Вашият прякор', brake: 'Ръчна спирачка', left: 'Завий наляво', right: 'Завий надясно', down: 'Назад', up: 'Напред',
       },
     },
   };
@@ -443,7 +453,7 @@
       ctx.lineWidth = 6; ctx.strokeStyle = '#12211a'; ctx.strokeText(p.text, x, y - 34 - p.o - up);
       ctx.fillStyle = p.c; ctx.fillText(p.text, x, y - 34 - p.o - up);
     }
-    ctx.globalAlpha = 1; drawWarden(); drawBubbles();
+    ctx.globalAlpha = 1; drawJob(); drawWarden(); drawBubbles();
     ctx.restore();
   }
 
@@ -551,7 +561,7 @@
     $('start').hidden = true; $('hud').hidden = false;
     if (matchMedia('(pointer: coarse)').matches) $('pad').hidden = false;
     parkedCount = 0; damage = 0; Object.keys(stats).forEach((k) => { stats[k] = 0; });
-    posted = false; heat = 0; warden = null; heatStars(); tips.length = 0; Object.keys(boost).forEach((k) => { boost[k] = 0; }); nextBoost = clock + 8; boostChips(); total = 0; lives = 3; streak = 0; startBest = best; newBestSaid = false; car = null;
+    posted = false; job = null; nextJob = clock + 25; heat = 0; warden = null; heatStars(); tips.length = 0; Object.keys(boost).forEach((k) => { boost[k] = 0; }); nextBoost = clock + 8; boostChips(); total = 0; lives = 3; streak = 0; startBest = best; newBestSaid = false; car = null;
     audioOn();
     nextGuest(true);
     setTimeout(() => document.body.classList.add('sign-away'), 5000);   // the name plate steps aside once the driving starts
@@ -678,6 +688,7 @@
     if (boost.double) parts.push('×2');
     if (boost.auto) parts.push('P');
     if (boost.shield) parts.push('♦');
+    if (job && job.carry) parts.push(`▣ ${job.p.n}`);
     const text = parts.join('  ');
     if (text !== lastChips) { lastChips = text; $('hud-boosts').textContent = text; }
   }
@@ -819,6 +830,83 @@
     ctx.beginPath(); ctx.arc(x, y, on ? 6 : 4.5, 0, TAU); ctx.fill(); ctx.stroke();
   }
 
+  // ---------- errands ----------
+  // Now and then a camper asks for something: pick it up at the green marker, drop it at the lane by their pitch.
+  // Errands are optional and run alongside the guest being parked.
+  const SPOTS = [[62, 74, 'reception', [0, 1, 2, 4]], [62, 74, 'reception', [1, 2, 4]], [23, 22, 'wash', [3]], [92, 22, 'pond', [5]], [31, 56, 'fire', [0]]];   // where, and which of L.items can be had there
+  let job = null, nextJob = 0;
+  function stepJobs() {
+    if (!job) {
+      if (clock < nextJob) return;
+      const homes = guests.filter((g) => g.parked && !g.packing && !g.leaving && g.parked.pitch !== target);
+      if (!homes.length) { nextJob = clock + 5; return; }
+      const g = pick(homes), p = g.parked.pitch, s = pick(SPOTS), item = pick(s[3]);
+      job = { g, p, x: s[0], y: s[1], item, carry: false, until: clock + 75, dx: p.x + p.w / 2, dy: p.laneBelow ? p.y + p.d + 2.2 : p.y - 2.2 };
+      toast(L.jobAsk(p.n, L.items[item], L.spots[s[2]]), 3600); sfx.next();
+      return;
+    }
+    if (clock > job.until || job.g.packing || job.g.leaving) { toast(L.jobLate, 2000); job = null; nextJob = clock + 20; return; }
+    const gx = job.carry ? job.dx : job.x, gy = job.carry ? job.dy : job.y;
+    if (!rectsOf(car).some((r) => rectCircle(r, gx, gy, job.carry ? 2.6 : 1.3))) return;
+    if (!job.carry) {
+      job.carry = true; job.until = clock + 60; sfx.coin(); pop(gx, gy, L.items[job.item], '#8fd18a', 22); toast(L.jobCarry(L.items[job.item], job.p.n), 2600);
+    } else {
+      total += 120; patience = Math.min(patienceMax, patience + 5); stats.errands++; sfx.park(4, false);
+      pop(gx, gy, '+120', '#8fd18a', 30); remark(L.thanks, job.dx, job.dy, 14);
+      if (stats.errands >= 5) award('errand');
+      job = null; nextJob = clock + 25; hud();
+    }
+  }
+  function drawJob() {
+    if (!job || mode !== 'play') return;
+    const gx = job.carry ? job.dx : job.x, gy = job.carry ? job.dy : job.y, [x, y] = P(gx, gy, 0.5), k = cam.s;
+    ctx.fillStyle = '#8fd18a'; ctx.strokeStyle = '#12211a'; ctx.lineWidth = 2.5; ctx.lineJoin = 'round';
+    ctx.beginPath(); ctx.arc(x, y, 0.95 * k * (1 + 0.12 * Math.sin(clock * 6)), 0, TAU); ctx.fill(); ctx.stroke();
+    ctx.fillStyle = '#12211a'; ctx.font = `900 ${Math.round(1.1 * k)}px Overpass, sans-serif`; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+    ctx.fillText(job.carry ? '↓' : '?', x, y + 1);
+    if (x < 30 || x > vw - 30 || y < 90 || y > vh - 30) {   // off screen: a green pointer
+      const ax = clamp(x, 34, vw - 34), ay = clamp(y, 150, vh - 110);
+      ctx.save(); ctx.translate(ax, ay); ctx.rotate(Math.atan2(y - ay, x - ax)); ctx.fillStyle = '#8fd18a';
+      ctx.beginPath(); ctx.moveTo(15, 0); ctx.lineTo(-9, -12); ctx.lineTo(-3, 0); ctx.lineTo(-9, 12); ctx.closePath(); ctx.fill(); ctx.stroke();
+      ctx.restore();
+    }
+  }
+
+  // ---------- radio ----------
+  // Three stations, each a small sequencer: a bass line, a kick and a tune that is made up afresh every two bars.
+  // Vitosha FM is in 7/8, as a rachenitsa should be.
+  const STATIONS = [
+    null,
+    { name: 'Vitosha FM', step: 0.17, len: 7, root: 2, scale: [0, 2, 3, 5, 7, 8, 10], bass: [0, -1, 0, -1, 4, -1, 4], kick: [0, 2, 4], wave: 'square' },
+    { name: 'Radio Lager', step: 0.26, len: 8, root: 0, scale: [0, 2, 4, 7, 9], bass: [0, -1, 2, -1, 3, -1, 2, -1], kick: [0, 4], wave: 'triangle' },
+    { name: 'Night Drive', step: 0.21, len: 8, root: -3, scale: [0, 3, 5, 7, 10], bass: [0, 0, -1, 0, 3, 3, -1, 2], kick: [0, 3, 6], wave: 'sawtooth' },
+  ];
+  let station = 1, radioT = 0, radioStep = 0, tune = [];
+  try { const v = localStorage.getItem('camp-radio'); if (v !== null) station = clamp(+v || 0, 0, STATIONS.length - 1); } catch (e) { /* private window */ }
+  function stepRadio(dt) {
+    const s = STATIONS[station];
+    if (!s || !AC || paused || mode !== 'play' || (radioT -= dt) > 0) return;
+    radioT = Math.max(radioT + s.step, 0);
+    const i = radioStep % s.len, deg = (n) => s.scale[n % s.scale.length] + 12 * Math.floor(n / s.scale.length);
+    if (i === 0 && (radioStep / s.len) % 2 === 0) {
+      let k = 2 + ((Math.random() * 3) | 0);
+      tune = Array.from({ length: s.len }, () => (Math.random() < 0.3 ? -1 : (k = clamp(k + ((Math.random() * 5) | 0) - 2, 0, 9))));
+    }
+    if (s.bass[i] >= 0) note(hz(s.root - 24 + deg(s.bass[i])), 0, s.step * 0.9, 'triangle', 0.14);
+    if (tune[i] >= 0) note(hz(s.root + deg(tune[i])), 0, s.step * 0.8, s.wave, 0.03);
+    if (s.kick.includes(i)) note(120, 0, 0.12, 'sine', 0.18, 45);
+    radioStep++;
+  }
+  function showRadio() { $('radio').classList.toggle('off', !station); $('radio').title = station ? STATIONS[station].name : L.radioOff; }
+  function tuneRadio() {
+    station = (station + 1) % STATIONS.length; radioStep = 0; radioT = 0.3;
+    try { localStorage.setItem('camp-radio', String(station)); } catch (e) { /* private window */ }
+    audioOn(); showRadio(); toast(station ? `♪ ${STATIONS[station].name}` : L.radioOff, 1600);
+  }
+  showRadio();
+  $('radio').addEventListener('click', () => { tuneRadio(); cv.focus(); });
+  addEventListener('keydown', (e) => { if (e.code === 'KeyR' && !e.repeat && !paused) tuneRadio(); });
+
   // ---------- simulation ----------
   function step(dt) {
     clock += dt;
@@ -848,7 +936,7 @@
 
     hornCool -= dt;
     if (keys.horn && hornCool <= 0) honk();
-    stepTips();
+    stepTips(); stepJobs();
     boost.speed -= dt; boost.freeze -= dt; driftCool -= dt; boostChips();
     if (car.auto) { stepAuto(dt); return; }
     if (boost.auto && autoPark()) return;
@@ -1693,7 +1781,7 @@
 
   // ---------- score card ----------
   // Pressing the Score plate pauses the game and opens a card with the figures behind the score and ways to share it.
-  const stats = { acc: 0, spd: 0, top: 0, bumps: 0, scares: 0, gaveUp: 0, time: 0, streak: 0, perfect: 0, tips: 0, honks: 0, boosts: 0, fines: 0 };
+  const stats = { acc: 0, spd: 0, top: 0, bumps: 0, scares: 0, gaveUp: 0, time: 0, streak: 0, perfect: 0, tips: 0, honks: 0, boosts: 0, fines: 0, errands: 0 };
   const card = $('card'), SITE = 'https://camping-sofia.com/';
   let paused = false, pic = null, picUrl = '';
   // A 1200 x 630 picture of the score for sharing: the camp as it looks right now, behind a plate with the figures.
@@ -1743,7 +1831,7 @@
     set('st-score', now); set('st-best', top);
     set('st-parked', n); set('st-onsite', guests.filter((g) => !g.packing && !g.leaving).length);
     set('st-acc', n ? `${Math.round(stats.acc / n)} / 100` : '–'); set('st-spd', n ? `${Math.round(stats.spd / n)} / 100` : '–');
-    set('st-top', n ? stats.top : '–'); set('st-streak', stats.streak); set('st-perfect', stats.perfect); set('st-tips', stats.tips); set('st-fines', stats.fines);
+    set('st-top', n ? stats.top : '–'); set('st-streak', stats.streak); set('st-perfect', stats.perfect); set('st-tips', stats.tips); set('st-fines', stats.fines); set('st-errands', stats.errands);
     set('st-rank', rankLine(now, startBest));
     boardFor(over);
     const ids = Object.keys(L.badges), list = $('bd-list');
@@ -1844,7 +1932,7 @@
   function tick(now) {
     const dt = Math.min(0.05, (now - last) / 1000); last = now;
     if (!paused) { step(dt); stepFx(dt); }
-    engineSound(dt);
+    engineSound(dt); stepRadio(dt);
     updateCamera(dt);
     frame(night);
     requestAnimationFrame(tick);
@@ -1853,5 +1941,5 @@
   requestAnimationFrame(tick);
 
   // For automated checks only: /?debug exposes the state.
-  if (location.search.includes('debug')) window.camp = { get car() { return car; }, get target() { return target; }, get parked() { return parkedCount; }, get score() { return score(); }, get night() { return night; }, people, skids, packUp, guests, pitches, stats, rectsOf, rectRect, keys, blocked, livingRect, corners, setClock: (t) => { clock = t; }, setPatience: (t) => { patience = t; }, get lives() { return lives; }, get heat() { return heat; }, get warden() { return warden; }, trouble, boost, chats, takeBoost, say, addTip, earned, award, tips, honk, rankLine, get streak() { return streak; }, get mode() { return mode; }, get patienceMax() { return patienceMax; }, pops, bits, give: (kind) => { car = makeVehicle(kind, 61.8, 80.5, -Math.PI / 2); car.born = -9; }, next: () => { car = null; nextGuest(); } };
+  if (location.search.includes('debug')) window.camp = { get car() { return car; }, get target() { return target; }, get parked() { return parkedCount; }, get score() { return score(); }, get night() { return night; }, people, skids, packUp, guests, pitches, stats, rectsOf, rectRect, keys, blocked, livingRect, corners, setClock: (t) => { clock = t; }, setPatience: (t) => { patience = t; }, get lives() { return lives; }, get job() { return job; }, setNextJob: (t) => { nextJob = t; }, tuneRadio, get station() { return station; }, get heat() { return heat; }, get warden() { return warden; }, trouble, boost, chats, takeBoost, say, addTip, earned, award, tips, honk, rankLine, get streak() { return streak; }, get mode() { return mode; }, get patienceMax() { return patienceMax; }, pops, bits, give: (kind) => { car = makeVehicle(kind, 61.8, 80.5, -Math.PI / 2); car.born = -9; }, next: () => { car = null; nextGuest(); } };
 })();

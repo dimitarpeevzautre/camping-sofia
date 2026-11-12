@@ -54,3 +54,7 @@ a perfect one adds 50, a VIP is worth double and parking after dark adds a quart
 Space is the handbrake: above walking pace it swings the back round (not with a caravan on). A purple token on the
 roads is a boost: speed, a time freeze, double points, self-parking or a shield. Campers from different pitches who
 meet stop for a short scripted chat; the scripts are in the language tables at the top of `js/game.js`.
+
+Bumps and scares raise a heat level; the warden's cart then chases the driver along the roads and a catch costs a
+fine. Campers ask for errands (pick up at the green marker, drop at their pitch) for 120 points. R tunes a
+synthesised radio: three stations, one of them in 7/8.
