@@ -104,6 +104,7 @@ button:focus-visible { outline: 3px solid var(--lake); outline-offset: 3px; }
   background: rgba(246, 241, 223, 0.86); border: 3px solid var(--ink); box-shadow: 0 4px 0 var(--ink);
   touch-action: none; user-select: none; -webkit-user-select: none;
 }
+.pad .horn { position: absolute; right: 16px; bottom: 92px; width: 56px; height: 56px; font-size: 1.3rem; pointer-events: auto; }
 .pad button.on { background: var(--plate); transform: translateY(3px); box-shadow: 0 1px 0 var(--ink); }
 
 /* The Score plate is a button: it opens the score card. */
@@ -121,6 +122,8 @@ button.plate:active { transform: translateY(3px); box-shadow: none; }
 .card h3 { margin: 18px 0 8px; font-size: 1rem; font-weight: 800; }
 .totals { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
 .totals .plate .v { font-size: 2rem; }
+.rank { margin: 12px 0 0; font-weight: 800; text-align: center; }
+.rank:empty { display: none; }
 .totals .plate:first-child { background: var(--plate); }
 .stats { margin: 14px 0 0; }
 .stats div { display: flex; justify-content: space-between; gap: 16px; padding: 6px 0; border-bottom: 2px dotted rgba(18, 33, 26, 0.3); }

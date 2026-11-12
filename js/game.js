@@ -26,7 +26,7 @@
   const STR = {
     en: {
       other: 'Български', otherCode: 'bg',
-      touchKeys: 'Steer with the left buttons. D drives, R reverses.',
+      touchKeys: 'Steer with the left buttons. D drives, R reverses, the small button honks.',
       names: { van: 'a campervan', motorhome: 'a motorhome', combo: 'a car and caravan' },
       labels: {},
       firstCombo: (n) => `A car and caravan for pitch ${n}. Get the caravan onto the pitch`,
@@ -37,6 +37,9 @@
       bump: (c) => `Bump: −${c}`,
       gaveUp: 'That guest got tired of waiting and left. One ♥ gone',
       parked: (p, a, s, m) => `+${p}: accuracy ${a}, speed ${s}${m > 1 ? `, ×${m}` : ''}`,
+      honk: 'Beep beep!', vip: 'A VIP guest: double points, less patience',
+      ranks: ['Trainee', 'Gate keeper', 'Camp host', 'Site warden', 'Camp manager', 'Legend of Vitosha'],
+      rankNext: (n, r) => `${n} more for ${r}`, short: (n) => `only ${n} short of your best`,
       perfect: 'Perfect!', newBest: 'New best score!', lifeBack: 'Five clean in a row: ♥ back',
       overTitle: 'Shift over', again: 'Play again', cardTitle: 'Your camp so far', close: 'Back to parking',
       careful: (who) => `Careful, that was a ${who}! −60`,
@@ -47,7 +50,7 @@
     },
     bg: {
       other: 'English', otherCode: 'en',
-      touchKeys: 'Завивайте с левите бутони. D е напред, R е назад.',
+      touchKeys: 'Завивайте с левите бутони. D е напред, R е назад, малкият бутон е клаксонът.',
       names: { van: 'ван', motorhome: 'кемпер', combo: 'кола с каравана' },
       labels: { Reception: 'Рецепция' },
       firstCombo: (n) => `Кола с каравана за място ${n}. Вкарайте караваната на мястото`,
@@ -58,6 +61,9 @@
       bump: (c) => `Удар: −${c}`,
       gaveUp: 'Гостът се отказа да чака и си тръгна. Минус едно ♥',
       parked: (p, a, s, m) => `+${p}: точност ${a}, бързина ${s}${m > 1 ? `, ×${m}` : ''}`,
+      honk: 'Бийп-бийп!', vip: 'VIP гост: двойни точки, по-малко търпение',
+      ranks: ['Стажант', 'Пазач на портала', 'Домакин на къмпинга', 'Управител на терена', 'Директор на къмпинга', 'Легенда на Витоша'],
+      rankNext: (n, r) => `още ${n} до „${r}“`, short: (n) => `само ${n} до рекорда ви`,
       perfect: 'Перфектно!', newBest: 'Нов рекорд!', lifeBack: 'Пет чисти поред: +♥',
       overTitle: 'Смяната свърши', again: 'Играй пак', cardTitle: 'Вашият къмпинг дотук', close: 'Обратно към паркирането',
       careful: (who) => `Внимавайте, това беше ${who}! −60`,
@@ -72,18 +78,18 @@
         h2: 'Истинският къмпинг още се строи.',
         intro: 'Дотогава гостите идват в този. Закарайте всеки до мястото, което свети. Паркирайте право и бързо за точки; чистите паркирания поред ги умножават. Ударите струват скъпо, а трима гости, които се откажат да чакат, слагат край на смяната.',
         play: 'Започнете да паркирате',
-        keys: 'Стрелки или WASD за шофиране. Интервал за спирачка.',
+        keys: 'Стрелки или WASD за шофиране. Интервал за спирачка, H за клаксон, M за звук.',
         by: `Camping Sofia е проект на ${BY}`,
         note: `Този къмпинг е измислен. Истинският идва в София, от ${BY}.`,
         cardTitle: 'Вашият къмпинг дотук',
         stParked: 'Паркирани гости', stOnsite: 'В къмпинга сега', stAcc: 'Средна точност', stSpd: 'Средна бързина',
-        stTop: 'Най-добро паркиране', stStreak: 'Най-дълга чиста серия', stPerfect: 'Перфектни паркирания', stBumps: 'Удари', stScares: 'Стреснати хора', stGaveUp: 'Гости, които се отказаха да чакат',
+        stTop: 'Най-добро паркиране', stStreak: 'Най-дълга чиста серия', stPerfect: 'Перфектни паркирания', stTips: 'Събрани бакшиши', stBumps: 'Удари', stScares: 'Стреснати хора', stGaveUp: 'Гости, които се отказаха да чакат',
         stTime: 'Време зад волана', shareTitle: 'Споделете резултата', shareNative: 'Сподели', savePic: 'Запази картинката', close: 'Обратно към паркирането',
       },
       aria: {
         camp: 'Къмпинг, гледан отгоре. Закарайте всеки пристигащ гост до мястото му.',
         patience: 'Колко още ще чака този гост', lives: 'Колко гости още може да разочаровате', mute: 'Звук (M)', scoreBtn: 'Вашата статистика и споделяне',
-        left: 'Завий наляво', right: 'Завий надясно', down: 'Назад', up: 'Напред',
+        horn: 'Клаксон', left: 'Завий наляво', right: 'Завий надясно', down: 'Назад', up: 'Напред',
       },
     },
   };
@@ -341,6 +347,12 @@
   }
   function drawFx() {
     ctx.save();
+    if (mode === 'play') drawTips();
+    if (car && car.vip) {   // a gold star rides above a VIP
+      const [x, y] = P(car.x, car.y, 3.2);
+      ctx.font = '900 30px Overpass, sans-serif'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; ctx.lineJoin = 'round';
+      ctx.lineWidth = 5; ctx.strokeStyle = '#12211a'; ctx.strokeText('★', x, y); ctx.fillStyle = '#f4c531'; ctx.fillText('★', x, y);
+    }
     for (const b of bits) { const [x, y] = P(b.x, b.y, b.z); ctx.fillStyle = b.c; ctx.fillRect(x - 3, y - 3, 6, 6); }
     ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; ctx.lineJoin = 'round';
     for (const p of pops) {
@@ -363,8 +375,8 @@
   let total = 0, lives = 3, streak = 0, startBest = 0, newBestSaid = false;
   try { best = +localStorage.getItem('camp-best-score') || 0; } catch (e) { /* private window */ }
 
-  const keys = { up: false, down: false, left: false, right: false, brake: false };
-  const KEYMAP = { ArrowUp: 'up', KeyW: 'up', ArrowDown: 'down', KeyS: 'down', ArrowLeft: 'left', KeyA: 'left', ArrowRight: 'right', KeyD: 'right', Space: 'brake' };
+  const keys = { up: false, down: false, left: false, right: false, brake: false, horn: false };
+  const KEYMAP = { ArrowUp: 'up', KeyW: 'up', ArrowDown: 'down', KeyS: 'down', ArrowLeft: 'left', KeyA: 'left', ArrowRight: 'right', KeyD: 'right', Space: 'brake', KeyH: 'horn' };
   addEventListener('keydown', (e) => {
     const k = KEYMAP[e.code];
     if (!k || paused) return;   // the score card is open: leave the keys to it
@@ -428,16 +440,18 @@
       people.some((o) => !o.hidden && room.some((r) => rectCircle(r, o.x, o.y, 0.8))))) {   // someone is in the gateway: wait for them
       car = null; setTimeout(() => { if (mode === 'play' && !car) nextGuest(); }, 400); return;
     }
-    car.born = clock;
+    car.born = clock; car.vip = parkedCount >= 3 && rnd() < 0.14;
     const options = freePitches();
     target = options[(rnd() * options.length) | 0];
     bumps = 0; holdT = 0;
     // Less time with every guest, more for a long drive and for the awkward vehicles.
     const dist = Math.hypot(target.x + target.w / 2 - car.x, target.y + target.d / 2 - car.y);
     patienceMax = Math.max(18, 50 - parkedCount * 1.6) + dist * 0.35 + (kind === 'combo' ? 22 : kind === 'motorhome' ? 6 : 0);
+    if (car.vip) patienceMax *= 0.85;
     patience = patienceMax;
     hud();
     if (kind === 'combo' && !metCaravan) { metCaravan = true; toast(L.firstCombo(target.n), 3800); }
+    else if (car.vip) { toast(L.vip, 2600); sfx.best(); }
     else if (parkedCount > 0) { toast(L.next(L.names[kind], target.n), 1500); sfx.next(); }
   }
   function packUp(g, delay = 0) {   // roll in the awning, call the family back, then drive off
@@ -452,7 +466,7 @@
     $('start').hidden = true; $('hud').hidden = false;
     if (matchMedia('(pointer: coarse)').matches) $('pad').hidden = false;
     parkedCount = 0; damage = 0; Object.keys(stats).forEach((k) => { stats[k] = 0; });
-    total = 0; lives = 3; streak = 0; startBest = best; newBestSaid = false; car = null;
+    tips.length = 0; total = 0; lives = 3; streak = 0; startBest = best; newBestSaid = false; car = null;
     audioOn();
     nextGuest(true);
     setTimeout(() => document.body.classList.add('sign-away'), 5000);   // the name plate steps aside once the driving starts
@@ -461,6 +475,60 @@
   }
   $('play').addEventListener('click', start);
   if (matchMedia('(pointer: coarse)').matches) $('keys').textContent = L.touchKeys;
+
+  // ---------- tips, the horn and ranks ----------
+  // Tips lie on the roads: drive over one for a few points. A new one turns up elsewhere.
+  const tips = [];
+  function addTip() {
+    for (let tries = 0; tries < 30; tries++) {
+      const r = roads[(Math.random() * roads.length) | 0], x = r.x + 1.5 + Math.random() * (r.w - 3), y = r.y + 1.5 + Math.random() * (r.h - 3);
+      if (y > 70 || tips.some((t) => Math.hypot(t.x - x, t.y - y) < 14) || (car && Math.hypot(car.x - x, car.y - y) < 12)) continue;
+      tips.push({ x, y, born: clock }); return;
+    }
+  }
+  function stepTips() {
+    while (tips.length < 4) addTip();
+    if (!car) return;
+    const rects = rectsOf(car);
+    for (let i = tips.length - 1; i >= 0; i--) {
+      const t = tips[i];
+      if (!rects.some((r) => rectCircle(r, t.x, t.y, 0.9))) continue;
+      tips.splice(i, 1); total += 25; stats.tips++; sfx.coin(); pop(t.x, t.y, '+25', '#f4c531', 24); hud();
+    }
+  }
+  function drawTips() {
+    for (const t of tips) {
+      const [x, y] = P(t.x, t.y, 0.6 + 0.25 * Math.sin(clock * 3 + t.x)), [sx, sy] = P(t.x, t.y), k = cam.s;
+      const w = Math.abs(Math.cos(clock * 2.4 + t.y)) * 0.75 + 0.2, a = clamp((clock - t.born) * 2, 0, 1);
+      ctx.globalAlpha = 0.25 * a; ctx.fillStyle = '#12211a'; ctx.beginPath(); ctx.ellipse(sx, sy, 0.7 * k, 0.4 * k, 0, 0, TAU); ctx.fill();
+      ctx.globalAlpha = a; ctx.fillStyle = '#f4c531'; ctx.strokeStyle = '#12211a'; ctx.lineWidth = 2.5;
+      ctx.beginPath(); ctx.ellipse(x, y, 0.8 * k * w, 0.8 * k, 0, 0, TAU); ctx.fill(); ctx.stroke();
+      ctx.fillStyle = '#12211a'; ctx.beginPath(); ctx.ellipse(x, y, 0.3 * k * w, 0.3 * k, 0, 0, TAU); ctx.fill();
+      ctx.globalAlpha = 1;
+    }
+  }
+  // The horn sends anyone ahead of the vehicle to the side of the road.
+  let hornCool = 0;
+  function honk() {
+    hornCool = 1.2; sfx.horn(); stats.honks++;
+    pop(car.x, car.y, L.honk, '#f6f1df', 22);
+    for (const o of people) {
+      if (o.hidden || o.kind === 'pet' || !o.path) continue;
+      const dx = o.x - car.x, dy = o.y - car.y;
+      if (Math.hypot(dx, dy) > 16) continue;
+      const side = Math.sign(-Math.sin(car.th) * dx + Math.cos(car.th) * dy) || 1, a = car.th + side * Math.PI / 2;
+      o.flee = 1.6; o.wait = 0; o.path.unshift([o.x + Math.cos(a) * 4.5, o.y + Math.sin(a) * 4.5]);
+    }
+  }
+  const RANKS = [0, 500, 1500, 3000, 5000, 8000];
+  function rankLine(n, was) {
+    let i = 0;
+    while (i < RANKS.length - 1 && n >= RANKS[i + 1]) i++;
+    const parts = [L.ranks[i]];
+    if (i < RANKS.length - 1) parts.push(L.rankNext(RANKS[i + 1] - n, L.ranks[i + 1]));
+    if (was > 0 && n > was) parts.push(L.newBest); else if (was > 0 && n < was && was - n <= Math.max(150, was * 0.15)) parts.push(L.short(was - n));
+    return parts.join(' · ');
+  }
 
   // ---------- simulation ----------
   function step(dt) {
@@ -488,6 +556,9 @@
     if (mode === 'play') stats.time += dt;
     if (mode !== 'play' || !car) return;
 
+    hornCool -= dt;
+    if (keys.horn && hornCool <= 0) honk();
+    stepTips();
     const t = car.t, v0 = car.v;
     const onRoad = onRoadOrPitch(car.x, car.y);
     const vmax = onRoad ? t.vmax : 4.5;
@@ -586,11 +657,11 @@
     // Clean parkings in a row multiply the points: x1, x1.25 ... up to x3. A bump or a crooked parking starts again.
     const clean = bumps === 0 && accuracy >= 60, perfect = clean && accuracy >= 90;
     streak = clean ? streak + 1 : 0;
-    const mult = 1 + Math.min(Math.max(streak - 1, 0), 8) * 0.25, pts = Math.round((accuracy + speed) * mult) + (perfect ? 50 : 0);
+    const mult = 1 + Math.min(Math.max(streak - 1, 0), 8) * 0.25, pts = Math.round((accuracy + speed) * mult * (car.vip ? 2 : 1)) + (perfect ? 50 : 0);
     total += pts; stats.streak = Math.max(stats.streak, streak); if (perfect) stats.perfect++;
     pop(r.cx, r.cy, `+${pts}`, '#f4c531', 40);
     if (perfect) { pop(r.cx, r.cy, L.perfect, '#f6f1df', 26, 40); confetti(r.cx, r.cy); }
-    else if (mult > 1) pop(r.cx, r.cy, `×${mult}`, '#f6f1df', 26, 40);
+    else if (mult > 1 || car.vip) pop(r.cx, r.cy, `×${mult * (car.vip ? 2 : 1)}`, '#f6f1df', 26, 40);
     sfx.park(streak, perfect);
     let back = false;
     if (clean && streak % 5 === 0 && lives < 3) { lives++; back = true; setTimeout(() => sfx.life(), 600); }
@@ -1310,7 +1381,7 @@
 
   // ---------- score card ----------
   // Pressing the Score plate pauses the game and opens a card with the figures behind the score and ways to share it.
-  const stats = { acc: 0, spd: 0, top: 0, bumps: 0, scares: 0, gaveUp: 0, time: 0, streak: 0, perfect: 0 };
+  const stats = { acc: 0, spd: 0, top: 0, bumps: 0, scares: 0, gaveUp: 0, time: 0, streak: 0, perfect: 0, tips: 0, honks: 0 };
   const card = $('card'), SITE = 'https://camping-sofia.com/';
   let paused = false, pic = null, picUrl = '';
   // A 1200 x 630 picture of the score for sharing: the camp as it looks right now, behind a plate with the figures.
@@ -1359,7 +1430,8 @@
     set('st-score', now); set('st-best', top);
     set('st-parked', n); set('st-onsite', guests.filter((g) => !g.packing && !g.leaving).length);
     set('st-acc', n ? `${Math.round(stats.acc / n)} / 100` : '–'); set('st-spd', n ? `${Math.round(stats.spd / n)} / 100` : '–');
-    set('st-top', n ? stats.top : '–'); set('st-streak', stats.streak); set('st-perfect', stats.perfect);
+    set('st-top', n ? stats.top : '–'); set('st-streak', stats.streak); set('st-perfect', stats.perfect); set('st-tips', stats.tips);
+    set('st-rank', rankLine(now, startBest));
     set('st-bumps', stats.bumps); set('st-scares', stats.scares); set('st-gaveup', stats.gaveUp);
     set('st-time', `${Math.floor(stats.time / 60)}:${String(Math.floor(stats.time % 60)).padStart(2, '0')}`);
     $('sh-fb').href = `https://www.facebook.com/sharer/sharer.php?u=${enc(SITE)}`;
@@ -1391,6 +1463,7 @@
     };
     paused = true; for (const k in keys) keys[k] = false;
     card.showModal();
+    if (over === true) $('card-close').focus();
   }
   $('score-btn').addEventListener('click', () => openCard());
   $('card-close').addEventListener('click', () => card.close());
@@ -1411,5 +1484,5 @@
   requestAnimationFrame(tick);
 
   // For automated checks only: /?debug exposes the state.
-  if (location.search.includes('debug')) window.camp = { get car() { return car; }, get target() { return target; }, get parked() { return parkedCount; }, get score() { return score(); }, get night() { return night; }, people, skids, packUp, guests, pitches, stats, rectsOf, rectRect, keys, blocked, livingRect, corners, setClock: (t) => { clock = t; }, setPatience: (t) => { patience = t; }, get lives() { return lives; }, get streak() { return streak; }, get mode() { return mode; }, get patienceMax() { return patienceMax; }, pops, bits, give: (kind) => { car = makeVehicle(kind, 61.8, 80.5, -Math.PI / 2); car.born = -9; }, next: () => { car = null; nextGuest(); } };
+  if (location.search.includes('debug')) window.camp = { get car() { return car; }, get target() { return target; }, get parked() { return parkedCount; }, get score() { return score(); }, get night() { return night; }, people, skids, packUp, guests, pitches, stats, rectsOf, rectRect, keys, blocked, livingRect, corners, setClock: (t) => { clock = t; }, setPatience: (t) => { patience = t; }, get lives() { return lives; }, tips, honk, rankLine, get streak() { return streak; }, get mode() { return mode; }, get patienceMax() { return patienceMax; }, pops, bits, give: (kind) => { car = makeVehicle(kind, 61.8, 80.5, -Math.PI / 2); car.born = -9; }, next: () => { car = null; nextGuest(); } };
 })();

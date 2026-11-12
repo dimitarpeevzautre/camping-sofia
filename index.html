@@ -19,7 +19,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Overpass:wght@400;600;800;900&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="/css/site.css?v=8">
+<link rel="stylesheet" href="/css/site.css?v=9">
 </head>
 <body>
 <canvas id="camp" data-a="camp" aria-label="A top-down view of a campsite. Drive each arriving camper to its pitch."></canvas>
@@ -51,7 +51,7 @@
   <h2 data-t="h2">We're still building the real camp.</h2>
   <p data-t="intro">Until it opens, the guests keep coming to this one. Drive each of them to the pitch that lights up. Park square and quickly for points; clean parkings in a row multiply them. Bumps cost you, and three guests who give up waiting end your shift.</p>
   <button id="play" type="button" data-t="play">Start parking</button>
-  <p class="keys" id="keys" data-t="keys">Arrow keys or WASD to drive. Space to brake.</p>
+  <p class="keys" id="keys" data-t="keys">Arrow keys or WASD to drive. Space to brake, H to honk, M for sound.</p>
   <p class="by" data-t="by">Camping Sofia is a project by <a href="https://thestable.bg" target="_blank" rel="noopener">thestable.bg</a></p>
 </section>
 
@@ -62,6 +62,7 @@
       <div class="plate"><span class="k" data-t="score">Score</span><span class="v" id="st-score">0</span></div>
       <div class="plate"><span class="k" data-t="best">Best</span><span class="v" id="st-best">0</span></div>
     </div>
+    <p class="rank" id="st-rank"></p>
     <dl class="stats">
       <div><dt data-t="stParked">Guests parked</dt><dd id="st-parked">0</dd></div>
       <div><dt data-t="stOnsite">On site now</dt><dd id="st-onsite">0</dd></div>
@@ -70,6 +71,7 @@
       <div><dt data-t="stTop">Best single parking</dt><dd id="st-top">–</dd></div>
       <div><dt data-t="stStreak">Longest clean streak</dt><dd id="st-streak">0</dd></div>
       <div><dt data-t="stPerfect">Perfect parkings</dt><dd id="st-perfect">0</dd></div>
+      <div><dt data-t="stTips">Tips picked up</dt><dd id="st-tips">0</dd></div>
       <div><dt data-t="stBumps">Bumps</dt><dd id="st-bumps">0</dd></div>
       <div><dt data-t="stScares">People you startled</dt><dd id="st-scares">0</dd></div>
       <div><dt data-t="stGaveUp">Guests who gave up waiting</dt><dd id="st-gaveup">0</dd></div>
@@ -100,11 +102,12 @@
     <button type="button" data-k="down" data-a="down" aria-label="Reverse">R</button>
     <button type="button" data-k="up" data-a="up" aria-label="Drive">D</button>
   </div>
+  <button type="button" class="horn" data-k="horn" data-a="horn" aria-label="Horn">♪</button>
 </nav>
 
 <footer class="note" data-t="note">This camp is made up. The real one is on its way to Sofia, from <a href="https://thestable.bg" target="_blank" rel="noopener">thestable.bg</a>.</footer>
 
 <noscript><p class="noscript">Camping Sofia is coming soon. Your base to enjoy Sofia.</p></noscript>
-<script src="/js/game.js?v=9" defer></script>
+<script src="/js/game.js?v=10" defer></script>
 </body>
 </html>
