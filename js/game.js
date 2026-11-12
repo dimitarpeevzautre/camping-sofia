@@ -1825,8 +1825,25 @@
     ctx.fillStyle = 'rgba(18,33,26,0.12)'; ctx.beginPath(); ctx.arc(x + R * 0.25, y + R * 0.3, R * 0.72, 0, TAU); ctx.fill();                  // the shaded side
     ctx.fillStyle = '#12211a'; ctx.beginPath(); ctx.arc(x, y, R * 0.13, 0, TAU); ctx.fill();                                                    // the vent at the crown
   }
+  // A stork's nest on top of one of the lamp posts, as every Bulgarian village has, with the stork at home.
+  function drawStork() {
+    const [x, y] = P(16, 34, 4.6), k = cam.s;
+    if (x < -40 || x > vw + 40 || y < -40 || y > vh + 40) return;
+    ctx.fillStyle = '#7a5c3c'; ctx.strokeStyle = '#5a4330'; ctx.lineWidth = 1.5;
+    ctx.beginPath(); ctx.arc(x, y, 0.95 * k, 0, TAU); ctx.fill(); ctx.stroke();                                   // the nest
+    ctx.strokeStyle = '#a98458'; ctx.lineWidth = 1;
+    for (let i = 0; i < 9; i++) { const a = i * 0.7; ctx.beginPath(); ctx.moveTo(x + Math.cos(a) * 0.3 * k, y + Math.sin(a) * 0.3 * k); ctx.lineTo(x + Math.cos(a + 0.5) * 1.05 * k, y + Math.sin(a + 0.5) * 1.05 * k); ctx.stroke(); }
+    const turn = reduceMotion ? 0.6 : 0.6 + Math.sin(clock * 0.25) * 0.5, c = Math.cos(turn), s = Math.sin(turn);
+    ctx.save(); ctx.translate(x, y - 0.1 * k); ctx.rotate(turn);
+    ctx.fillStyle = '#f6f1df'; ctx.strokeStyle = 'rgba(18,33,26,0.5)'; ctx.lineWidth = 1;
+    ctx.beginPath(); ctx.ellipse(0, 0, 0.6 * k, 0.34 * k, 0, 0, TAU); ctx.fill(); ctx.stroke();                 // body
+    ctx.fillStyle = '#22262a'; ctx.beginPath(); ctx.ellipse(-0.32 * k, 0, 0.3 * k, 0.3 * k, 0, 0, TAU); ctx.fill();   // black wing tips, folded
+    ctx.fillStyle = '#f6f1df'; ctx.beginPath(); ctx.arc(0.62 * k, 0, 0.17 * k, 0, TAU); ctx.fill(); ctx.stroke();    // head
+    ctx.fillStyle = '#d5503c'; ctx.beginPath(); ctx.moveTo(0.74 * k, -0.05 * k); ctx.lineTo(1.25 * k, 0); ctx.lineTo(0.74 * k, 0.05 * k); ctx.closePath(); ctx.fill();   // the long red bill
+    ctx.restore();
+  }
   function drawAmbient(ground) {   // ground: the ducks, drawn with the world; otherwise what is in the air
-    if (!ground) drawBalloon();
+    if (!ground) { drawStork(); drawBalloon(); }
     if (!ground) drawCloudShadows();
     if (ground) drawPondLife();
     const k = cam.s;
