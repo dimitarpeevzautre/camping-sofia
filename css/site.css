@@ -167,6 +167,10 @@ button.plate:active { transform: translateY(3px); box-shadow: none; }
 .badges li.got::before { content: '★'; }
 .mine { margin: 12px 0 0 !important; font-size: 0.9rem !important; font-weight: 800; }
 .mine:empty { display: none; }
+#play-chill, #card-restart { display: block; margin: 10px 0 0; font: inherit; font-size: 0.9rem; font-weight: 800; padding: 6px 12px; color: var(--ink); background: var(--paper); border: 3px solid var(--ink); border-radius: 8px; box-shadow: 0 3px 0 var(--ink); cursor: pointer; }
+#card-restart { margin: 12px auto 0; }
+#card-restart[hidden] { display: none; }
+body.chill .patience, body.chill .lives { visibility: hidden; }
 .legend { margin: 12px 0 0; font-size: 0.85rem; }
 .legend summary { font-weight: 800; cursor: pointer; }
 .legend ul { margin: 6px 0 0; padding-left: 1.2em; display: grid; gap: 3px; }
