@@ -548,10 +548,8 @@
   }
   function drawFx() {
     ctx.save();
-    drawAmbient();
-    if (mode === 'play') { drawWash(); drawRamps(); }
-    drawProps();
-    if (mode === 'play') { drawGnomes(); drawTips(); }
+    drawAmbient(false);
+    if (mode === 'play') drawTips();
     if (car && car.vip) {   // a gold star rides above a VIP
       const [x, y] = P(car.x, car.y, 3.2);
       ctx.font = '900 30px Overpass, sans-serif'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; ctx.lineJoin = 'round';
@@ -565,7 +563,7 @@
       ctx.lineWidth = 6; ctx.strokeStyle = '#12211a'; ctx.strokeText(p.text, x, y - 34 - p.o - up);
       ctx.fillStyle = p.c; ctx.fillText(p.text, x, y - 34 - p.o - up);
     }
-    ctx.globalAlpha = 1; drawJob(); drawThief(); if (mode === 'play') { drawIce(); drawRoamers(); } drawWarden(); drawRain(); drawFlies(); drawPlane(); drawBubbles(); drawMap();
+    ctx.globalAlpha = 1; drawJob(); drawRain(); drawFlies(); drawPlane(); drawBubbles(); drawMap();
     ctx.restore();
   }
 
@@ -1602,10 +1600,10 @@
     if (night > 0.2 && !reduceMotion && (smokeT -= dt) <= 0) { smokeT = 0.35; smoke.push({ x: fire.x + (Math.random() - 0.5) * 0.4, y: fire.y, z: 0.6, life: 4.5, d: Math.random() - 0.5 }); }
     for (let i = smoke.length - 1; i >= 0; i--) { const s = smoke[i]; s.z += 1.1 * dt; s.x += (0.35 + s.d * 0.3) * dt; if ((s.life -= dt) <= 0) smoke.splice(i, 1); }
   }
-  function drawAmbient() {
+  function drawAmbient(ground) {   // ground: the ducks, drawn with the world; otherwise what is in the air
     const k = cam.s;
     ctx.lineJoin = 'round';
-    for (const d of ducks) {   // ducks keep to the middle of the pond
+    for (const d of ground ? ducks : []) {   // ducks keep to the middle of the pond
       const x0 = pond.x + Math.cos(d.a) * pond.rx * d.r, y0 = pond.y + Math.sin(d.a) * pond.ry * d.r, [x, y] = P(x0, y0), h = d.a + (d.s > 0 ? Math.PI / 2 : -Math.PI / 2);
       if (x < -20 || x > vw + 20 || y < -20 || y > vh + 20) continue;
       ctx.strokeStyle = 'rgba(246,241,223,0.35)'; ctx.lineWidth = 1.5; ctx.beginPath(); ctx.ellipse(x, y, 0.75 * k, 0.5 * k, 0, 0, TAU); ctx.stroke();   // its ripple
@@ -1615,7 +1613,7 @@
       ctx.fillStyle = '#f0b83a'; ctx.beginPath(); ctx.moveTo(0.44 * k, -0.06 * k); ctx.lineTo(0.6 * k, 0); ctx.lineTo(0.44 * k, 0.06 * k); ctx.closePath(); ctx.fill();
       ctx.restore();
     }
-    if (night < 0.35 && !reduceMotion) for (const f of flutter) {   // butterflies, by day
+    if (!ground && night < 0.35 && !reduceMotion) for (const f of flutter) {   // butterflies, by day
       const x0 = f.x + Math.sin(clock * 0.5 + f.p) * 4 + Math.sin(clock * 1.7 + f.p * 3) * 0.8, y0 = f.y + Math.cos(clock * 0.37 + f.p * 2) * 4, [x, y] = P(x0, y0, 0.8);
       if (x < 0 || x > vw || y < 0 || y > vh) continue;
       const flap = 0.25 + 0.75 * Math.abs(Math.sin(clock * 9 + f.p)), r = 0.2 * k;
@@ -1623,11 +1621,11 @@
       ctx.beginPath(); ctx.ellipse(x - r * flap * 0.6, y, r * flap, r * 0.8, 0, 0, TAU); ctx.ellipse(x + r * flap * 0.6, y, r * flap, r * 0.8, 0, 0, TAU); ctx.fill();
       ctx.globalAlpha = 1;
     }
-    for (const s of smoke) {   // woodsmoke drifting up from the fire
+    for (const s of ground ? [] : smoke) {   // woodsmoke drifting up from the fire
       const [x, y] = P(s.x, s.y, s.z), a = clamp(s.life / 4.5, 0, 1);
       ctx.fillStyle = `rgba(226,224,214,${0.28 * a * Math.min(1, night * 2)})`; ctx.beginPath(); ctx.arc(x, y, k * (0.35 + (1 - a) * 0.9), 0, TAU); ctx.fill();
     }
-    if (flock) for (let i = 0; i < 5; i++) {   // five birds in a V, and their shadows on the ground
+    if (flock && !ground) for (let i = 0; i < 5; i++) {   // five birds in a V, and their shadows on the ground
       const row = Math.ceil(i / 2), side = i % 2 ? 1 : -1, dir = Math.sign(flock.vx), bx = flock.x - dir * row * 1.6, by = flock.y + side * row * 1.2;
       const [sx, sy] = P(bx + 3, by + 4), [x, y] = P(bx, by, 9), w = (0.55 + 0.2 * Math.sin(clock * 7 + i)) * k;
       ctx.strokeStyle = 'rgba(18,33,26,0.18)'; ctx.lineWidth = 2; ctx.beginPath(); ctx.moveTo(sx - w, sy - w * 0.3); ctx.lineTo(sx, sy); ctx.lineTo(sx + w, sy - w * 0.3); ctx.stroke();
@@ -2603,6 +2601,8 @@
       } else drawVehicle(v);
     }
     drawPeople();
+    drawAmbient(true);
+    if (mode === 'play') { drawWash(); drawGnomes(); drawIce(); drawRoamers(); drawThief(); }
 
     // tents
     for (const t of tents) {
