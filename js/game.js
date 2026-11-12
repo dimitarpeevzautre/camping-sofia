@@ -26,7 +26,7 @@
   const STR = {
     en: {
       other: 'Български', otherCode: 'bg',
-      touchKeys: 'Steer with the left buttons. D drives, R reverses, the small button honks.',
+      touchKeys: 'Steer with the left buttons. D drives, R reverses. The small buttons are the handbrake and the horn.',
       names: { van: 'a campervan', motorhome: 'a motorhome', combo: 'a car and caravan' },
       labels: {},
       firstCombo: (n) => `A car and caravan for pitch ${n}. Get the caravan onto the pitch`,
@@ -47,6 +47,33 @@
         host: 'Camp host: 1500 points in one shift', legend: 'Legend of Vitosha: 8000 points in one shift',
       },
       quick: 'Lightning!', close2: 'Just in time!', wave: (n) => `${n} guests parked. The next ones are in more of a hurry`,
+      boosts: {
+        speed: 'Speed boost: ten seconds of extra pace', freeze: 'Time freeze: the guest stops counting for twelve seconds',
+        double: 'Double points on your next parking', auto: 'Self-parking: get close to the pitch and let go',
+        shield: 'Shield: your next bump or scare is forgiven',
+      },
+      autoOn: 'Self-parking', shielded: 'Shield!', drift: 'Drift!', stBoosts: 'Boosts picked up',
+      ouch: ['Hey! Watch it!', 'Are you blind?', 'Slow down!', 'That was close!'],
+      honked: ['Alright, alright!', 'Keep your hair on!', 'Coming through, is it?', 'Charming.'],
+      nice: ['Nicely parked!', 'Now that is how it is done.', 'Smooth!', 'Dead centre. Respect.', 'Somebody has done this before.'],
+      chats: [
+        ['Is that Vitosha up there?', 'Cherni Vrah. Two hours on foot.', 'Tomorrow, then.'],
+        ['Where are you in from?', 'Rotterdam. Three days on the road.', 'We came from Plovdiv. Forty minutes.'],
+        ['Have you tried the banitsa in town?', 'Twice. Today.', 'Sensible.'],
+        ['Is the shower hot?', 'If you are quick.', 'And if I am not?', 'Refreshing.'],
+        ['Your awning is leaning.', 'It is a feature.', 'It is a sail.'],
+        ['The metro takes you straight to the centre.', 'With the dog?', 'The dog rides for free.'],
+        ['Did you hear the owl last night?', 'That was my husband.', 'Impressive range.'],
+        ['Can I borrow a tin opener?', 'For a coffee, yes.', 'Deal.'],
+        ['Who keeps driving round in circles?', 'New chap at the gate.', 'He will learn.'],
+        ['Boyana Church is worth the trip.', 'We were going to the mall.', 'Go to the church.'],
+        ['How long are you staying?', 'One night. That was a week ago.', 'It does that.'],
+        ['Is that rakia home-made?', 'My grandfather says so.', 'Then one small one.', 'There are no small ones.'],
+        ['Mum says dinner is ready.', 'Five more minutes!', 'She said you would say that.'],
+        ['Your cat is on my roof again.', 'She likes the solar panel.', 'So do I. It was working.'],
+        ['Seven Rila Lakes tomorrow?', 'Only if you drive.', 'Only if you park.'],
+        ['Lovely evening.', 'Smells like someone is grilling.', 'That is us. Come over.'],
+      ],
       honk: 'Beep beep!', vip: 'A VIP guest: double points, less patience',
       ranks: ['Trainee', 'Gate keeper', 'Camp host', 'Site warden', 'Camp manager', 'Legend of Vitosha'],
       rankNext: (n, r) => `${n} more for ${r}`, short: (n) => `only ${n} short of your best`,
@@ -60,7 +87,7 @@
     },
     bg: {
       other: 'English', otherCode: 'en',
-      touchKeys: 'Завивайте с левите бутони. D е напред, R е назад, малкият бутон е клаксонът.',
+      touchKeys: 'Завивайте с левите бутони. D е напред, R е назад. Малките бутони са ръчната спирачка и клаксонът.',
       names: { van: 'ван', motorhome: 'кемпер', combo: 'кола с каравана' },
       labels: { Reception: 'Рецепция' },
       firstCombo: (n) => `Кола с каравана за място ${n}. Вкарайте караваната на мястото`,
@@ -81,6 +108,33 @@
         host: 'Домакин на къмпинга: 1500 точки в една смяна', legend: 'Легенда на Витоша: 8000 точки в една смяна',
       },
       quick: 'Светкавично!', close2: 'В последната секунда!', wave: (n) => `${n} паркирани гости. Следващите бързат повече`,
+      boosts: {
+        speed: 'Ускорение: десет секунди по-бързо', freeze: 'Спряно време: гостът не брои дванайсет секунди',
+        double: 'Двойни точки за следващото паркиране', auto: 'Автопаркиране: приближете мястото и пуснете',
+        shield: 'Щит: следващият удар или стреснат човек се прощава',
+      },
+      autoOn: 'Автопаркиране', shielded: 'Щит!', drift: 'Дрифт!',
+      ouch: ['Ей! Внимавай!', 'Сляп ли си?', 'По-бавно!', 'На косъм!'],
+      honked: ['Добре де, добре!', 'Спокойно!', 'Път ли искаш?', 'Много мило.'],
+      nice: ['Браво, чисто паркиране!', 'Така се прави.', 'Като по конец!', 'Точно в средата. Респект.', 'Личи си опитът.'],
+      chats: [
+        ['Това горе Витоша ли е?', 'Черни връх. Два часа пеша.', 'Утре тогава.'],
+        ['Откъде идвате?', 'От Ротердам. Три дни път.', 'Ние сме от Пловдив. Четирийсет минути.'],
+        ['Опитахте ли баницата в града?', 'Два пъти. Днес.', 'Разумно.'],
+        ['Топъл ли е душът?', 'Ако си бърз.', 'А ако не съм?', 'Освежаващо.'],
+        ['Тентата ви е накриво.', 'Така е по проект.', 'Това е платно.'],
+        ['Метрото ви кара право до центъра.', 'С кучето?', 'Кучето пътува без билет.'],
+        ['Чухте ли бухала снощи?', 'Това беше мъжът ми.', 'Впечатляващ диапазон.'],
+        ['Имате ли отварачка за консерви?', 'Срещу едно кафе.', 'Става.'],
+        ['Кой обикаля в кръг с този кемпер?', 'Новият на портала.', 'Ще се научи.'],
+        ['Боянската църква си заслужава.', 'Мислехме за мола.', 'Идете на църквата.'],
+        ['За колко време сте тук?', 'За една нощ. Това беше преди седмица.', 'Така става тук.'],
+        ['Ракията домашна ли е?', 'Дядо така казва.', 'Тогава една малка.', 'Малки няма.'],
+        ['Мама каза, че вечерята е готова.', 'Още пет минути!', 'Каза, че така ще кажеш.'],
+        ['Котката ви пак е на покрива ми.', 'Харесва ѝ соларният панел.', 'И на мен. Преди работеше.'],
+        ['Утре на Седемте рилски езера?', 'Само ако ти караш.', 'Само ако ти паркираш.'],
+        ['Хубава вечер.', 'Мирише на скара.', 'Ние сме. Елате.'],
+      ],
       honk: 'Бийп-бийп!', vip: 'VIP гост: двойни точки, по-малко търпение',
       ranks: ['Стажант', 'Пазач на портала', 'Домакин на къмпинга', 'Управител на терена', 'Директор на къмпинга', 'Легенда на Витоша'],
       rankNext: (n, r) => `още ${n} до „${r}“`, short: (n) => `само ${n} до рекорда ви`,
@@ -98,7 +152,7 @@
         h2: 'Истинският къмпинг още се строи.',
         intro: 'Дотогава гостите идват в този. Закарайте всеки до мястото, което свети. Паркирайте право и бързо за точки; чистите паркирания поред ги умножават. Ударите струват скъпо, а трима гости, които се откажат да чакат, слагат край на смяната.',
         play: 'Започнете да паркирате',
-        keys: 'Стрелки или WASD за шофиране. Интервал за спирачка, H за клаксон, M за звук.',
+        keys: 'Стрелки или WASD за шофиране. Интервал е ръчната спирачка: на скорост завърта задницата. H е клаксон, M спира звука.',
         by: `Camping Sofia е проект на ${BY}`,
         note: `Този къмпинг е измислен. Истинският идва в София, от ${BY}.`,
         cardTitle: 'Вашият къмпинг дотук',
@@ -109,7 +163,7 @@
       aria: {
         camp: 'Къмпинг, гледан отгоре. Закарайте всеки пристигащ гост до мястото му.',
         patience: 'Колко още ще чака този гост', lives: 'Колко гости още може да разочаровате', mute: 'Звук (M)', scoreBtn: 'Вашата статистика и споделяне',
-        horn: 'Клаксон', left: 'Завий наляво', right: 'Завий надясно', down: 'Назад', up: 'Напред',
+        horn: 'Клаксон', brake: 'Ръчна спирачка', left: 'Завий наляво', right: 'Завий надясно', down: 'Назад', up: 'Напред',
       },
     },
   };
@@ -381,6 +435,7 @@
       ctx.lineWidth = 6; ctx.strokeStyle = '#12211a'; ctx.strokeText(p.text, x, y - 34 - p.o - up);
       ctx.fillStyle = p.c; ctx.fillText(p.text, x, y - 34 - p.o - up);
     }
+    ctx.globalAlpha = 1; drawBubbles();
     ctx.restore();
   }
 
@@ -488,7 +543,7 @@
     $('start').hidden = true; $('hud').hidden = false;
     if (matchMedia('(pointer: coarse)').matches) $('pad').hidden = false;
     parkedCount = 0; damage = 0; Object.keys(stats).forEach((k) => { stats[k] = 0; });
-    tips.length = 0; total = 0; lives = 3; streak = 0; startBest = best; newBestSaid = false; car = null;
+    tips.length = 0; Object.keys(boost).forEach((k) => { boost[k] = 0; }); nextBoost = clock + 8; boostChips(); total = 0; lives = 3; streak = 0; startBest = best; newBestSaid = false; car = null;
     audioOn();
     nextGuest(true);
     setTimeout(() => document.body.classList.add('sign-away'), 5000);   // the name plate steps aside once the driving starts
@@ -501,21 +556,24 @@
   // ---------- tips, the horn and ranks ----------
   // Tips lie on the roads: drive over one for a few points. A new one turns up elsewhere.
   const tips = [];
-  function addTip() {
+  function addTip(kind) {
     for (let tries = 0; tries < 30; tries++) {
       const r = roads[(Math.random() * roads.length) | 0], x = r.x + 1.5 + Math.random() * (r.w - 3), y = r.y + 1.5 + Math.random() * (r.h - 3);
       if (y > 70 || tips.some((t) => Math.hypot(t.x - x, t.y - y) < 14) || (car && Math.hypot(car.x - x, car.y - y) < 12)) continue;
-      tips.push({ x, y, born: clock, time: Math.random() < 0.25 }); return;
+      tips.push({ x, y, born: clock, time: !kind && Math.random() < 0.25, boost: kind }); return;
     }
   }
   function stepTips() {
-    while (tips.length < 4) addTip();
+    for (let n = tips.filter((t) => !t.boost).length; n < 4; n++) addTip();
+    if (clock > nextBoost && !tips.some((t) => t.boost)) addTip(pick(['speed', 'freeze', 'double', 'auto', 'shield']));
     if (!car) return;
     const rects = rectsOf(car);
     for (let i = tips.length - 1; i >= 0; i--) {
       const t = tips[i];
       if (!rects.some((r) => rectCircle(r, t.x, t.y, 0.9))) continue;
-      tips.splice(i, 1); stats.tips++; sfx.coin();
+      tips.splice(i, 1);
+      if (t.boost) { takeBoost(t.boost); pop(t.x, t.y, BOOST_SIGN[t.boost], '#b98ce0', 30); hud(); continue; }
+      stats.tips++; sfx.coin();
       if (t.time) { patience = Math.min(patienceMax, patience + 8); pop(t.x, t.y, '+8 s', '#6fb6d9', 24); }   // a blue one buys time
       else { total += 25; pop(t.x, t.y, '+25', '#f4c531', 24); }
       hud();
@@ -524,11 +582,13 @@
   function drawTips() {
     for (const t of tips) {
       const [x, y] = P(t.x, t.y, 0.6 + 0.25 * Math.sin(clock * 3 + t.x)), [sx, sy] = P(t.x, t.y), k = cam.s;
-      const w = Math.abs(Math.cos(clock * 2.4 + t.y)) * 0.75 + 0.2, a = clamp((clock - t.born) * 2, 0, 1);
+      const w = t.boost ? 1.3 : Math.abs(Math.cos(clock * 2.4 + t.y)) * 0.75 + 0.2, a = clamp((clock - t.born) * 2, 0, 1);
       ctx.globalAlpha = 0.25 * a; ctx.fillStyle = '#12211a'; ctx.beginPath(); ctx.ellipse(sx, sy, 0.7 * k, 0.4 * k, 0, 0, TAU); ctx.fill();
-      ctx.globalAlpha = a; ctx.fillStyle = t.time ? '#6fb6d9' : '#f4c531'; ctx.strokeStyle = '#12211a'; ctx.lineWidth = 2.5;
+      ctx.globalAlpha = a; ctx.fillStyle = t.boost ? '#b98ce0' : t.time ? '#6fb6d9' : '#f4c531'; ctx.strokeStyle = '#12211a'; ctx.lineWidth = 2.5;
       ctx.beginPath(); ctx.ellipse(x, y, 0.8 * k * w, 0.8 * k, 0, 0, TAU); ctx.fill(); ctx.stroke();
-      ctx.fillStyle = '#12211a'; ctx.beginPath(); ctx.ellipse(x, y, 0.3 * k * w, 0.3 * k, 0, 0, TAU); ctx.fill();
+      ctx.fillStyle = '#12211a';
+      if (t.boost) { ctx.font = `900 ${Math.round(0.95 * k)}px Overpass, sans-serif`; ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; ctx.fillText(BOOST_SIGN[t.boost], x, y + 1); }
+      else { ctx.beginPath(); ctx.ellipse(x, y, 0.3 * k * w, 0.3 * k, 0, 0, TAU); ctx.fill(); }
       ctx.globalAlpha = 1;
     }
   }
@@ -537,12 +597,14 @@
   function honk() {
     hornCool = 1.2; sfx.horn(); stats.honks++;
     pop(car.x, car.y, L.honk, '#f6f1df', 22);
+    let said = false;
     for (const o of people) {
       if (o.hidden || o.kind === 'pet' || !o.path) continue;
       const dx = o.x - car.x, dy = o.y - car.y;
       if (Math.hypot(dx, dy) > 16) continue;
       const side = Math.sign(-Math.sin(car.th) * dx + Math.cos(car.th) * dy) || 1, a = car.th + side * Math.PI / 2;
       o.flee = 1.6; o.wait = 0; o.path.unshift([o.x + Math.cos(a) * 4.5, o.y + Math.sin(a) * 4.5]);
+      if (!said) { said = true; say(o, pick(L.honked)); }
     }
   }
   const RANKS = [0, 500, 1500, 3000, 5000, 8000];
@@ -591,6 +653,101 @@
   }
   mine();
 
+  // ---------- boosts ----------
+  // One purple token lies on the roads at a time. speed and freeze run for a while; double, auto and shield are
+  // kept until they are used.
+  const boost = { speed: 0, freeze: 0, double: 0, auto: 0, shield: 0 };
+  const BOOST_SIGN = { speed: '»', freeze: '❄', double: '×2', auto: 'P', shield: '♦' };
+  let nextBoost = 0, driftCool = 0, lastChips = '';
+  function takeBoost(kind) {
+    if (kind === 'speed') boost.speed = 10; else if (kind === 'freeze') boost.freeze = 12; else boost[kind]++;
+    stats.boosts++; nextBoost = clock + 12; sfx.best(); toast(L.boosts[kind], 2600);
+  }
+  function boostChips() {
+    const parts = [];
+    if (boost.speed > 0) parts.push(`» ${Math.ceil(boost.speed)}`);
+    if (boost.freeze > 0) parts.push(`❄ ${Math.ceil(boost.freeze)}`);
+    if (boost.double) parts.push('×2');
+    if (boost.auto) parts.push('P');
+    if (boost.shield) parts.push('♦');
+    const text = parts.join('  ');
+    if (text !== lastChips) { lastChips = text; $('hud-boosts').textContent = text; }
+  }
+  // Self-parking: close to the pitch the vehicle takes over and puts itself down dead centre.
+  function autoPark() {
+    const p = target, r = livingRect(car);
+    if (Math.hypot(r.cx - (p.x + p.w / 2), r.cy - (p.y + p.d / 2)) > 8) return false;
+    boost.auto--; sfx.life(); pop(car.x, car.y, L.autoOn, '#b98ce0', 24);
+    if (car.t.trailer) { arrived(true); return true; }   // the caravan is pushed onto the pitch anyway
+    const th = (p.laneBelow ? -1 : 1) * Math.PI / 2, ghost = { ...car, th, ph: th, x: 0, y: 0 }, g = livingRect(ghost);
+    car.auto = { t: 0, x0: car.x, y0: car.y, th0: car.th, x1: p.x + p.w / 2 - g.cx, y1: p.y + p.d / 2 - g.cy, th1: th };
+    return true;
+  }
+  function stepAuto(dt) {
+    const a = car.auto, k = Math.min(1, (a.t += dt) / 1.1), e = k * k * (3 - 2 * k);
+    car.x = lerp(a.x0, a.x1, e); car.y = lerp(a.y0, a.y1, e); car.th = wrap(a.th0 + wrap(a.th1 - a.th0) * e); car.vh = car.ph = car.th;
+    car.v = 0; car.steer = 0;
+    if (k >= 1) { car.auto = null; arrived(true); }
+  }
+
+  // ---------- campers talking ----------
+  // People from different pitches who meet stop for a few words; some also have something to say to the driver.
+  const chats = [];
+  let chatT = 4;
+  function say(o, text, dur = 2.6) { o.say = text; o.sayT = clock + dur; }
+  const talker = (o) => !o.hidden && o.kind !== 'pet' && !(o.flee > 0) && !o.chat && !(o.chatCool > clock);
+  function stepChats(dt) {
+    for (let i = chats.length - 1; i >= 0; i--) {
+      const c = chats[i], gone = c.a.hidden || c.b.hidden || c.a.flee > 0 || c.b.flee > 0 || Math.hypot(c.a.x - c.b.x, c.a.y - c.b.y) > 6;
+      if (gone || (clock >= c.t && c.i >= c.lines.length)) {
+        c.a.chat = c.b.chat = false; c.a.chatCool = c.b.chatCool = clock + 45; chats.splice(i, 1); continue;
+      }
+      if (clock >= c.t) { say(c.i % 2 ? c.b : c.a, c.lines[c.i], 2.7); c.i++; c.t = clock + 2.9; }
+    }
+    if ((chatT -= dt) > 0 || chats.length >= 3) return;
+    chatT = 1.5;
+    for (let i = 0; i < people.length; i++) {
+      const a = people[i];
+      if (!talker(a)) continue;
+      for (let j = i + 1; j < people.length; j++) {
+        const b = people[j];
+        if (!talker(b) || a.g === b.g || Math.hypot(a.x - b.x, a.y - b.y) > 3.4) continue;
+        const lines = pick(L.chats), stand = lines.length * 2.9 + 1;
+        a.chat = b.chat = true; a.wait = Math.max(a.wait, stand); b.wait = Math.max(b.wait, stand);
+        a.dir = Math.atan2(b.y - a.y, b.x - a.x); b.dir = a.dir + Math.PI;
+        chats.push({ a, b, lines, i: 0, t: clock + 0.4 });
+        return;
+      }
+    }
+  }
+  function remark(lines, x, y, reach = 12) {   // the nearest camper in earshot says something
+    let who = null, best = reach;
+    for (const o of people) {
+      if (o.hidden || o.kind === 'pet' || o.chat) continue;
+      const d = Math.hypot(o.x - x, o.y - y);
+      if (d < best) { best = d; who = o; }
+    }
+    if (who) say(who, pick(lines));
+  }
+  function drawBubbles() {
+    ctx.font = '800 13px Overpass, "Segoe UI", sans-serif'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; ctx.lineJoin = 'round';
+    for (const o of people) {
+      if (o.hidden || !(o.sayT > clock)) continue;
+      const [px, py] = P(o.x, o.y, 1.7);
+      if (px < -150 || px > vw + 150 || py < -40 || py > vh + 80) continue;
+      const w = ctx.measureText(o.say).width + 18, h = 24, x = clamp(px, w / 2 + 6, vw - w / 2 - 6), y = py - 30;
+      ctx.globalAlpha = clamp((o.sayT - clock) / 0.3, 0, 1);
+      ctx.fillStyle = '#f6f1df'; ctx.strokeStyle = '#12211a'; ctx.lineWidth = 2.5;
+      ctx.beginPath();
+      if (ctx.roundRect) ctx.roundRect(x - w / 2, y - h / 2, w, h, 9); else ctx.rect(x - w / 2, y - h / 2, w, h);
+      ctx.fill(); ctx.stroke();
+      ctx.beginPath(); ctx.moveTo(px - 5, y + h / 2 - 1); ctx.lineTo(px, y + h / 2 + 8); ctx.lineTo(px + 5, y + h / 2 - 1); ctx.fill();
+      ctx.beginPath(); ctx.moveTo(px - 5, y + h / 2); ctx.lineTo(px, y + h / 2 + 8); ctx.lineTo(px + 5, y + h / 2); ctx.stroke();
+      ctx.fillStyle = '#12211a'; ctx.fillText(o.say, x, y + 1);
+    }
+    ctx.globalAlpha = 1;
+  }
+
   // ---------- simulation ----------
   function step(dt) {
     clock += dt;
@@ -613,18 +770,22 @@
       }
     }
     for (let i = ghosts.length - 1; i >= 0; i--) { ghosts[i].alpha -= dt / 1.2; if (ghosts[i].alpha <= 0) ghosts.splice(i, 1); }
-    stepPeople(dt);
+    stepPeople(dt); stepChats(dt);
     if (mode === 'play') stats.time += dt;
     if (mode !== 'play' || !car) return;
 
     hornCool -= dt;
     if (keys.horn && hornCool <= 0) honk();
     stepTips();
+    boost.speed -= dt; boost.freeze -= dt; driftCool -= dt; boostChips();
+    if (car.auto) { stepAuto(dt); return; }
+    if (boost.auto && autoPark()) return;
     const t = car.t, v0 = car.v;
     const onRoad = onRoadOrPitch(car.x, car.y);
-    const vmax = onRoad ? t.vmax : 4.5;
-    if (keys.brake) car.v -= Math.sign(car.v) * Math.min(Math.abs(car.v), 16 * dt);
-    else if (keys.up) car.v += (car.v < 0 ? 14 : 6.5) * dt;
+    // The handbrake locks the rear wheels: at speed the back swings round and the vehicle slides. Not with a caravan on.
+    const fast = boost.speed > 0 ? 1.5 : 1, vmax = (onRoad ? t.vmax : 4.5) * fast, hb = keys.brake && !t.trailer && Math.abs(car.v) > 2.5;
+    if (keys.brake) car.v -= Math.sign(car.v) * Math.min(Math.abs(car.v), (hb ? 5 : 16) * dt);
+    else if (keys.up) car.v += (car.v < 0 ? 14 : 6.5 * fast) * dt;
     else if (keys.down) car.v -= (car.v > 0 ? 14 : 4.5) * dt;
     else car.v -= Math.sign(car.v) * Math.min(Math.abs(car.v), (onRoad ? 2.6 : 5) * dt);
     car.braking = keys.brake || (keys.down && car.v > 0.3) || (keys.up && car.v < -0.3);
@@ -638,30 +799,34 @@
 
     const sub = 3, h = dt / sub;
     for (let i = 0; i < sub; i++) {
-      const px = car.x, py = car.y, pth = car.th, pph = car.ph;
-      const dth = (car.v / t.wb) * Math.tan(car.steer) * h;
+      const px = car.x, py = car.y, pth = car.th, pph = car.ph, pvh = car.vh === undefined ? car.th : car.vh;
+      const dth = (car.v / t.wb) * Math.tan(car.steer) * h * (hb ? 2.6 : 1);
       car.th = wrap(car.th + dth);
-      car.x += Math.cos(car.th) * car.v * h; car.y += Math.sin(car.th) * car.v * h;
+      // the direction of travel follows the nose; on the handbrake it lags a long way behind
+      car.vh = t.trailer ? car.th : wrap(pvh + wrap(car.th - pvh) * (1 - Math.exp(-h * (hb ? 1.4 : 22))));
+      car.x += Math.cos(car.vh) * car.v * h; car.y += Math.sin(car.vh) * car.v * h;
       if (t.trailer) {
         const d = car.th - car.ph, tr = t.trailer;
         car.ph = wrap(car.ph + (car.v * h / tr.axle) * Math.sin(d) - (tr.hitch / tr.axle) * dth * Math.cos(d));
         if (Math.abs(wrap(car.th - car.ph)) > 1.2) {     // jackknifed: refuse the move
-          car.x = px; car.y = py; car.th = pth; car.ph = pph; car.v = 0;
+          car.x = px; car.y = py; car.th = pth; car.ph = pph; car.vh = pvh; car.v = 0;
           if (clock - lastNote > 3) { toast(L.jackknife); lastNote = clock; }
           break;
         }
       }
       if (blocked(car)) {
-        car.x = px; car.y = py; car.th = pth; car.ph = pph;
+        car.x = px; car.y = py; car.th = pth; car.ph = pph; car.vh = pvh;
         if (Math.abs(v0) > 1.2 && bumpCool <= 0) {
           const cost = Math.round(10 + Math.abs(v0) * 4);
-          bumps++; bumpCool = 0.5; shake = reduceMotion ? 0 : Math.min(1, Math.abs(v0) / 6);
-          damage += cost; stats.bumps++; streak = 0; sfx.bump(Math.abs(v0)); pop(car.x, car.y, `−${cost}`, '#e2553d', 26); toast(L.bump(cost), 1100); hud();
+          bumpCool = 0.5; shake = reduceMotion ? 0 : Math.min(1, Math.abs(v0) / 6);
+          if (boost.shield) { boost.shield--; sfx.bump(Math.abs(v0)); pop(car.x, car.y, L.shielded, '#b98ce0', 26); }
+          else { bumps++; damage += cost; stats.bumps++; streak = 0; sfx.bump(Math.abs(v0)); pop(car.x, car.y, `−${cost}`, '#e2553d', 26); toast(L.bump(cost), 1100); hud(); }
         }
         car.v = -car.v * 0.25;
         break;
       }
     }
+    if (hb && driftCool <= 0 && Math.abs(wrap(car.th - car.vh)) > 0.55) { driftCool = 2.5; total += 10; pop(car.x, car.y, `${L.drift} +10`, '#f6f1df', 22); hud(); }
     const wp = wheelPoints(car);   // braking hard from speed leaves rubber behind
     if (car._w && car.braking && Math.abs(v0) > 3.5) for (let i = 0; i < wp.length; i++) skids.push({ a: car._w[i], b: wp[i], t: clock });
     if (skids.length > 1500) skids.splice(0, skids.length - 1500);
@@ -683,7 +848,7 @@
     holdT = inside && Math.abs(car.v) < 0.3 ? holdT + dt : 0;
     if (holdT > 0.6) return arrived();
 
-    patience -= dt;
+    if (boost.freeze <= 0) patience -= dt;
     const bar = $('hud-patience');
     bar.style.transform = `scaleX(${clamp(patience / patienceMax, 0, 1)})`;
     bar.classList.toggle('low', patience < 10);
@@ -699,13 +864,13 @@
     setTimeout(() => openCard(true), 1100);
   }
 
-  function arrived() {
+  function arrived(forced) {
     // Points: up to 100 for accuracy (centred on the pitch and square to it) and up to 100 for speed (patience left).
     const r = livingRect(car), p = target, towing = !!car.t.trailer;
     const dx = Math.abs(r.cx - (p.x + p.w / 2)) / 1.5, dy = Math.abs(r.cy - (p.y + p.d / 2)) / 2.5, skew = Math.abs(Math.cos(r.a)) / 0.3;
     const fit = towing ? 0.55 * (1 - clamp(dx, 0, 1)) + 0.45 * (1 - clamp(skew, 0, 1))   // a caravan is pushed in the last metre, so depth does not count
       : 0.45 * (1 - clamp(dx, 0, 1)) + 0.2 * (1 - clamp(dy, 0, 1)) + 0.35 * (1 - clamp(skew, 0, 1));
-    const accuracy = Math.round(100 * fit), speed = Math.round(100 * clamp(patience / patienceMax, 0, 1));
+    const accuracy = forced === true ? 100 : Math.round(100 * fit), speed = Math.round(100 * clamp(patience / patienceMax, 0, 1));
     car.v = 0; car.steer = 0; car.braking = false; car.reversing = false;
     let stay = car;
     if (towing) {   // the caravan stays; its car unhitches and heads into town
@@ -722,12 +887,13 @@
     // Clean parkings in a row multiply the points: x1, x1.25 ... up to x3. A bump or a crooked parking starts again.
     const clean = bumps === 0 && accuracy >= 60, perfect = clean && accuracy >= 90;
     streak = clean ? streak + 1 : 0;
-    const mult = 1 + Math.min(Math.max(streak - 1, 0), 8) * 0.25, dark = night > 0.6, pts = Math.round((accuracy + speed) * mult * (car.vip ? 2 : 1) * (dark ? 1.25 : 1)) + (perfect ? 50 : 0);
+    const mult = 1 + Math.min(Math.max(streak - 1, 0), 8) * 0.25, dark = night > 0.6, pts = Math.round((accuracy + speed) * mult * (car.vip ? 2 : 1) * (dark ? 1.25 : 1) * (boost.double ? 2 : 1)) + (perfect ? 50 : 0);
+    if (boost.double) boost.double--;
     const quick = speed >= 85 ? L.quick : speed <= 12 ? L.close2 : '';   // very fast, or at the last second: a little extra
     if (quick) { total += 30; pop(r.cx, r.cy, `${quick} +30`, '#f6f1df', 22, dark ? 100 : 74); }
     total += pts; stats.streak = Math.max(stats.streak, streak); if (perfect) stats.perfect++;
     pop(r.cx, r.cy, `+${pts}`, '#f4c531', 40);
-    if (perfect) { pop(r.cx, r.cy, L.perfect, '#f6f1df', 26, 40); confetti(r.cx, r.cy); }
+    if (perfect) { pop(r.cx, r.cy, L.perfect, '#f6f1df', 26, 40); confetti(r.cx, r.cy); remark(L.nice, r.cx, r.cy); }
     else if (mult > 1 || car.vip) pop(r.cx, r.cy, `×${mult * (car.vip ? 2 : 1)}`, '#f6f1df', 26, 40);
     if (dark) pop(r.cx, r.cy, L.nightBonus, '#6fb6d9', 22, 74);
     sfx.park(streak, perfect);
@@ -833,11 +999,13 @@
 
   // The car ran into someone, or nearly: it stops dead, they jump clear, and it costs points.
   function startle(o) {
-    damage += 60; stats.scares++; streak = 0; sfx.startle(); pop(o.x, o.y, '−60', '#e2553d', 26); o.cool = 2.5; o.flee = 1.2; o.wait = 0;
+    const safe = boost.shield > 0;
+    if (safe) { boost.shield--; pop(o.x, o.y, L.shielded, '#b98ce0', 26); } else { damage += 60; stats.scares++; streak = 0; pop(o.x, o.y, '−60', '#e2553d', 26); }
+    sfx.startle(); say(o, pick(L.ouch)); o.cool = 2.5; o.flee = 1.2; o.wait = 0;
     car.v = 0; shake = reduceMotion ? 0 : 0.6;
     const a = Math.atan2(o.y - car.y, o.x - car.x);
     o.path.unshift([o.x + Math.cos(a) * 2.5, o.y + Math.sin(a) * 2.5]);
-    toast(L.careful(L.who[o.kind === 'pet' ? (o.cat ? 'cat' : 'dog') : o.kind]), 1800);
+    if (!safe) toast(L.careful(L.who[o.kind === 'pet' ? (o.cat ? 'cat' : 'dog') : o.kind]), 1800);
     hud();
   }
 
@@ -1451,7 +1619,7 @@
 
   // ---------- score card ----------
   // Pressing the Score plate pauses the game and opens a card with the figures behind the score and ways to share it.
-  const stats = { acc: 0, spd: 0, top: 0, bumps: 0, scares: 0, gaveUp: 0, time: 0, streak: 0, perfect: 0, tips: 0, honks: 0 };
+  const stats = { acc: 0, spd: 0, top: 0, bumps: 0, scares: 0, gaveUp: 0, time: 0, streak: 0, perfect: 0, tips: 0, honks: 0, boosts: 0 };
   const card = $('card'), SITE = 'https://camping-sofia.com/';
   let paused = false, pic = null, picUrl = '';
   // A 1200 x 630 picture of the score for sharing: the camp as it looks right now, behind a plate with the figures.
@@ -1560,5 +1728,5 @@
   requestAnimationFrame(tick);
 
   // For automated checks only: /?debug exposes the state.
-  if (location.search.includes('debug')) window.camp = { get car() { return car; }, get target() { return target; }, get parked() { return parkedCount; }, get score() { return score(); }, get night() { return night; }, people, skids, packUp, guests, pitches, stats, rectsOf, rectRect, keys, blocked, livingRect, corners, setClock: (t) => { clock = t; }, setPatience: (t) => { patience = t; }, get lives() { return lives; }, earned, award, tips, honk, rankLine, get streak() { return streak; }, get mode() { return mode; }, get patienceMax() { return patienceMax; }, pops, bits, give: (kind) => { car = makeVehicle(kind, 61.8, 80.5, -Math.PI / 2); car.born = -9; }, next: () => { car = null; nextGuest(); } };
+  if (location.search.includes('debug')) window.camp = { get car() { return car; }, get target() { return target; }, get parked() { return parkedCount; }, get score() { return score(); }, get night() { return night; }, people, skids, packUp, guests, pitches, stats, rectsOf, rectRect, keys, blocked, livingRect, corners, setClock: (t) => { clock = t; }, setPatience: (t) => { patience = t; }, get lives() { return lives; }, boost, chats, takeBoost, say, addTip, earned, award, tips, honk, rankLine, get streak() { return streak; }, get mode() { return mode; }, get patienceMax() { return patienceMax; }, pops, bits, give: (kind) => { car = makeVehicle(kind, 61.8, 80.5, -Math.PI / 2); car.born = -9; }, next: () => { car = null; nextGuest(); } };
 })();
