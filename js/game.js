@@ -2217,6 +2217,7 @@
     if (kind === 'pond') return { x: rand(88, 101), y: 19.7, ly: 21, lane: 0 };
     if (kind === 'fire') { const a = rand(0, TAU); return { x: fire.x + Math.cos(a) * 2.5, y: fire.y + Math.sin(a) * 2.5, ly: 70.6, lane: 2 }; }
     if (kind === 'reception') return { x: 65.6, y: rand(73, 78), ly: 70.6, lane: 2 };
+    if (kind === 'picnic') { const [x, y] = pick([[25, 79], [38.5, 83], [45, 71.5], [94, 81]]); return { x: x + rand(-0.9, 0.9), y: y + (Math.random() < 0.5 ? -1.1 : 1.1), ly: 70.6, lane: 2, sit: true }; }   // a seat at one of the picnic tables
     if (kind === 'play') return { x: rand(82.5, 90), y: rand(77, 82.5), ly: 70.6, lane: 2, play: true };   // the playground
     let x; do { x = rand(10, 110); } while (x > 55 && x < 81);   // somewhere on the meadow, clear of the road and reception
     return { x, y: rand(71.5, 84), ly: 70.6, lane: 2 };
@@ -2275,7 +2276,7 @@
       o.wait = rand(2, 9); return;
     }
     if (atHome) {
-      if (Math.random() < (dusk ? 0.2 : 0.35)) return routeTo(o, placeTo(dusk && o.owl ? 'fire' : pick(['wc', 'wc', 'pond', 'fire', 'reception', 'meadow'])));
+      if (Math.random() < (dusk ? 0.2 : 0.35)) return routeTo(o, placeTo(dusk && o.owl ? 'fire' : pick(['wc', 'wc', 'pond', 'picnic', 'picnic', 'reception', 'meadow'])));
       o.wait = rand(15, 50); return;
     }
     routeTo(o, Math.random() < 0.75 ? o.home : placeTo(pick(['pond', 'fire', 'meadow'])));
@@ -2325,7 +2326,7 @@
         if (sp > 0) {
           if (d < sp * dt + 0.05) {
             o.x = tx; o.y = ty; o.path.shift();
-            if (!o.path.length) { if (o.dest) o.at = o.dest; o.wait = o.dest && o.dest.play ? rand(12, 30) : o.kind === 'kid' ? rand(1, 6) : o.at === o.home ? rand(12, 40) : rand(5, 18); }
+            if (!o.path.length) { if (o.dest) o.at = o.dest; o.wait = o.dest && o.dest.sit ? rand(20, 45) : o.dest && o.dest.play ? rand(12, 30) : o.kind === 'kid' ? rand(1, 6) : o.at === o.home ? rand(12, 40) : rand(5, 18); }
           } else { o.x += (dx / d) * sp * dt; o.y += (dy / d) * sp * dt; o.dir = Math.atan2(dy, dx); o.phase += dt * sp * 4; }
         }
       }
