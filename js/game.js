@@ -447,8 +447,9 @@
         if (Math.hypot(o.x - r.cx, o.y - r.cy) > 16) continue;
         for (const q of rectsOf(o)) if (rectRect(r, q)) return true;
       }
-      if (ice && v === car && Math.hypot(ice.x - r.cx, ice.y - r.cy) < 12 && rectRect(r, iceRect())) return true;
-      if (v === car) for (const t of roamers) if (Math.hypot(t.x - r.cx, t.y - r.cy) < 12 && rectRect(r, roamRect(t))) return true;
+      // the demo's driver is not clever enough for moving traffic, so for the demo alone traffic can be passed through
+      if (ice && v === car && !demo && Math.hypot(ice.x - r.cx, ice.y - r.cy) < 12 && rectRect(r, iceRect())) return true;
+      if (v === car && !demo) for (const t of roamers) if (Math.hypot(t.x - r.cx, t.y - r.cy) < 12 && rectRect(r, roamRect(t))) return true;
     }
     return false;
   }
@@ -1220,19 +1221,30 @@
   // ---------- the ice-cream van ----------
   // Slow traffic: it trundles round the lanes playing its tune, and it is very much in the way.
   let ice = null, jingleT = 0;
+  // Where a vehicle on the lanes is heading: the next junction, moved over to the right-hand side of its way there.
+  function lanePoint(t, end) {
+    const A = NODES[t.at], B = NODES[t.to], len = Math.hypot(B[0] - A[0], B[1] - A[1]) || 1, off = t.off || 0;
+    const dx = (B[0] - A[0]) / len, dy = (B[1] - A[1]) / len, ax = A[0] - dy * off, ay = A[1] + dx * off;   // the same road, moved over to the right
+    if (end) return [ax + dx * len, ay + dy * len];
+    const u = clamp((t.x - ax) * dx + (t.y - ay) * dy + 5, 0, len);   // five metres further along that line than it is now
+    return [ax + dx * u, ay + dy * u];
+  }
   const iceRect = () => ({ cx: ice.x, cy: ice.y, hl: 2.8, hw: 1.05, a: ice.th });
   function stepIce(dt) {
     if (!ice) { ice = { x: NODES.C[0], y: NODES.C[1], th: Math.PI, at: 'C', to: 'B' }; return; }
     const t = ice;
-    if (nodeGap(t.to, t.x, t.y) < 0.3) {
+    t.off = 2.7;
+    const end = lanePoint(t, true);
+    if (Math.hypot(end[0] - t.x, end[1] - t.y) < 0.9) {
       const from = t.at, ways = [...LINKS[t.to]].filter((k) => k !== 'G' && k !== from);
       t.at = t.to; t.to = ways.length ? pick(ways) : from;
     }
-    const gx = NODES[t.to][0] - t.x, gy = NODES[t.to][1] - t.y, gd = Math.hypot(gx, gy);
+    const goal = lanePoint(t);
+    const gx = goal[0] - t.x, gy = goal[1] - t.y, gd = Math.hypot(gx, gy);
     t.th = wrap(t.th + clamp(wrap(Math.atan2(gy, gx) - t.th), -1.6 * dt, 1.6 * dt));
     // it waits for anything in front of it: the driver, guests driving out, people
-    const fx = Math.cos(t.th), fy = Math.sin(t.th), ahead = (x, y, far) => { const dx = x - t.x, dy = y - t.y, a = dx * fx + dy * fy; return a > 0 && a < far && Math.abs(dx * fy - dy * fx) < 2.6; };
-    const held = (car && (ahead(car.x, car.y, 10) || Math.hypot(car.x - t.x, car.y - t.y) < 5)) || guests.some((g) => g.leave && ahead(g.x, g.y, 10)) || people.some((o) => !o.hidden && ahead(o.x, o.y, 5));
+    const fx = Math.cos(t.th), fy = Math.sin(t.th), ahead = (x, y, far) => { const dx = x - t.x, dy = y - t.y, a = dx * fx + dy * fy; return a > 0 && a < far && Math.abs(dx * fy - dy * fx) < 1.9; };
+    const held = (car && ahead(car.x, car.y, 7)) || guests.some((g) => g.leave && ahead(g.x, g.y, 10)) || people.some((o) => !o.hidden && ahead(o.x, o.y, 5));
     if (!held && Math.abs(wrap(Math.atan2(gy, gx) - t.th)) < 0.5) { const sp = Math.min(2.2 * dt, gd); t.x += fx * sp; t.y += fy * sp; }
     if (car && (jingleT -= dt) <= 0 && Math.hypot(car.x - t.x, car.y - t.y) < 28) {
       jingleT = 5;
@@ -1257,26 +1269,28 @@
   // A tractor that mows at walking pace and a postman on a moped who is always late. Like the ice-cream van they
   // keep to the lanes, wait for whatever is in front of them and are solid to the driver.
   const roamers = [
-    { kind: 'tractor', x: NODES.A[0], y: NODES.A[1], th: Math.PI / 2, at: 'A', to: 'D', sp: 1.6, hl: 1.9, hw: 1.0 },
-    { kind: 'biker', x: NODES.F[0], y: NODES.F[1], th: Math.PI, at: 'F', to: 'E', sp: 3, hl: 0.95, hw: 0.45, paint: '#3f7fa6' },
-    { kind: 'cyclist', x: NODES.B[0], y: NODES.B[1], th: Math.PI, at: 'B', to: 'A', sp: 2.1, hl: 0.8, hw: 0.3, paint: '#d5503c', jersey: '#f0b83a' },
-    { kind: 'cyclist', x: NODES.D[0], y: NODES.D[1], th: 0, at: 'D', to: 'E', sp: 1.8, hl: 0.8, hw: 0.3, paint: '#5f9070', jersey: '#8b6fae' },
-    { kind: 'hikers', x: NODES.E[0], y: NODES.E[1], th: -Math.PI / 2, at: 'E', to: 'B', sp: 1.0, hl: 0.8, hw: 1.0 },
+    { kind: 'tractor', x: NODES.A[0], y: NODES.A[1], th: Math.PI / 2, at: 'A', to: 'D', sp: 1.6, hl: 1.9, hw: 1.0, off: 2.6 },
+    { kind: 'biker', x: NODES.F[0], y: NODES.F[1], th: Math.PI, at: 'F', to: 'E', sp: 3, hl: 0.95, hw: 0.45, paint: '#3f7fa6', off: 2.8 },
+    { kind: 'cyclist', x: NODES.B[0], y: NODES.B[1], th: Math.PI, at: 'B', to: 'A', sp: 2.1, hl: 0.8, hw: 0.3, paint: '#d5503c', jersey: '#f0b83a', off: 3.2 },
+    { kind: 'cyclist', x: NODES.D[0], y: NODES.D[1], th: 0, at: 'D', to: 'E', sp: 1.8, hl: 0.8, hw: 0.3, paint: '#5f9070', jersey: '#8b6fae', off: 3.2 },
+    { kind: 'hikers', x: NODES.E[0], y: NODES.E[1], th: -Math.PI / 2, at: 'E', to: 'B', sp: 1.0, hl: 0.8, hw: 1.0, off: 3.0 },
   ];
   const roamRect = (t) => ({ cx: t.x, cy: t.y, hl: t.hl, hw: t.hw, a: t.th });
   function stepRoamers(dt) {
     for (const t of roamers) {
-      if (nodeGap(t.to, t.x, t.y) < 0.3) {
+      const end = lanePoint(t, true);
+      if (Math.hypot(end[0] - t.x, end[1] - t.y) < 0.9) {
         const from = t.at, ways = [...LINKS[t.to]].filter((k) => k !== 'G' && k !== from);
         t.at = t.to; t.to = ways.length ? pick(ways) : from;
       }
-      const gx = NODES[t.to][0] - t.x, gy = NODES[t.to][1] - t.y, gd = Math.hypot(gx, gy), want = Math.atan2(gy, gx);
+      const goal = lanePoint(t);
+      const gx = goal[0] - t.x, gy = goal[1] - t.y, gd = Math.hypot(gx, gy), want = Math.atan2(gy, gx);
       t.th = wrap(t.th + clamp(wrap(want - t.th), -2.5 * dt, 2.5 * dt));
       const fx = Math.cos(t.th), fy = Math.sin(t.th), far = 5 + t.sp;
-      const ahead = (x, y, d) => { const dx = x - t.x, dy = y - t.y, a = dx * fx + dy * fy; return a > 0 && a < d && Math.abs(dx * fy - dy * fx) < 2.4; };
+      const ahead = (x, y, d) => { const dx = x - t.x, dy = y - t.y, a = dx * fx + dy * fy; return a > 0 && a < d && Math.abs(dx * fy - dy * fx) < 1.8; };
       const sameWay = (o) => Math.cos(o.th) * fx + Math.sin(o.th) * fy > 0.3;   // queue only behind traffic going the same way
-      const held = (car && (ahead(car.x, car.y, far) || Math.hypot(car.x - t.x, car.y - t.y) < 3.5)) || (ice && sameWay(ice) && ahead(ice.x, ice.y, far)) || roamers.some((o) => o !== t && sameWay(o) && ahead(o.x, o.y, far))
-        || guests.some((g) => g.leave && ahead(g.x, g.y, far)) || people.some((o) => !o.hidden && ahead(o.x, o.y, 4));
+      const held = (car && ahead(car.x, car.y, far)) || (ice && sameWay(ice) && ahead(ice.x, ice.y, far)) || roamers.some((o) => o !== t && sameWay(o) && ahead(o.x, o.y, far))
+        || guests.some((g) => g.leave && ahead(g.x, g.y, far)) || (t.kind !== 'hikers' && t.kind !== 'cyclist' && people.some((o) => !o.hidden && ahead(o.x, o.y, 4)));
       if (!held && Math.abs(wrap(want - t.th)) < 0.5) { const sp = Math.min(t.sp * dt, gd); t.x += fx * sp; t.y += fy * sp; }
     }
   }
@@ -1365,9 +1379,9 @@
     const hx = Math.cos(car.th), hy = Math.sin(car.th);
     for (const o of ice ? [...roamers, ice] : roamers) {
       const dx = o.x - car.x, dy = o.y - car.y, ahead = dx * hx + dy * hy, side = -dx * hy + dy * hx;
-      if (ahead < 1 || ahead > 11 || Math.abs(side) > 2.4) continue;
+      if (ahead < 1 || ahead > 11 || Math.abs(side) > (o.hw || 1.05) + car.t.Wd / 2 + 0.35) continue;   // only what the vehicle would actually touch
       const away = side > 0 ? -1 : 1;   // pass on the side it is not on
-      return [car.x + hx * 7 - hy * away * 3.2, car.y + hy * 7 + hx * away * 3.2];
+      return [car.x + hx * 7 - hy * away * 2.2, car.y + hy * 7 + hx * away * 2.2];
     }
     for (const o of people) {   // and give anyone on foot a wide berth
       if (o.hidden) continue;
