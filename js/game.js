@@ -206,12 +206,12 @@
         h2: 'Истинският къмпинг още се строи.',
         intro: 'Дотогава гостите идват в този. Закарайте всеки до мястото, което свети. Паркирайте право и бързо за точки; чистите паркирания поред ги умножават. Ударите струват скъпо и докарват управителя, а трима гости, които се откажат да чакат, слагат край на смяната.',
         play: 'Започнете да паркирате',
-        keys: 'Стрелки или WASD за шофиране. Интервал е ръчната спирачка: на скорост завърта задницата. H е клаксон, M спира звука, R сменя радиото. Работи и с геймпад.',
+        keys: 'Стрелки или WASD за шофиране. Интервал е ръчната спирачка: на скорост завърта задницата. H е клаксон, M спира звука, R сменя радиото, P е пауза. Работи и с геймпад.',
         by: `Camping Sofia е проект на ${BY}`,
         note: `Този къмпинг е измислен. Истинският идва в София, от ${BY}.`,
         cardTitle: 'Вашият къмпинг дотук',
         stParked: 'Паркирани гости', stOnsite: 'В къмпинга сега', stAcc: 'Средна точност', stSpd: 'Средна бързина',
-        stTop: 'Най-добро паркиране', stStreak: 'Най-дълга чиста серия', stPerfect: 'Перфектни паркирания', lgCone: 'Конусите летят, ако ги ударите: по 5 точки, но управителят забелязва.', lgIce: 'Колата за сладолед кара бавно и не бърза за никъде. Заобиколете я.', stGnomes: 'Намерени скрити джуджета', lgGnome: 'Из къмпинга са скрити десет градински джуджета. Струва си да ги намерите.', legendTitle: 'Какво има по пътищата',
+        stTop: 'Най-добро паркиране', stStreak: 'Най-дълга чиста серия', stPerfect: 'Перфектни паркирания', chill: 'Почивен ден: без часовник', restart: 'Обратно към портала', lgCone: 'Конусите летят, ако ги ударите: по 5 точки, но управителят забелязва.', lgIce: 'Колата за сладолед кара бавно и не бърза за никъде. Заобиколете я.', stGnomes: 'Намерени скрити джуджета', lgGnome: 'Из къмпинга са скрити десет градински джуджета. Струва си да ги намерите.', legendTitle: 'Какво има по пътищата',
         lgTip: 'Жълта монета: 25 точки. Синя: 8 секунди повече.', lgBoost: 'Лилав жетон: бонус. Ускорение, спряно време, двойни точки, автопаркиране, щит или дъжд от бакшиши.',
         lgJob: 'Зелен знак: поръчка. Вземете и закарайте до мястото за 120 точки.', lgDog: 'Кучето с наденичките: настигнете го за 200 точки.',
         lgWarden: 'Червени звезди: управителят ви гони. Глобата боли, чистото паркиране го успокоява.', lgRain: 'В дъжд и по тъмно паркирането носи повече, но пътят се хлъзга.', stErrands: 'Изпълнени поръчки', stFines: 'Глоби от управителя', lbTitle: 'Най-добрите къмпингари', lbWeek: 'Тази седмица', lbAll: 'За всички времена', lbPost: 'Запиши резултата ми', stTips: 'Събрани бакшиши', stBumps: 'Удари', stScares: 'Стреснати хора', stGaveUp: 'Гости, които се отказаха да чакат',
@@ -506,6 +506,7 @@
   let mode = 'attract';
   let parkedCount = 0, best = 0, damage = 0, night = 0, bumps = 0, holdT = 0, patience = 1, patienceMax = 60, bumpCool = 0, shake = 0;
   let clock = 0, lastNote = 0, metCaravan = false;
+  let chill = false;   // a day off: no clock, no lives, nothing recorded
   let total = 0, lives = 3, streak = 0, startBest = 0, newBestSaid = false;
   try { best = +localStorage.getItem('camp-best-score') || 0; } catch (e) { /* private window */ }
 
@@ -542,7 +543,7 @@
     if (mode === 'play') checkGoals();
     $('hud-pitch').textContent = target ? target.n : '–';
     const now = score();
-    if (mode === 'play' && now > best) {
+    if (mode === 'play' && now > best && !chill) {
       best = now; try { localStorage.setItem('camp-best-score', String(best)); } catch (e) { /* private window */ }
       if (startBest > 0 && !newBestSaid) { newBestSaid = true; toast(L.newBest, 2600); sfx.best(); banner(L.bBest); }
     }
@@ -601,8 +602,8 @@
   }
   function checkout() { guests.filter((g) => !g.packing && !g.leaving).slice(0, 3).forEach((g, i) => packUp(g, i * 5)); }
 
-  function start() {
-    mode = 'play';
+  function start(off) {
+    mode = 'play'; chill = off === true; document.body.classList.toggle('chill', chill);
     document.body.classList.add('playing');
     $('start').hidden = true; $('hud').hidden = false;
     if (matchMedia('(pointer: coarse)').matches) $('pad').hidden = false;
@@ -614,7 +615,8 @@
     toast(L.first(target.n), 2200); toastQ.length = 0; boss('start');
     cv.focus();
   }
-  $('play').addEventListener('click', start);
+  $('play').addEventListener('click', () => start());
+  $('play-chill').addEventListener('click', () => start(true));
   if (matchMedia('(pointer: coarse)').matches) $('keys').textContent = L.touchKeys;
 
   // ---------- tips, the horn and ranks ----------
@@ -1316,7 +1318,7 @@
     holdT = inside && Math.abs(car.v) < 0.3 ? holdT + dt : 0;
     if (holdT > 0.6) return arrived();
 
-    if (boost.freeze <= 0) patience -= dt;
+    if (boost.freeze <= 0 && !chill) patience -= dt;
     const bar = $('hud-patience');
     bar.style.transform = `scaleX(${clamp(patience / patienceMax, 0, 1)})`;
     bar.classList.toggle('low', patience < 10);
@@ -1338,7 +1340,7 @@
     const dx = Math.abs(r.cx - (p.x + p.w / 2)) / 1.5, dy = Math.abs(r.cy - (p.y + p.d / 2)) / 2.5, skew = Math.abs(Math.cos(r.a)) / 0.3;
     const fit = towing ? 0.55 * (1 - clamp(dx, 0, 1)) + 0.45 * (1 - clamp(skew, 0, 1))   // a caravan is pushed in the last metre, so depth does not count
       : 0.45 * (1 - clamp(dx, 0, 1)) + 0.2 * (1 - clamp(dy, 0, 1)) + 0.35 * (1 - clamp(skew, 0, 1));
-    const accuracy = forced === true ? 100 : Math.round(100 * fit), speed = Math.round(100 * clamp(patience / patienceMax, 0, 1));
+    const accuracy = forced === true ? 100 : Math.round(100 * fit), speed = chill ? 50 : Math.round(100 * clamp(patience / patienceMax, 0, 1));
     car.v = 0; car.steer = 0; car.braking = false; car.reversing = false;
     let stay = car;
     if (towing) {   // the caravan stays; its car unhitches and heads into town
@@ -1357,7 +1359,7 @@
     streak = clean ? streak + 1 : 0;
     const mult = 1 + Math.min(Math.max(streak - 1, 0), 8) * 0.25, dark = night > 0.6, pts = Math.round((accuracy + speed) * mult * (car.vip ? 2 : 1) * (dark ? 1.25 : 1) * (boost.double ? 2 : 1) * (rain > 0.3 ? 1.2 : 1)) + (perfect ? 50 : 0);
     if (boost.double) boost.double--;
-    const quick = speed >= 85 ? L.quick : speed <= 12 ? L.close2 : '';   // very fast, or at the last second: a little extra
+    const quick = chill ? '' : speed >= 85 ? L.quick : speed <= 12 ? L.close2 : '';   // very fast, or at the last second: a little extra
     if (quick) { total += 30; pop(r.cx, r.cy, `${quick} +30`, '#f6f1df', 22, dark ? 100 : 74); }
     if (clean && clock - lastDrift < 4) { total += 50; pop(r.cx, r.cy, `${L.driftPark} +50`, '#f6f1df', 22, quick ? 126 : 100); award('driftpark'); }
     total += pts; stats.streak = Math.max(stats.streak, streak); if (perfect) stats.perfect++;
@@ -2135,6 +2137,7 @@
     $('card-title').textContent = over === true ? L.overTitle : L.cardTitle;
     $('card-close').textContent = over === true ? L.again : L.close;
     $('card-again').textContent = L.again; $('card-again').hidden = over !== true;
+    $('card-restart').hidden = over === true;
     const now = score(), top = Math.max(best, now), n = parkedCount, enc = encodeURIComponent;
     const text = L.share(top);
     const set = (id, v) => { $(id).textContent = v; };
@@ -2185,8 +2188,10 @@
   $('score-btn').addEventListener('click', () => openCard());
   $('card-close').addEventListener('click', () => card.close());
   $('card-again').addEventListener('click', () => card.close());
+  $('card-restart').addEventListener('click', () => location.reload());
+  addEventListener('keydown', (e) => { if ((e.code === 'KeyP' || e.code === 'Escape') && mode === 'play' && !paused) { e.preventDefault(); openCard(); } });
   card.addEventListener('click', (e) => { if (e.target === card) card.close(); });   // a click on the backdrop
-  card.addEventListener('close', () => { paused = false; last = performance.now(); cv.focus(); if (mode === 'over') start(); });
+  card.addEventListener('close', () => { paused = false; last = performance.now(); cv.focus(); if (mode === 'over') start(chill); });
 
   // ---------- leaderboard ----------
   // A small service on Google Cloud keeps the best scores (see the `backend` branch). It stores a nickname and the
@@ -2214,7 +2219,7 @@
   }
   function postScore(name) {
     const n = score();
-    if (!API || posted || n <= 0 || !name) return;
+    if (!API || posted || chill || n <= 0 || !name) return;
     posted = true; $('lb-form').hidden = true; $('lb-status').textContent = '…';
     fetch(`${API}/score`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ name, score: n, parked: parkedCount, time: Math.round(stats.time) }) })
       .then((r) => (r.ok ? r.json() : Promise.reject(r.status)))
@@ -2229,7 +2234,7 @@
   function boardFor(over) {   // called when the score card opens
     if (!API) return;
     $('lb').hidden = false;
-    const can = over === true && !posted && score() > 0;
+    const can = over === true && !posted && !chill && score() > 0;
     $('lb-form').hidden = !can; $('lb-name').value = myName;
     if (!posted) $('lb-status').textContent = can ? L.lbNote : '';
     if (can && myName) postScore(myName); else loadTop();
