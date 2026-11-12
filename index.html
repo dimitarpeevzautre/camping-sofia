@@ -19,7 +19,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Overpass:wght@400;600;800;900&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="/css/site.css?v=17">
+<link rel="stylesheet" href="/css/site.css?v=18">
 </head>
 <body>
 <canvas id="camp" data-a="camp" aria-label="A top-down view of a campsite. Drive each arriving camper to its pitch."></canvas>
@@ -70,6 +70,11 @@
       <li data-t="lgRain">Parking in the rain or after dark pays more, but the road is slippery.</li>
     </ul>
   </details>
+  <details class="legend shop">
+    <summary><span data-t="shopTitle">Camp shop</span>: <b id="shop-coins"></b></summary>
+    <p data-t="shopNote">Every point you score becomes a coin when the shift ends.</p>
+    <ul id="shop-list"></ul>
+  </details>
   <p class="mine" id="mine"></p>
   <p class="mine" id="lead"></p>
   <p class="keys" id="keys" data-t="keys">Arrow keys or WASD to drive. Space is the handbrake: at speed it swings the back round. H honks, M mutes, R tunes the radio, P pauses. A gamepad works too.</p>
@@ -109,6 +114,7 @@
       <div><dt data-t="stTips">Tips picked up</dt><dd id="st-tips">0</dd></div>
       <div><dt data-t="stErrands">Errands run</dt><dd id="st-errands">0</dd></div>
       <div><dt data-t="stGnomes">Hidden gnomes found</dt><dd id="st-gnomes">0</dd></div>
+      <div><dt data-t="stBank">Coins for the camp shop</dt><dd id="st-bank">0</dd></div>
       <div><dt data-t="stFines">Fines from the warden</dt><dd id="st-fines">0</dd></div>
       <div><dt data-t="stBumps">Bumps</dt><dd id="st-bumps">0</dd></div>
       <div><dt data-t="stScares">People you startled</dt><dd id="st-scares">0</dd></div>
@@ -150,6 +156,6 @@
 <footer class="note" data-t="note">This camp is made up. The real one is on its way to Sofia, from <a href="https://thestable.bg" target="_blank" rel="noopener">thestable.bg</a>.</footer>
 
 <noscript><p class="noscript">Camping Sofia is coming soon. Your base to enjoy Sofia.</p></noscript>
-<script src="/js/game.js?v=25" defer></script>
+<script src="/js/game.js?v=26" defer></script>
 </body>
 </html>
