@@ -87,6 +87,16 @@
       rainOn: 'Rain! The roads are slippery', rainBonus: 'Rain +20%', bRush: 'TIP RUSH!', bDog: 'GOOD DOG!',
       dogOn: 'A dog has run off with the sausages! Catch up with it for a reward', dogWon: 'Sausages rescued! +200', dogLost: 'The dog got away with the sausages',
       gnome: (n, of) => `You found a garden gnome! ${n} of ${of}`, bGnomes: 'ALL THE GNOMES!', driftPark: 'Handbrake parking',
+      boss: {
+        start: ['Baba Ginka: The gate is yours. Do not scratch anything.', 'Baba Ginka: Guests are coming. Smile and park.', 'Baba Ginka: Remember, the hedge costs more than you do.'],
+        fine: ['Baba Ginka: That fine comes out of your banitsa money.', 'Baba Ginka: The warden is my cousin. No discounts.'],
+        roll: ['Baba Ginka: Five clean ones! I knew I hired you for a reason.', 'Baba Ginka: Keep this up and you get the good chair.'],
+        gaveUp: ['Baba Ginka: That guest went to a hotel. A HOTEL.', 'Baba Ginka: They left a review. I am not reading it to you.'],
+        dog: ['Baba Ginka: You saved the sausages. Dinner is on me.'],
+        scare: ['Baba Ginka: We park campers here, not guests.', 'Baba Ginka: The children are not cones.'],
+        over: ['Baba Ginka: Tomorrow you start with the wheelbarrow.', 'Baba Ginka: Not bad. Not good. Not bad.', 'Baba Ginka: The guests asked for you by name. Mostly politely.',
+          'Baba Ginka: I am putting your photo up at reception.', 'Baba Ginka: Take the big office. I never liked it.', 'Baba Ginka: They will name a pitch after you.'],
+      },
       honk: 'Beep beep!', vip: 'A VIP guest: double points, less patience',
       ranks: ['Trainee', 'Gate keeper', 'Camp host', 'Site warden', 'Camp manager', 'Legend of Vitosha'],
       rankNext: (n, r) => `${n} more for ${r}`, short: (n) => `only ${n} short of your best`,
@@ -161,6 +171,16 @@
       rainOn: 'Дъжд! Пътищата са хлъзгави', rainBonus: 'Дъжд +20%', bRush: 'БАКШИШИ!', bDog: 'ДОБРО КУЧЕ!',
       dogOn: 'Куче избяга с наденичките! Настигнете го за награда', dogWon: 'Наденичките са спасени! +200', dogLost: 'Кучето избяга с наденичките',
       gnome: (n, of) => `Намерихте градинско джудже! ${n} от ${of}`, bGnomes: 'ВСИЧКИ ДЖУДЖЕТА!', driftPark: 'Паркиране с ръчна',
+      boss: {
+        start: ['Баба Гинка: Порталът е твой. Нищо да не драскаш.', 'Баба Гинка: Гостите идват. Усмивка и паркирай.', 'Баба Гинка: Запомни, живият плет струва повече от теб.'],
+        fine: ['Баба Гинка: Глобата е от парите ти за баница.', 'Баба Гинка: Управителят ми е братовчед. Отстъпки няма.'],
+        roll: ['Баба Гинка: Пет чисти! Знаех си защо те взех.', 'Баба Гинка: Карай така и столът с облегалката е твой.'],
+        gaveUp: ['Баба Гинка: Този гост отиде на хотел. НА ХОТЕЛ.', 'Баба Гинка: Оставиха отзив. Няма да ти го чета.'],
+        dog: ['Баба Гинка: Спаси наденичките. Вечерята е от мен.'],
+        scare: ['Баба Гинка: Тук паркираме кемпери, не гости.', 'Баба Гинка: Децата не са конуси.'],
+        over: ['Баба Гинка: Утре започваш с ръчната количка.', 'Баба Гинка: Не е зле. Не е и добре. Не е зле.', 'Баба Гинка: Гостите питаха за теб по име. Повечето учтиво.',
+          'Баба Гинка: Слагам снимката ти на рецепцията.', 'Баба Гинка: Вземи големия кабинет. И без това не го харесвах.', 'Баба Гинка: Ще кръстят място на твое име.'],
+      },
       honk: 'Бийп-бийп!', vip: 'VIP гост: двойни точки, по-малко търпение',
       ranks: ['Стажант', 'Пазач на портала', 'Домакин на къмпинга', 'Управител на терена', 'Директор на къмпинга', 'Легенда на Витоша'],
       rankNext: (n, r) => `още ${n} до „${r}“`, short: (n) => `само ${n} до рекорда ви`,
@@ -498,8 +518,12 @@
     b.addEventListener('contextmenu', (e) => e.preventDefault());
   });
 
-  let toastTimer = 0;
+  let toastTimer = 0, toastUntil = 0;
+  const toastQ = [];   // remarks from the owner wait here until the screen is clear
+  function boss(key) { if (toastQ.length < 2) toastQ.push(pick(L.boss[key])); }
+  function stepToasts() { if (toastQ.length && mode === 'play' && performance.now() > toastUntil + 500) toast(toastQ.shift(), 3400); }
   function toast(text, ms = 1800) {
+    toastUntil = performance.now() + ms;
     const el = $('toast');
     el.textContent = text; el.classList.add('on');
     clearTimeout(toastTimer); toastTimer = setTimeout(() => el.classList.remove('on'), ms);
@@ -576,7 +600,7 @@
     audioOn();
     nextGuest(true);
     setTimeout(() => document.body.classList.add('sign-away'), 5000);   // the name plate steps aside once the driving starts
-    toast(L.first(target.n), 2200);
+    toast(L.first(target.n), 2200); toastQ.length = 0; boss('start');
     cv.focus();
   }
   $('play').addEventListener('click', start);
@@ -832,7 +856,7 @@
       const fine = 40 + 30 * Math.ceil(heat);
       damage += fine; streak = 0; heat = 0; heatStars(); stats.fines++; car.v = 0;
       w.direct = false; w.to = nearNode(w.x, w.y);
-      sfx.lost(); pop(car.x, car.y, `−${fine}`, '#e2553d', 30); toast(L.fined(fine), 2600); banner(L.bFined); hud();
+      sfx.lost(); pop(car.x, car.y, `−${fine}`, '#e2553d', 30); toast(L.fined(fine), 2600); banner(L.bFined); boss('fine'); hud();
     }
   }
   function drawWarden() {
@@ -974,7 +998,7 @@
     const gx = NODES[t.to][0] - t.x, gy = NODES[t.to][1] - t.y, gd = Math.hypot(gx, gy), sp = Math.min(7.2 * dt, gd);
     if (gd > 0.01) { t.x += (gx / gd) * sp; t.y += (gy / gd) * sp; t.th = Math.atan2(gy, gx); }
     if (Math.hypot(car.x - t.x, car.y - t.y) < 2.8) {
-      total += 200; stats.dogs++; award('dog'); sfx.park(6, true); pop(t.x, t.y, '+200', '#f4c531', 34); toast(L.dogWon, 2600); banner(L.bDog);
+      total += 200; stats.dogs++; award('dog'); sfx.park(6, true); pop(t.x, t.y, '+200', '#f4c531', 34); toast(L.dogWon, 2600); banner(L.bDog); boss('dog');
       thief = null; nextThief = clock + 75; hud();
     } else if (clock > t.until) { toast(L.dogLost, 2200); thief = null; nextThief = clock + 60; }
   }
@@ -1159,7 +1183,7 @@
     bar.classList.toggle('low', patience < 10);
     if (patience <= 0) {   // one guest let down; the third ends the shift
       stats.gaveUp++; lives--; streak = 0; car = null; sfx.lost();
-      if (lives <= 0) gameOver(); else { toast(L.gaveUp, 2400); setTimeout(() => { if (mode === 'play' && !car) nextGuest(); }, 1600); }
+      if (lives <= 0) gameOver(); else { toast(L.gaveUp, 2400); boss('gaveUp'); setTimeout(() => { if (mode === 'play' && !car) nextGuest(); }, 1600); }
       hud();
     }
   }
@@ -1204,7 +1228,7 @@
     if (dark) pop(r.cx, r.cy, L.nightBonus, '#6fb6d9', 22, 74); else if (rain > 0.3) pop(r.cx, r.cy, L.rainBonus, '#6fb6d9', 22, 74);
     sfx.park(streak, perfect);
     if (clean) { heat = Math.max(0, heat - 0.5); heatStars(); }
-    if (streak === 9) banner(L.bMax); else if (streak === 5) banner(L.bRoll); else if (perfect) banner(L.bPerfect);
+    if (streak === 9) banner(L.bMax); else if (streak === 5) { banner(L.bRoll); boss('roll'); } else if (perfect) banner(L.bPerfect);
     const vip = car.vip;
     let back = false;
     if (clean && streak % 5 === 0 && lives < 3) { lives++; back = true; setTimeout(() => sfx.life(), 600); }
@@ -1313,6 +1337,7 @@
     car.v = 0; shake = reduceMotion ? 0 : 0.6;
     const a = Math.atan2(o.y - car.y, o.x - car.x);
     o.path.unshift([o.x + Math.cos(a) * 2.5, o.y + Math.sin(a) * 2.5]);
+    if (!safe && Math.random() < 0.5) boss('scare');
     if (!safe) toast(L.careful(L.who[o.kind === 'pet' ? (o.cat ? 'cat' : 'dog') : o.kind]), 1800);
     hud();
   }
@@ -1979,6 +2004,7 @@
     set('st-acc', n ? `${Math.round(stats.acc / n)} / 100` : '–'); set('st-spd', n ? `${Math.round(stats.spd / n)} / 100` : '–');
     set('st-top', n ? stats.top : '–'); set('st-streak', stats.streak); set('st-perfect', stats.perfect); set('st-tips', stats.tips); set('st-fines', stats.fines); set('st-errands', stats.errands); set('st-gnomes', `${found.size}/${GNOMES.length}`);
     set('st-rank', rankLine(now, startBest));
+    { let i = 0; while (i < RANKS.length - 1 && now >= RANKS[i + 1]) i++; set('st-boss', over === true ? L.boss.over[i] : ''); }
     boardFor(over);
     const ids = Object.keys(L.badges), list = $('bd-list');
     set('bd-title', `${L.badgesTitle} ${ids.filter((id) => earned.has(id)).length}/${ids.length}`);
@@ -2077,7 +2103,7 @@
   let last = performance.now();
   function tick(now) {
     const dt = Math.min(0.05, (now - last) / 1000); last = now;
-    if (!paused) { step(dt); stepFx(dt); }
+    if (!paused) { step(dt); stepFx(dt); stepToasts(); }
     engineSound(dt); stepRadio(dt); rainSound();
     updateCamera(dt);
     frame(night);
