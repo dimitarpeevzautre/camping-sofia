@@ -1728,6 +1728,28 @@
       }
       ctx.lineCap = 'butt'; ctx.lineWidth = 1;
     }
+    {   // a small playground beyond the reception: a sandpit, a swing and a seesaw
+      const [ox, oy] = P(86, 78.5);
+      if (ox > -200 && ox < vw + 200 && oy > -200 && oy < vh + 200) {
+        const sand = { cx: 84, cy: 79.5, hl: 2.2, hw: 1.7, a: 0.15 };
+        poly(quad(sand, -2.2, 2.2, -1.7, 1.7, 0), '#e8d49a', 'rgba(18,33,26,0.35)');
+        poly(quad(sand, -2.35, 2.35, -1.85, -1.65, 0.25), '#b98a55'); poly(quad(sand, -2.35, 2.35, 1.65, 1.85, 0.25), '#b98a55');
+        poly(quad(sand, -2.35, -2.15, -1.85, 1.85, 0.25), '#a97a48'); poly(quad(sand, 2.15, 2.35, -1.85, 1.85, 0.25), '#a97a48');
+        const [bx, by] = RP(sand, 0.6, -0.4, 0.3); ctx.fillStyle = '#d5503c'; ctx.beginPath(); ctx.arc(bx, by, 0.28 * k, 0, TAU); ctx.fill();          // a bucket
+        const [mx, my] = RP(sand, -0.7, 0.5, 0.15); ctx.fillStyle = '#d9c183'; ctx.beginPath(); ctx.arc(mx, my, 0.5 * k, 0, TAU); ctx.fill();          // a sandcastle
+        const sw = { cx: 89.5, cy: 77, hl: 1.6, hw: 0.9, a: -0.2 }, swing = reduceMotion ? 0 : Math.sin(clock * 1.6) * 0.55;
+        ctx.strokeStyle = '#8a6a45'; ctx.lineWidth = Math.max(2, k * 0.14); ctx.lineCap = 'round';
+        for (const l of [-1.6, 1.6]) { ctx.beginPath(); ctx.moveTo(...RP(sw, l, -0.9, 0)); ctx.lineTo(...RP(sw, l, 0, 2.3)); ctx.lineTo(...RP(sw, l, 0.9, 0)); ctx.stroke(); }
+        ctx.beginPath(); ctx.moveTo(...RP(sw, -1.6, 0, 2.3)); ctx.lineTo(...RP(sw, 1.6, 0, 2.3)); ctx.stroke();
+        ctx.strokeStyle = '#22262a'; ctx.lineWidth = 1.5;
+        for (const [l, ph] of [[-0.6, swing], [0.6, -swing * 0.7]]) { const seat = RP(sw, l, ph, 0.6); ctx.beginPath(); ctx.moveTo(...RP(sw, l, 0, 2.3)); ctx.lineTo(...seat); ctx.stroke(); ctx.fillStyle = l < 0 ? '#3f7fa6' : '#f0b83a'; ctx.beginPath(); ctx.arc(seat[0], seat[1], 0.26 * k, 0, TAU); ctx.fill(); }
+        const see = { cx: 88, cy: 81.5, hl: 2, hw: 0.2, a: 0.5 }, tip = reduceMotion ? 0 : Math.sin(clock * 1.1) * 0.35;
+        ctx.strokeStyle = '#d5503c'; ctx.lineWidth = Math.max(3, k * 0.2);
+        ctx.beginPath(); ctx.moveTo(...RP(see, -2, 0, 0.6 + tip)); ctx.lineTo(...RP(see, 2, 0, 0.6 - tip)); ctx.stroke();
+        ctx.fillStyle = '#8a6a45'; const [cx0, cy0] = RP(see, 0, 0, 0.3); ctx.beginPath(); ctx.arc(cx0, cy0, 0.25 * k, 0, TAU); ctx.fill();
+        ctx.lineCap = 'butt'; ctx.lineWidth = 1;
+      }
+    }
     for (const [tx, ty] of tubs) {
       const [x, y] = P(tx, ty, 0.5);
       if (x < -30 || x > vw + 30 || y < -30 || y > vh + 30) continue;
