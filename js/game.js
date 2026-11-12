@@ -101,6 +101,9 @@
       goalNames: { tips: 'Tips', errands: 'Errands', perfect: 'Perfect parkings', dogs: 'Catch the dog', streak: 'Clean streak', parked: 'Guests parked', boosts: 'Boosts', honks: 'Honks' },
       goalDone: (g) => `Goal done: ${g}. +150`, bGoals: 'ALL GOALS!',
       bStrike: 'STRIKE!',
+      coins: (n) => `${n} coins`,
+      perks: { magnet: 'Magnet: tips jump to you from further away', tyres: 'Rain tyres: no slipping in the wet', banitsa: 'Banitsa for the warden: fines are halved',
+        calm: 'Camp brochure: guests wait 15% longer', heart: 'Fourth heart: one more guest may give up' },
       honk: 'Beep beep!', vip: 'A VIP guest: double points, less patience',
       ranks: ['Trainee', 'Gate keeper', 'Camp host', 'Site warden', 'Camp manager', 'Legend of Vitosha'],
       rankNext: (n, r) => `${n} more for ${r}`, short: (n) => `only ${n} short of your best`,
@@ -189,6 +192,9 @@
       goalNames: { tips: 'Бакшиши', errands: 'Поръчки', perfect: 'Перфектни паркирания', dogs: 'Хванете кучето', streak: 'Чиста серия', parked: 'Паркирани гости', boosts: 'Бонуси', honks: 'Клаксон' },
       goalDone: (g) => `Изпълнена цел: ${g}. +150`, bGoals: 'ВСИЧКИ ЦЕЛИ!',
       bStrike: 'СТРАЙК!',
+      coins: (n) => `${n} монети`,
+      perks: { magnet: 'Магнит: бакшишите скачат към вас отдалеч', tyres: 'Гуми за дъжд: без хлъзгане на мокро', banitsa: 'Баница за управителя: глобите са наполовина',
+        calm: 'Брошура на къмпинга: гостите чакат с 15% повече', heart: 'Четвърто сърце: още един гост може да се откаже' },
       honk: 'Бийп-бийп!', vip: 'VIP гост: двойни точки, по-малко търпение',
       ranks: ['Стажант', 'Пазач на портала', 'Домакин на къмпинга', 'Управител на терена', 'Директор на къмпинга', 'Легенда на Витоша'],
       rankNext: (n, r) => `още ${n} до „${r}“`, short: (n) => `само ${n} до рекорда ви`,
@@ -211,7 +217,7 @@
         note: `Този къмпинг е измислен. Истинският идва в София, от ${BY}.`,
         cardTitle: 'Вашият къмпинг дотук',
         stParked: 'Паркирани гости', stOnsite: 'В къмпинга сега', stAcc: 'Средна точност', stSpd: 'Средна бързина',
-        stTop: 'Най-добро паркиране', stStreak: 'Най-дълга чиста серия', stPerfect: 'Перфектни паркирания', chill: 'Почивен ден: без часовник', restart: 'Обратно към портала', lgCone: 'Конусите летят, ако ги ударите: по 5 точки, но управителят забелязва.', lgIce: 'Колата за сладолед кара бавно и не бърза за никъде. Заобиколете я.', stGnomes: 'Намерени скрити джуджета', lgGnome: 'Из къмпинга са скрити десет градински джуджета. Струва си да ги намерите.', legendTitle: 'Какво има по пътищата',
+        stTop: 'Най-добро паркиране', stStreak: 'Най-дълга чиста серия', stPerfect: 'Перфектни паркирания', shopTitle: 'Магазинът на къмпинга', shopNote: 'Всяка точка става монета в края на смяната.', stBank: 'Монети за магазина', chill: 'Почивен ден: без часовник', restart: 'Обратно към портала', lgCone: 'Конусите летят, ако ги ударите: по 5 точки, но управителят забелязва.', lgIce: 'Колата за сладолед кара бавно и не бърза за никъде. Заобиколете я.', stGnomes: 'Намерени скрити джуджета', lgGnome: 'Из къмпинга са скрити десет градински джуджета. Струва си да ги намерите.', legendTitle: 'Какво има по пътищата',
         lgTip: 'Жълта монета: 25 точки. Синя: 8 секунди повече.', lgBoost: 'Лилав жетон: бонус. Ускорение, спряно време, двойни точки, автопаркиране, щит или дъжд от бакшиши.',
         lgJob: 'Зелен знак: поръчка. Вземете и закарайте до мястото за 120 точки.', lgDog: 'Кучето с наденичките: настигнете го за 200 точки.',
         lgWarden: 'Червени звезди: управителят ви гони. Глобата боли, чистото паркиране го успокоява.', lgRain: 'В дъжд и по тъмно паркирането носи повече, но пътят се хлъзга.', stErrands: 'Изпълнени поръчки', stFines: 'Глоби от управителя', lbTitle: 'Най-добрите къмпингари', lbWeek: 'Тази седмица', lbAll: 'За всички времена', lbPost: 'Запиши резултата ми', stTips: 'Събрани бакшиши', stBumps: 'Удари', stScares: 'Стреснати хора', stGaveUp: 'Гости, които се отказаха да чакат',
@@ -498,6 +504,27 @@
     ctx.restore();
   }
 
+  // ---------- the camp shop ----------
+  // Every point of a finished shift becomes a coin. Coins buy small permanent advantages, kept in this browser.
+  const PERKS = { magnet: 1500, tyres: 2000, banitsa: 2500, calm: 3500, heart: 5000 };
+  const owned = new Set();
+  let bank = 0;
+  try { bank = +localStorage.getItem('camp-bank') || 0; JSON.parse(localStorage.getItem('camp-perks') || '[]').forEach((k) => owned.add(k)); } catch (e) { /* private window */ }
+  const maxLives = () => (owned.has('heart') ? 4 : 3);
+  function saveShop() { try { localStorage.setItem('camp-bank', String(bank)); localStorage.setItem('camp-perks', JSON.stringify([...owned])); } catch (e) { /* private window */ } }
+  function shop() {
+    $('shop-coins').textContent = L.coins(bank);
+    const list = $('shop-list');
+    list.textContent = '';
+    Object.keys(PERKS).forEach((k) => {
+      const li = document.createElement('li'), b = document.createElement('button'), has = owned.has(k);
+      li.textContent = L.perks[k]; b.type = 'button'; b.textContent = has ? '✓' : PERKS[k]; b.disabled = has || bank < PERKS[k];
+      b.addEventListener('click', () => { if (owned.has(k) || bank < PERKS[k]) return; bank -= PERKS[k]; owned.add(k); saveShop(); shop(); });
+      li.append(b); list.append(li);
+    });
+  }
+  shop();
+
   // ---------- game state ----------
   const guests = [];           // parked vehicles, oldest first
   const ghosts = [];           // tow cars fading out as they leave for town; nothing can hit them
@@ -548,7 +575,7 @@
       if (startBest > 0 && !newBestSaid) { newBestSaid = true; toast(L.newBest, 2600); sfx.best(); banner(L.bBest); }
     }
     if (mode === 'play') scoreBadges(now);
-    $('hud-lives').textContent = '♥'.repeat(Math.max(0, lives)) + '♡'.repeat(3 - Math.max(0, lives));
+    $('hud-lives').textContent = '♥'.repeat(Math.max(0, lives)) + '♡'.repeat(maxLives() - Math.max(0, lives));
     const m = 1 + Math.min(streak, 8) * 0.25, combo = $('hud-combo'), was = combo.textContent;   // what the next clean parking is worth
     combo.textContent = streak ? `×${m}` : '';
     if (combo.textContent !== was && streak) { combo.classList.remove('hit'); void combo.offsetWidth; combo.classList.add('hit'); }
@@ -589,6 +616,7 @@
     const dist = Math.hypot(target.x + target.w / 2 - car.x, target.y + target.d / 2 - car.y);
     patienceMax = Math.max(18, 50 - parkedCount * 1.6) + dist * 0.35 + (kind === 'combo' ? 22 : kind === 'motorhome' ? 6 : 0);
     if (car.vip) patienceMax *= 0.85;
+    if (owned.has('calm')) patienceMax *= 1.15;
     patience = patienceMax;
     hud();
     if (kind === 'combo' && !metCaravan) { metCaravan = true; toast(L.firstCombo(target.n), 3800); }
@@ -608,7 +636,7 @@
     $('start').hidden = true; $('hud').hidden = false;
     if (matchMedia('(pointer: coarse)').matches) $('pad').hidden = false;
     parkedCount = 0; damage = 0; Object.keys(stats).forEach((k) => { stats[k] = 0; });
-    drawGoals(); playT = clock; posted = false; thief = null; nextThief = clock + 50; raining = false; nextRain = clock + 70; job = null; nextJob = clock + 25; heat = 0; warden = null; heatStars(); tips.length = 0; Object.keys(boost).forEach((k) => { boost[k] = 0; }); nextBoost = clock + 8; boostChips(); total = 0; lives = 3; streak = 0; startBest = best; newBestSaid = false; car = null;
+    drawGoals(); playT = clock; posted = false; thief = null; nextThief = clock + 50; raining = false; nextRain = clock + 70; job = null; nextJob = clock + 25; heat = 0; warden = null; heatStars(); tips.length = 0; Object.keys(boost).forEach((k) => { boost[k] = 0; }); nextBoost = clock + 8; boostChips(); total = 0; lives = maxLives(); streak = 0; startBest = best; newBestSaid = false; car = null;
     audioOn();
     nextGuest(true);
     setTimeout(() => document.body.classList.add('sign-away'), 5000);   // the name plate steps aside once the driving starts
@@ -637,7 +665,7 @@
     for (let i = tips.length - 1; i >= 0; i--) {
       const t = tips[i];
       if (t.until && clock > t.until) { tips.splice(i, 1); continue; }
-      if (!rects.some((r) => rectCircle(r, t.x, t.y, 0.9))) continue;
+      if (!rects.some((r) => rectCircle(r, t.x, t.y, owned.has('magnet') ? 3.2 : 0.9))) continue;
       tips.splice(i, 1);
       if (t.boost) { takeBoost(t.boost); pop(t.x, t.y, BOOST_SIGN[t.boost], '#b98ce0', 30); hud(); continue; }
       stats.tips++; sfx.coin();
@@ -866,7 +894,7 @@
     if (gd > 0.05) { w.x += (gx / gd) * Math.min(sp, gd); w.y += (gy / gd) * Math.min(sp, gd); w.th = wrap(w.th + clamp(wrap(Math.atan2(gy, gx) - w.th), -6 * dt, 6 * dt)); }
     if (heat > 0 && (sirenT -= dt) <= 0) { sirenT = 0.45; w.hi = !w.hi; if (d < 45) note(w.hi ? 740 : 587, 0, 0.2, 'square', 0.035); }
     if (hot && d < 2.7 && clock - car.born > 2 && !car.auto) {   // caught
-      const fine = 40 + 30 * Math.ceil(heat);
+      const fine = Math.round((40 + 30 * Math.ceil(heat)) * (owned.has('banitsa') ? 0.5 : 1));
       damage += fine; streak = 0; heat = 0; heatStars(); stats.fines++; car.v = 0;
       w.direct = false; w.to = nearNode(w.x, w.y);
       sfx.lost(); pop(car.x, car.y, `−${fine}`, '#e2553d', 30); toast(L.fined(fine), 2600); banner(L.bFined); boss('fine'); hud();
@@ -1253,7 +1281,7 @@
     const onRoad = onRoadOrPitch(car.x, car.y);
     // The handbrake locks the rear wheels: at speed the back swings round and the vehicle slides. Not with a caravan on.
     const fast = boost.speed > 0 ? 1.5 : 1, vmax = (onRoad ? t.vmax : 4.5) * fast, hb = keys.brake && !t.trailer && Math.abs(car.v) > 2.5;
-    if (keys.brake) car.v -= Math.sign(car.v) * Math.min(Math.abs(car.v), (hb ? 5 : rain > 0.3 ? 9 : 16) * dt);
+    if (keys.brake) car.v -= Math.sign(car.v) * Math.min(Math.abs(car.v), (hb ? 5 : rain > 0.3 && !owned.has('tyres') ? 9 : 16) * dt);
     else if (keys.up) car.v += (car.v < 0 ? 14 : 6.5 * fast) * dt;
     else if (keys.down) car.v -= (car.v > 0 ? 14 : 4.5) * dt;
     else car.v -= Math.sign(car.v) * Math.min(Math.abs(car.v), (onRoad ? 2.6 : 5) * dt);
@@ -1272,7 +1300,7 @@
       const dth = (car.v / t.wb) * Math.tan(car.steer) * h * (hb ? 2.6 : 1);
       car.th = wrap(car.th + dth);
       // the direction of travel follows the nose; on the handbrake it lags a long way behind
-      car.vh = t.trailer ? car.th : wrap(pvh + wrap(car.th - pvh) * (1 - Math.exp(-h * (hb ? 1.4 : rain > 0.3 ? 5 : 22))));
+      car.vh = t.trailer ? car.th : wrap(pvh + wrap(car.th - pvh) * (1 - Math.exp(-h * (hb ? 1.4 : rain > 0.3 && !owned.has('tyres') ? 5 : 22))));
       car.x += Math.cos(car.vh) * car.v * h; car.y += Math.sin(car.vh) * car.v * h;
       if (t.trailer) {
         const d = car.th - car.ph, tr = t.trailer;
@@ -1331,6 +1359,7 @@
 
   function gameOver() {
     mode = 'over'; target = null; sfx.over(); banner(L.bOver);
+    if (!chill) { bank += Math.max(0, score()); saveShop(); }
     setTimeout(() => openCard(true), 1100);
   }
 
@@ -1372,7 +1401,7 @@
     if (streak === 9) banner(L.bMax); else if (streak === 5) { banner(L.bRoll); boss('roll'); } else if (perfect) banner(L.bPerfect);
     const vip = car.vip;
     let back = false;
-    if (clean && streak % 5 === 0 && lives < 3) { lives++; back = true; setTimeout(() => sfx.life(), 600); }
+    if (clean && streak % 5 === 0 && lives < maxLives()) { lives++; back = true; setTimeout(() => sfx.life(), 600); }
     stay.points = pts; stay.stay = 150 + Math.random() * 170;
     target.guest = stay; guests.push(stay);
     parkedCount++; stats.acc += accuracy; stats.spd += speed; stats.top = Math.max(stats.top, stay.points);
@@ -2144,7 +2173,7 @@
     set('st-score', now); set('st-best', top);
     set('st-parked', n); set('st-onsite', guests.filter((g) => !g.packing && !g.leaving).length);
     set('st-acc', n ? `${Math.round(stats.acc / n)} / 100` : '–'); set('st-spd', n ? `${Math.round(stats.spd / n)} / 100` : '–');
-    set('st-top', n ? stats.top : '–'); set('st-streak', stats.streak); set('st-perfect', stats.perfect); set('st-tips', stats.tips); set('st-fines', stats.fines); set('st-errands', stats.errands); set('st-gnomes', `${found.size}/${GNOMES.length}`);
+    set('st-top', n ? stats.top : '–'); set('st-streak', stats.streak); set('st-perfect', stats.perfect); set('st-tips', stats.tips); set('st-fines', stats.fines); set('st-errands', stats.errands); set('st-bank', bank); set('st-gnomes', `${found.size}/${GNOMES.length}`);
     set('st-rank', rankLine(now, startBest));
     { let i = 0; while (i < RANKS.length - 1 && now >= RANKS[i + 1]) i++; set('st-boss', over === true ? L.boss.over[i] : ''); }
     boardFor(over);
@@ -2258,5 +2287,5 @@
   requestAnimationFrame(tick);
 
   // For automated checks only: /?debug exposes the state.
-  if (location.search.includes('debug')) window.camp = { get car() { return car; }, get target() { return target; }, get parked() { return parkedCount; }, get score() { return score(); }, get night() { return night; }, people, skids, packUp, guests, pitches, stats, rectsOf, rectRect, keys, blocked, livingRect, corners, setClock: (t) => { clock = t; }, setPatience: (t) => { patience = t; }, get lives() { return lives; }, props, get goals() { return goals; }, get ice() { return ice; }, found, GNOMES, get thief() { return thief; }, get rain() { return rain; }, setNext: (o) => { if (o.rain !== undefined) nextRain = o.rain; if (o.thief !== undefined) nextThief = o.thief; }, get job() { return job; }, setNextJob: (t) => { nextJob = t; }, tuneRadio, get station() { return station; }, get heat() { return heat; }, get warden() { return warden; }, trouble, boost, chats, takeBoost, say, addTip, earned, award, tips, honk, rankLine, get streak() { return streak; }, get mode() { return mode; }, get patienceMax() { return patienceMax; }, pops, bits, give: (kind) => { car = makeVehicle(kind, 61.8, 80.5, -Math.PI / 2); car.born = -9; }, next: () => { car = null; nextGuest(); } };
+  if (location.search.includes('debug')) window.camp = { get car() { return car; }, get target() { return target; }, get parked() { return parkedCount; }, get score() { return score(); }, get night() { return night; }, people, skids, packUp, guests, pitches, stats, rectsOf, rectRect, keys, blocked, livingRect, corners, setClock: (t) => { clock = t; }, setPatience: (t) => { patience = t; }, get lives() { return lives; }, owned, get bank() { return bank; }, setBank: (n) => { bank = n; saveShop(); shop(); }, props, get goals() { return goals; }, get ice() { return ice; }, found, GNOMES, get thief() { return thief; }, get rain() { return rain; }, setNext: (o) => { if (o.rain !== undefined) nextRain = o.rain; if (o.thief !== undefined) nextThief = o.thief; }, get job() { return job; }, setNextJob: (t) => { nextJob = t; }, tuneRadio, get station() { return station; }, get heat() { return heat; }, get warden() { return warden; }, trouble, boost, chats, takeBoost, say, addTip, earned, award, tips, honk, rankLine, get streak() { return streak; }, get mode() { return mode; }, get patienceMax() { return patienceMax; }, pops, bits, give: (kind) => { car = makeVehicle(kind, 61.8, 80.5, -Math.PI / 2); car.born = -9; }, next: () => { car = null; nextGuest(); } };
 })();
