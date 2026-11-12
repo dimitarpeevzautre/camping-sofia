@@ -676,7 +676,7 @@
       car = null; setTimeout(() => { if (mode === 'play' && !car) nextGuest(); }, 400); return;
     }
     car.born = clock; car.vip = parkedCount >= 3 && rnd() < 0.14;
-    if ((demo || parkedCount >= 1) && Math.random() < 0.18) { car.rare = pick(RARE_FOR[kind]); spot(car.rare); }
+    if ((demo || parkedCount >= 1) && Math.random() < 0.22) { car.rare = pick(RARE_FOR[kind]); spot(car.rare); }
     if (false) {   // rush hour is gone
  rushLeft = 3; banner(L.bHour); toastQ.push(L.rushOn); }
     car.rush = rushLeft > 0; if (car.rush) rushLeft--;
@@ -1484,7 +1484,8 @@
       spotted.add(key); total += 100; sfx.best();
       try { localStorage.setItem('camp-spotted', JSON.stringify([...spotted])); } catch (e) { /* private window */ }
     }
-    toastQ.push(L.rareSpot(L.rares[key], spotted.size, RARE_ALL.length));
+    const note = L.rareSpot(L.rares[key], spotted.size, RARE_ALL.length);
+    setTimeout(() => { if (mode === 'play' && !demo) toast(note, 3400); }, 1700);   // after the line that says who is next
     if (spotted.size === RARE_ALL.length) award('collector');
   }
   function rareRows() {
