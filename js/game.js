@@ -1360,6 +1360,24 @@
   function endDemo() { demo = false; for (const k in keys) keys[k] = false; car = null; target = null; }
   // The demo with a caravan on: along the far side of the lane, turn in late, then straight down the middle of the
   // pitch so the caravan follows the car in.
+  // Slow traffic ahead of the demo vehicle: aim to one side of it and go round, as a patient driver would.
+  function demoDodge(tx, ty) {
+    const hx = Math.cos(car.th), hy = Math.sin(car.th);
+    for (const o of ice ? [...roamers, ice] : roamers) {
+      const dx = o.x - car.x, dy = o.y - car.y, ahead = dx * hx + dy * hy, side = -dx * hy + dy * hx;
+      if (ahead < 1 || ahead > 11 || Math.abs(side) > 2.4) continue;
+      const away = side > 0 ? -1 : 1;   // pass on the side it is not on
+      return [car.x + hx * 7 - hy * away * 3.2, car.y + hy * 7 + hx * away * 3.2];
+    }
+    for (const o of people) {   // and give anyone on foot a wide berth
+      if (o.hidden) continue;
+      const dx = o.x - car.x, dy = o.y - car.y, ahead = dx * hx + dy * hy, side = -dx * hy + dy * hx;
+      if (ahead < 0.5 || ahead > 8 || Math.abs(side) > 1.7) continue;
+      const away = side > 0 ? -1 : 1;
+      return [car.x + hx * 6 - hy * away * 2.6, car.y + hy * 6 + hx * away * 2.6];
+    }
+    return [tx, ty];
+  }
   function demoCombo(dt, p) {
     const cx = p.x + p.w / 2, laneY = p.laneBelow ? p.y + p.d + 5 : p.y - 4.5, into = p.laneBelow ? -1 : 1, side = cx < 60 ? -1 : 1;
     const far = laneY - into * 2.4, endY = into > 0 ? p.y + p.d - 0.8 : p.y + 0.8;
@@ -1372,6 +1390,7 @@
       if (side * (car.x - (cx - side * 4.3)) > 0) demoI = 2;
     }
     if (demoI === 2) { tx = cx; ty = fy + into * 6; want = 2; }
+    if (demoI < 2) [tx, ty] = demoDodge(tx, ty);
     const err = wrap(Math.atan2(ty - fy, tx - fx) - car.th), noseY = car.y + Math.sin(car.th) * 3.6, done = demoI === 2 && (into > 0 ? noseY > endY : noseY < endY);
     if (done) want = 0;
     keys.left = err < -0.04; keys.right = err > 0.04; keys.up = car.v < want - 0.2; keys.down = car.v > want + 0.8 || (done && car.v > 0.2); keys.brake = false; keys.horn = false;
@@ -1392,6 +1411,7 @@
     const fx = car.x + Math.cos(car.th) * car.t.wb, fy = car.y + Math.sin(car.th) * car.t.wb;
     let [tx, ty] = demoPts[demoI];
     if (demoI < demoPts.length - 1 && Math.hypot(tx - fx, ty - fy) < (demoI === 0 ? 5 : 2.5)) { demoI++; [tx, ty] = demoPts[demoI]; }
+    if (demoI < 2) [tx, ty] = demoDodge(tx, ty);
     const err = wrap(Math.atan2(ty - fy, tx - fx) - car.th), d = Math.hypot(tx - fx, ty - fy), r = livingRect(car);
     const inside = demoI === demoPts.length - 1 && Math.abs(r.cy - (p.y + p.d / 2)) < 1 && Math.abs(r.cx - (p.x + p.w / 2)) < 1.2;
     const want = inside ? 0 : demoI >= 2 ? 2 : Math.abs(err) > 0.5 ? 2.5 : d < 9 ? 3.5 : 7;
