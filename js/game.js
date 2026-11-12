@@ -27,7 +27,7 @@
     en: {
       other: 'Български', otherCode: 'bg',
       touchKeys: 'Steer with the left buttons. D drives, R reverses. The small buttons are the handbrake and the horn.',
-      names: { van: 'a campervan', motorhome: 'a motorhome', combo: 'a car and caravan' },
+      names: { van: 'a campervan', motorhome: 'a motorhome', combo: 'a car and caravan', roofcar: 'a car with a roof tent' },
       labels: {},
       firstCombo: (n) => `A car and caravan for pitch ${n}. Swing wide, then drive straight in: the caravan follows`,
       next: (name, n) => `Next: ${name} for pitch ${n}`,
@@ -126,6 +126,8 @@
       dayOff: 'A day off: no clock. V swaps your vehicle', swapped: (v) => `Now driving ${v}`,
       washed: 'Squeaky clean', washSlow: 'Slower through the wash bay',
       bAir: 'BIG AIR!',
+      rares: { bus: 'a 1960s camper bus', beetle: 'a little old car with a roof tent', woodie: 'a wood-panelled estate', firetruck: 'a fire engine turned camper', airstream: 'a polished aluminium caravan', teardrop: 'a teardrop caravan' },
+      rareSpot: (name, n, of) => `A rare sight: ${name}! ${n} of ${of} spotted`, rareTitle: 'Rare vehicles spotted',
       honk: 'Beep beep!', vip: 'A VIP guest: double points, less patience',
       ranks: ['Trainee', 'Gate keeper', 'Camp host', 'Site warden', 'Camp manager', 'Legend of Vitosha'],
       rankNext: (n, r) => `${n} more for ${r}`, short: (n) => `only ${n} short of your best`,
@@ -140,7 +142,7 @@
     bg: {
       other: 'English', otherCode: 'en',
       touchKeys: 'Завивайте с левите бутони. D е напред, R е назад. Малките бутони са ръчната спирачка и клаксонът.',
-      names: { van: 'ван', motorhome: 'кемпер', combo: 'кола с каравана' },
+      names: { van: 'ван', motorhome: 'кемпер', combo: 'кола с каравана', roofcar: 'кола с палатка на покрива' },
       labels: { Reception: 'Рецепция' },
       firstCombo: (n) => `Кола с каравана за място ${n}. Вземете широк завой и влезте направо: караваната ще ви последва`,
       next: (name, n) => `Следва: ${name} за място ${n}`,
@@ -239,6 +241,8 @@
       dayOff: 'Почивен ден: без часовник. V сменя возилото', swapped: (v) => `Сега карате ${v}`,
       washed: 'Блести от чистота', washSlow: 'По-бавно през автомивката',
       bAir: 'ПОЛЕТ!',
+      rares: { bus: 'кемпер бус от 60-те', beetle: 'малка стара кола с палатка на покрива', woodie: 'комби с дървени панели', firetruck: 'пожарна, превърната в кемпер', airstream: 'лъскава алуминиева каравана', teardrop: 'каравана капка' },
+      rareSpot: (name, n, of) => `Рядка гледка: ${name}! Забелязани ${n} от ${of}`, rareTitle: 'Забелязани редки возила',
       honk: 'Бийп-бийп!', vip: 'VIP гост: двойни точки, по-малко търпение',
       ranks: ['Стажант', 'Пазач на портала', 'Домакин на къмпинга', 'Управител на терена', 'Директор на къмпинга', 'Легенда на Витоша'],
       rankNext: (n, r) => `още ${n} до „${r}“`, short: (n) => `само ${n} до рекорда ви`,
@@ -373,6 +377,7 @@
     van: { name: 'campervan', L: 5.6, Wd: 2.1, wb: 3.3, rear: 1.0, vmax: 6.5, z: 2.3 },
     motorhome: { name: 'motorhome', L: 7.2, Wd: 2.35, wb: 4.0, rear: 1.6, vmax: 5.5, z: 2.9 },
     combo: { name: 'car and caravan', L: 4.5, Wd: 1.85, wb: 2.7, rear: 0.9, vmax: 5.5, z: 1.5, trailer: { hitch: 1.2, bar: 1.3, L: 5.2, Wd: 2.25, axle: 4.2, z: 2.6 } },
+    roofcar: { name: 'car with a roof tent', L: 4.5, Wd: 1.85, wb: 2.7, rear: 0.9, vmax: 6, z: 1.8 },
     car: { name: 'car', L: 4.5, Wd: 1.85, wb: 2.7, rear: 0.9, vmax: 8.5, z: 1.5 },   // a tow car once it has unhitched
     caravan: { name: 'caravan', L: 5.2, Wd: 2.25, wb: 0, rear: 2.3, vmax: 0, z: 2.6 },   // unhitched, its car away in town
   };
@@ -649,7 +654,7 @@
     if (free.length < 8 && !guests.some((g) => g.packing)) checkout();
     const roll = rnd();
     // The second guest always tows a caravan, so everyone meets one early.
-    const kind = demo ? (Math.random() < 0.4 ? 'combo' : 'van') : parkedCount === 0 ? 'van' : parkedCount === 1 && !metCaravan ? 'combo' : roll < 0.4 ? 'van' : roll < 0.65 ? 'motorhome' : 'combo';
+    const kind = demo ? (Math.random() < 0.4 ? 'combo' : 'van') : parkedCount === 0 ? 'van' : parkedCount === 1 && !metCaravan ? 'combo' : roll < 0.3 ? 'van' : roll < 0.52 ? 'roofcar' : roll < 0.72 ? 'motorhome' : 'combo';
     car = makeVehicle(kind, 61.8, 80.5, -Math.PI / 2);   // on the right, clear of guests driving out
     const room = rectsOf(car).map((r) => ({ ...r, hl: r.hl + 1.5, hw: r.hw + 0.8 }));
     if (!now && (guests.some((o) => o.leave && rectsOf(o).some((q) => room.some((r) => rectRect(r, q)))) ||
@@ -657,6 +662,7 @@
       car = null; setTimeout(() => { if (mode === 'play' && !car) nextGuest(); }, 400); return;
     }
     car.born = clock; car.vip = parkedCount >= 3 && rnd() < 0.14;
+    if ((demo || parkedCount >= 1) && Math.random() < 0.18) { car.rare = pick(RARE_FOR[kind]); spot(car.rare); }
     if (false) {   // rush hour is gone
  rushLeft = 3; banner(L.bHour); toastQ.push(L.rushOn); }
     car.rush = rushLeft > 0; if (car.rush) rushLeft--;
@@ -1153,7 +1159,7 @@
     if (job) dot(job.carry ? job.dx : job.x, job.carry ? job.dy : job.y, 3.5, '#8fd18a');
     if (thief) dot(thief.x, thief.y, 3.5, '#c98a55');
     if (ice) dot(ice.x, ice.y, 3, '#f2a7c0');
-    for (const t of roamers) dot(t.x, t.y, 2.5, t.kind === 'tractor' ? '#56994f' : '#e8855f');
+    for (const t of roamers) dot(t.x, t.y, t.kind === 'tractor' ? 2.5 : 1.8, t.kind === 'tractor' ? '#56994f' : '#e8855f');
     if (warden) dot(warden.x, warden.y, 3.5, heat > 0 && Math.sin(clock * 14) > 0 ? '#e2553d' : '#7fa6ff');
     if (car) {
       const cx = x0 + car.x * k, cy = y0 + car.y * k, c = Math.cos(car.th), s = Math.sin(car.th);
@@ -1198,7 +1204,7 @@
   // ---------- the ice-cream van ----------
   // Slow traffic: it trundles round the lanes playing its tune, and it is very much in the way.
   let ice = null, jingleT = 0;
-  const iceRect = () => ({ cx: ice.x, cy: ice.y, hl: 2.4, hw: 1.05, a: ice.th });
+  const iceRect = () => ({ cx: ice.x, cy: ice.y, hl: 2.8, hw: 1.05, a: ice.th });
   function stepIce(dt) {
     if (!ice) { ice = { x: NODES.C[0], y: NODES.C[1], th: Math.PI, at: 'C', to: 'B' }; return; }
     const t = ice;
@@ -1221,7 +1227,7 @@
   function drawIce() {
     if (!ice) return;
     const r = iceRect();
-    drawBox(r, 2.3, '#f6f1df', '#f2a7c0');
+    drawVan(r, ICE_SKIN);
     const [x, y] = P(ice.x, ice.y, 3.1), k = cam.s;   // the cone on the roof
     ctx.strokeStyle = '#12211a'; ctx.lineWidth = 2; ctx.lineJoin = 'round';
     ctx.fillStyle = '#d9a13b'; ctx.beginPath(); ctx.moveTo(x - 0.4 * k, y); ctx.lineTo(x + 0.4 * k, y); ctx.lineTo(x, y + 0.9 * k); ctx.closePath(); ctx.fill(); ctx.stroke();
@@ -1233,7 +1239,10 @@
   // keep to the lanes, wait for whatever is in front of them and are solid to the driver.
   const roamers = [
     { kind: 'tractor', x: NODES.A[0], y: NODES.A[1], th: Math.PI / 2, at: 'A', to: 'D', sp: 1.6, hl: 1.9, hw: 1.0 },
-    { kind: 'moped', x: NODES.F[0], y: NODES.F[1], th: Math.PI, at: 'F', to: 'E', sp: 3, hl: 0.95, hw: 0.4 },
+    { kind: 'biker', x: NODES.F[0], y: NODES.F[1], th: Math.PI, at: 'F', to: 'E', sp: 3, hl: 0.95, hw: 0.45, paint: '#3f7fa6' },
+    { kind: 'cyclist', x: NODES.B[0], y: NODES.B[1], th: Math.PI, at: 'B', to: 'A', sp: 2.1, hl: 0.8, hw: 0.3, paint: '#d5503c', jersey: '#f0b83a' },
+    { kind: 'cyclist', x: NODES.D[0], y: NODES.D[1], th: 0, at: 'D', to: 'E', sp: 1.8, hl: 0.8, hw: 0.3, paint: '#5f9070', jersey: '#8b6fae' },
+    { kind: 'hikers', x: NODES.E[0], y: NODES.E[1], th: -Math.PI / 2, at: 'E', to: 'B', sp: 1.0, hl: 0.5, hw: 0.7 },
   ];
   const roamRect = (t) => ({ cx: t.x, cy: t.y, hl: t.hl, hw: t.hw, a: t.th });
   function stepRoamers(dt) {
@@ -1255,14 +1264,10 @@
   function drawRoamers() {
     for (const t of roamers) {
       const r = roamRect(t);
-      if (t.kind === 'tractor') {
-        drawBox(r, 1.3, '#3f7a3a', '#56994f');
-        drawBox({ cx: t.x - Math.cos(t.th) * 0.7, cy: t.y - Math.sin(t.th) * 0.7, hl: 0.8, hw: 0.8, a: t.th }, 2.4, '#2d5a2a', '#f4c531');
-      } else {
-        drawBox(r, 0.9, '#c8553d', '#e8dfc8');
-        const [x, y] = P(t.x, t.y, 1.5);
-        ctx.fillStyle = '#f4c531'; ctx.strokeStyle = '#12211a'; ctx.lineWidth = 2; ctx.beginPath(); ctx.arc(x, y, 0.35 * cam.s, 0, TAU); ctx.fill(); ctx.stroke();
-      }
+      if (t.kind === 'tractor') drawTractor(r);
+      else if (t.kind === 'biker') drawBiker(r, t);
+      else if (t.kind === 'cyclist') drawCyclist(r, t);
+      else drawHikers(r, t);
     }
   }
 
@@ -1375,6 +1380,101 @@
     if (demoBack > 0) { demoBack -= dt; keys.up = false; keys.down = true; keys.left = !keys.left; keys.right = !keys.right; demoRef = null; return; }
     if (!demoRef || Math.hypot(car.x - demoRef.x, car.y - demoRef.y) > 1 || inside) demoRef = { x: car.x, y: car.y, t: demoT };
     else if (demoT - demoRef.t > 2) demoBack = 1.3;
+  }
+
+  // ---------- more models ----------
+  // A car with a tent on its roof: folded flat while it drives, opened to one side once it is parked.
+  function drawRoofCar(b, v) {
+    const hl = b.hl, hw = b.hw, bug = v.rare === 'beetle', wood = v.rare === 'woodie', p = bug ? '#e8c35a' : wood ? '#efe3c2' : v.paint;
+    for (const w of [-1, 1]) { wheel(b, hl - 0.9, w * (hw - 0.1), v.steer); wheel(b, -hl + 0.9, w * (hw - 0.1)); }
+    const rf = bug ? 0.85 : 0.5, rb = bug ? 0.8 : 0.3;
+    const wall = wood ? (nl, nw) => (Math.abs(nw) > 0.5 ? '#a9763f' : p) : shade(p, 0.84);
+    solid(b, hull(-hl, hl, hw, rf, rb), 0.28, hull(-hl + 0.04, hl - 0.06, hw - 0.05, rf, rb), 0.86, wall, p);
+    for (const w of [-1, 1]) {
+      poly(quad(b, hl - 0.4, hl - 0.16, w * (hw - 0.66), w * (hw - 0.26), 0.87), HEAD);
+      poly(quad(b, -hl + 0.1, -hl + 0.28, w * (hw - 0.66), w * (hw - 0.24), 0.87), tailOf(v));
+      poly(quad(b, hl - 1.62, hl - 1.42, w * (hw - 0.04), w * (hw + 0.16), 0.94), shade(p, 0.6));
+    }
+    solid(b, hull(-hl + 0.2, hl - 1.3, hw - 0.1, bug ? 0.6 : 0.3), 0.86, hull(-hl + 0.5, hl - 1.9, hw - 0.24, bug ? 0.5 : 0.25), 1.46, GLASS, shade(p, 1.06));
+    const open = v.parked ? clamp((clock - v.parked.t) / 1.2, 0, 1) * (v.packing ? 1 - clamp((clock - v.packing - 2) / 1.5, 0, 1) : 1) : 0;
+    const tent = bug ? '#d5503c' : '#6f8f5a', l0 = -hl + 0.6, l1 = hl - 2.0, base = box(l0, l1, -(hw - 0.3), hw - 0.3);
+    solid(b, base, 1.5, base, 1.74, '#3a3f3a', shade(tent, 0.9));
+    if (open > 0.05) {
+      const s = v.side, w0 = -s * (hw - 0.3), w1 = s * (hw - 0.3 + 1.3 * open), ridge = (w0 + w1) / 2, zt = 1.74 + 1.15 * open;
+      poly([RP(b, l0, w0, 1.74), RP(b, l1, w0, 1.74), RP(b, l1, ridge, zt), RP(b, l0, ridge, zt)], shade(tent, 0.82), EDGE);
+      poly([RP(b, l0, w1, 1.74), RP(b, l1, w1, 1.74), RP(b, l1, ridge, zt), RP(b, l0, ridge, zt)], tent, EDGE);
+      ctx.strokeStyle = '#c9cdc8'; ctx.lineWidth = Math.max(1.5, cam.s * 0.07);
+      ctx.beginPath(); ctx.moveTo(...RP(b, l0 + 0.5, w1, 1.74)); ctx.lineTo(...RP(b, l0 + 0.5, w1 + s * 0.55, 0)); ctx.stroke(); ctx.lineWidth = 1;
+    }
+  }
+  const part = (r, l, w, hl, hw) => ({ cx: r.cx + Math.cos(r.a) * l - Math.sin(r.a) * w, cy: r.cy + Math.sin(r.a) * l + Math.cos(r.a) * w, hl, hw, a: r.a });
+  const disc = (r, l, w, z, rad, fill) => { const [x, y] = RP(r, l, w, z); ctx.fillStyle = fill; ctx.strokeStyle = EDGE; ctx.beginPath(); ctx.arc(x, y, cam.s * rad, 0, TAU); ctx.fill(); ctx.stroke(); };
+  function drawTractor(r) {
+    const deck = box(-r.hl - 1.4, -r.hl - 0.2, -1.25, 1.25);
+    solid(r, deck, 0.12, deck, 0.42, '#c98f2e', '#f0b83a');                                             // the mower it pulls
+    for (const w of [-1, 1]) {
+      const q = part(r, -0.7, w * 0.95, 0.78, 0.25), o = box(-0.78, 0.78, -0.25, 0.25);
+      solid(q, o, 0, o, 1.55, '#1b1d1f', '#2a2d30');                                                   // tall rear wheels
+      wheel(r, 1.25, w * 0.7);
+    }
+    const hood = hull(0.0, 1.9, 0.5, 0.22), seat = hull(-1.5, 0.2, 0.72, 0.2);
+    solid(r, seat, 0.6, seat, 1.15, '#356b31', '#3f7a3a');
+    solid(r, hood, 0.6, hood, 1.4, '#3f7a3a', '#56994f');
+    solid(r, hull(-1.4, 0.15, 0.66, 0.2), 1.15, hull(-1.3, -0.05, 0.56, 0.2), 2.35, GLASS, '#f4c531');   // glass cab, yellow roof
+    disc(r, 1.35, 0.28, 1.95, 0.09, '#2a2d30');                                                        // exhaust
+    for (const w of [-1, 1]) poly(quad(r, 1.82, 1.92, w * 0.18, w * 0.42, 1.0), HEAD);
+  }
+  function drawBiker(r, t) {   // a touring motorbike with panniers
+    wheel(r, 0.72, 0); wheel(r, -0.72, 0);
+    for (const w of [-1, 1]) { const o = box(-0.95, -0.4, w * 0.18, w * 0.46); solid(r, o, 0.42, o, 0.92, '#2b2f33', '#3d4247'); }
+    const body = hull(-0.7, 0.75, 0.2, 0.16);
+    solid(r, body, 0.45, body, 1.0, shade(t.paint, 0.85), t.paint);
+    poly(quad(r, 0.78, 0.9, -0.12, 0.12, 0.95), HEAD);
+    disc(r, -0.15, 0, 1.35, 0.3, '#33383d');                                                           // jacket
+    disc(r, 0.12, 0, 1.7, 0.19, '#f6f1df');                                                            // helmet
+  }
+  function drawCyclist(r, t) {
+    const sway = Math.sin(clock * 6 + t.x) * 0.05;
+    ctx.strokeStyle = '#22262a'; ctx.lineCap = 'round';
+    ctx.lineWidth = Math.max(2, cam.s * 0.1);
+    for (const l of [0.5, -0.5]) { ctx.beginPath(); ctx.moveTo(...RP(r, l - 0.3, 0, 0.35)); ctx.lineTo(...RP(r, l + 0.3, 0, 0.35)); ctx.stroke(); }   // wheels, seen from above
+    ctx.strokeStyle = t.paint; ctx.lineWidth = Math.max(1.5, cam.s * 0.06);
+    ctx.beginPath(); ctx.moveTo(...RP(r, -0.5, 0, 0.6)); ctx.lineTo(...RP(r, 0.5, 0, 0.6)); ctx.stroke();                                          // frame
+    ctx.strokeStyle = '#22262a'; ctx.beginPath(); ctx.moveTo(...RP(r, 0.45, -0.25, 1.0)); ctx.lineTo(...RP(r, 0.45, 0.25, 1.0)); ctx.stroke();    // handlebars
+    ctx.lineWidth = 1; ctx.lineCap = 'butt';
+    disc(r, -0.12, sway, 1.2, 0.24, t.jersey);
+    disc(r, 0.16, sway, 1.5, 0.15, '#f4c531');                                                         // helmet
+  }
+  function drawHikers(r, t) {   // two backpackers side by side
+    [[-0.36, '#c8553d', '#3f7fa6'], [0.36, '#5f9070', '#d9a13b']].forEach(([w, pack, shirt], i) => {
+      const bob = Math.sin(clock * 7 + i * 2) * 0.05;
+      disc(r, -0.26, w, 0.95, 0.27, pack);                                                             // the rucksack on the back
+      disc(r, -0.42, w, 1.15, 0.13, shade(pack, 0.8));                                                 // bedroll
+      disc(r, 0.02 + bob, w, 1.0, 0.22, shirt);
+      disc(r, 0.1 + bob, w, 1.5, 0.14, i ? '#e2b48c' : '#b9805a');
+    });
+  }
+  const ICE_SKIN = { paint: '#f2a7c0', extra: 2, side: 1, steer: 0 };
+
+  // ---------- rare vehicles ----------
+  // Now and then something unusual turns up at the gate. Each kind is worth a hundred the first time it is seen,
+  // and the album on the score card remembers them between visits.
+  const RARE_FOR = { van: ['bus'], roofcar: ['beetle', 'woodie'], motorhome: ['firetruck'], combo: ['airstream', 'teardrop'] };
+  const RARE_ALL = ['bus', 'beetle', 'woodie', 'firetruck', 'airstream', 'teardrop'];
+  const spotted = new Set();
+  try { JSON.parse(localStorage.getItem('camp-spotted') || '[]').forEach((k) => spotted.add(k)); } catch (e) { /* private window */ }
+  function spot(key) {
+    if (demo) return;
+    if (!spotted.has(key)) {
+      spotted.add(key); total += 100; sfx.best();
+      try { localStorage.setItem('camp-spotted', JSON.stringify([...spotted])); } catch (e) { /* private window */ }
+    }
+    toastQ.push(L.rareSpot(L.rares[key], spotted.size, RARE_ALL.length));
+  }
+  function rareRows() {
+    const ul = $('rare-list');
+    ul.textContent = ''; $('rare-title').textContent = `${L.rareTitle} ${spotted.size}/${RARE_ALL.length}`;
+    RARE_ALL.forEach((k) => { const li = document.createElement('li'); li.textContent = spotted.has(k) ? L.rares[k] : '???'; if (spotted.has(k)) li.className = 'got'; ul.append(li); });
   }
 
   // ---------- gamepad ----------
@@ -1649,7 +1749,7 @@
     let stay = car;
     if (towing) {   // the caravan stays; its car unhitches and heads into town
       stay = makeVehicle('caravan', 0, 0, car.ph);
-      stay.paint = car.paint; stay.side = car.side;
+      stay.paint = car.paint; stay.side = car.side; stay.rare = car.rare;
       const off = stay.t.L / 2 - stay.t.rear, th = Math.sin(car.ph) >= 0 ? Math.PI / 2 : -Math.PI / 2;
       stay.x = r.cx - Math.cos(car.ph) * off; stay.y = r.cy - Math.sin(car.ph) * off;
       stay.slide = { x: p.x + p.w / 2 - Math.cos(th) * off, y: p.y + p.d / 2 - Math.sin(th) * off, th };
@@ -2174,7 +2274,7 @@
   }
 
   function drawVan(b, v) {
-    const hl = b.hl, hw = b.hw, p = v.paint, up = v.extra === 2 ? SHELL : p;   // some are two-tone
+    const bus = v.rare === 'bus', hl = b.hl, hw = b.hw, p = bus ? '#5fa8a0' : v.paint, up = bus || v.extra === 2 ? SHELL : p;   // some are two-tone
     for (const w of [-1, 1]) { wheel(b, hl - 1.3, w * (hw - 0.1), v.steer); wheel(b, -hl + 1.0, w * (hw - 0.1)); }
     const low = hull(-hl, hl, hw, 0.4, 0.22);
     solid(b, low, 0.3, low, 1.15, shade(p, 0.86), p);
@@ -2190,10 +2290,16 @@
     poly(quad(b, 0.0, 0.7, -0.4, 0.4, 2.31), SKYLIGHT, EDGE);
     if (v.extra === 1) panel(b, -hl + 0.7, -0.4, -0.55, 0.55, 2.31, 3);
     awningCase(b, v, -1.7, 1.0, 2.1);
+    if (bus) {   // a surfboard on the roof
+      const board = hull(-hl + 0.3, hl - 1.5, 0.3, 0.3);
+      solid(b, board.map(([l, w]) => [l, w - 0.5]), 2.32, board.map(([l, w]) => [l, w - 0.5]), 2.42, '#d9a13b', '#f4c531');
+      poly(quad(b, -hl + 0.5, hl - 1.7, -0.54, -0.46, 2.43), '#d5503c');
+    }
   }
 
   function drawMotorhome(b, v) {
-    const hl = b.hl, hw = b.hw, p = v.paint, acc = accentOf(v);
+    const fire = v.rare === 'firetruck', hl = b.hl, hw = b.hw, p = fire ? '#c8372d' : v.paint, acc = fire ? '#f6f1df' : accentOf(v);
+    const SHELL_WALL = fire ? '#c8372d' : '#ddd8c9', SHELL = fire ? '#b3322a' : '#f3f0e6';   // a retired fire engine keeps its red
     for (const w of [-1, 1]) { wheel(b, hl - 1.6, w * (hw - 0.12), v.steer); wheel(b, -hl + 1.6, w * (hw - 0.1)); }
     const cab = hull(hl - 2.4, hl, hw - 0.1, 0.45, 0.1);
     solid(b, cab, 0.3, cab, 1.2, shade(p, 0.86), p);
@@ -2216,11 +2322,18 @@
     const [dx, dy] = RP(b, -hl + 0.7, -v.side * 0.45, 3.0);                                            // satellite dome
     ctx.fillStyle = '#e4e2da'; ctx.strokeStyle = EDGE; ctx.beginPath(); ctx.arc(dx, dy, cam.s * 0.36, 0, TAU); ctx.fill(); ctx.stroke();
     awningCase(b, v, -2.7, 1.3, 2.9);
+    if (fire) {   // the ladder it never gave back
+      ctx.strokeStyle = '#d6dee0'; ctx.lineWidth = Math.max(1.5, cam.s * 0.07);
+      for (const w of [0.5, 0.95]) { ctx.beginPath(); ctx.moveTo(...RP(b, -hl + 0.5, w * -v.side, 3.02)); ctx.lineTo(...RP(b, hl - 2.6, w * -v.side, 3.02)); ctx.stroke(); }
+      for (let l = -hl + 0.7; l < hl - 2.6; l += 0.45) { ctx.beginPath(); ctx.moveTo(...RP(b, l, 0.5 * -v.side, 3.02)); ctx.lineTo(...RP(b, l, 0.95 * -v.side, 3.02)); ctx.stroke(); }
+      ctx.lineWidth = 1;
+    }
   }
 
   // r is the caravan body; its drawbar reaches 1.3 m ahead of it, to the tow ball.
   function drawCaravan(r, v) {
-    const hl = r.hl, hw = r.hw, acc = accentOf(v);
+    const air = v.rare === 'airstream', tear = v.rare === 'teardrop', hl = r.hl, hw = r.hw, acc = air ? '#9aa3a9' : tear ? '#f6f1df' : accentOf(v);
+    const SHELL_WALL = air ? '#c3c9ce' : tear ? '#b98a55' : '#ddd8c9', SHELL = air ? '#e6eaed' : '#f3f0e6';
     ctx.strokeStyle = TRIM; ctx.lineWidth = Math.max(2, cam.s * 0.14); ctx.lineJoin = 'round';         // A-frame
     ctx.beginPath(); ctx.moveTo(...RP(r, hl, -0.7, 0.45)); ctx.lineTo(...RP(r, hl + 1.3, 0, 0.45)); ctx.lineTo(...RP(r, hl, 0.7, 0.45)); ctx.stroke();
     ctx.lineWidth = 1;
@@ -2229,10 +2342,10 @@
     const gas = hull(hl - 0.05, hl + 0.5, 0.6, 0.15);                                                  // gas locker
     solid(r, gas, 0.5, gas, 1.2, '#b4b7b2', '#cfd1cb');
     for (const w of [-1, 1]) wheel(r, -0.3, w * (hw - 0.08));
-    const o = hull(-hl, hl, hw, 0.32, 0.2);
+    const o = tear ? hull(-hl + 1.5, hl, hw - 0.25, 0.75, 0.3) : hull(-hl, hl, hw, air ? 0.95 : 0.32, air ? 0.95 : 0.2);
     solid(r, o, 0.45, o, 1.15, SHELL_WALL);
     solid(r, o, 1.15, o, 1.7, (nl) => (nl > 0.5 ? GLASS : acc));                                       // front window, coloured band
-    solid(r, o, 1.7, hull(-hl + 0.12, hl - 0.5, hw - 0.06, 0.32, 0.2), 2.6, SHELL_WALL, SHELL);
+    solid(r, o, 1.7, tear ? hull(-hl + 1.7, hl - 0.6, hw - 0.4, 0.6, 0.3) : hull(-hl + 0.12, hl - 0.5, hw - 0.06, air ? 0.9 : 0.32, air ? 0.9 : 0.2), 2.6, SHELL_WALL, SHELL);
     for (const w of [-1, 1]) endPanel(r, -1, w * 0.6, w * 0.88, 0.7, 1.08, tailOf(v));
     poly(quad(r, hl - 1.75, hl - 0.95, -0.6, 0.6, 2.61), SKYLIGHT, EDGE);
     const hatch = box(-0.9, -0.3, -0.3, 0.3);
@@ -2249,6 +2362,7 @@
     ctx.globalAlpha = clamp(v.alpha, 0, 1);
     ctx.lineWidth = 1; ctx.lineJoin = 'round';
     if (v.kind === 'van') drawVan(b, v);
+    else if (v.kind === 'roofcar') drawRoofCar(b, v);
     else if (v.kind === 'motorhome') drawMotorhome(b, v);
     else if (v.kind === 'caravan') drawCaravan(b, v);
     else {
@@ -2264,6 +2378,7 @@
 
   // Once parked, a guest rolls out an awning and puts two chairs under it.
   function drawCampLife(v) {
+    if (v.kind === 'roofcar') return;   // its tent is on the roof
     const r = livingRect(v), z = (v.t.trailer ? v.t.trailer.z : v.t.z) - 0.2, side = v.side;
     const w0 = side * r.hw, w1 = side * (r.hw + 2.1);
     const open = clamp((clock - v.parked.t) / 0.8, 0, 1) * (v.packing ? 1 - clamp((clock - v.packing - 2.5) / 1.5, 0, 1) : 1), wm = lerp(w0, w1, open);
@@ -2461,7 +2576,7 @@
     set('st-top', n ? stats.top : '–'); set('st-streak', stats.streak); set('st-perfect', stats.perfect); set('st-tips', stats.tips); set('st-errands', stats.errands); set('st-bank', bank); set('st-gnomes', `${found.size}/${GNOMES.length}`);
     set('st-rank', rankLine(now, startBest));
     { let i = 0; while (i < RANKS.length - 1 && now >= RANKS[i + 1]) i++; set('st-boss', over === true ? L.boss.over[i] : ''); }
-    boardFor(over); clubRows(); runRows(now);
+    boardFor(over); clubRows(); runRows(now); rareRows();
     const ids = Object.keys(L.badges), list = $('bd-list');
     set('bd-title', `${L.badgesTitle} ${ids.filter((id) => earned.has(id)).length}/${ids.length}`);
     list.textContent = '';
