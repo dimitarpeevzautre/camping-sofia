@@ -37,6 +37,15 @@
       bump: (c) => `Bump: −${c}`,
       gaveUp: 'That guest got tired of waiting and left. One ♥ gone',
       parked: (p, a, s, m) => `+${p}: accuracy ${a}, speed ${s}${m > 1 ? `, ×${m}` : ''}`,
+      badge: (n) => `Badge earned: ${n}`, badgesTitle: 'Badges', nightBonus: 'Night shift +25%',
+      mine: (b, r, n, of) => `Your best: ${b} · ${r} · ${n}/${of} badges`,
+      badges: {
+        first: 'Welcome: park your first guest', perfect: 'Bullseye: a perfect parking', caravan: 'Reverse gear: park a caravan cleanly',
+        streak5: 'On a roll: five clean parkings in a row', streak9: 'Unstoppable: reach the ×3 multiplier', night: 'Night owl: a clean parking after dark',
+        vip: 'Red carpet: a perfect parking for a VIP', tips: 'Pocket money: ten tips in one shift', gentle: 'Gentle driver: eight guests without a bump or a scare',
+        ten: 'Full house: ten guests in one shift', twenty: 'Rush hour hero: twenty guests in one shift',
+        host: 'Camp host: 1500 points in one shift', legend: 'Legend of Vitosha: 8000 points in one shift',
+      },
       honk: 'Beep beep!', vip: 'A VIP guest: double points, less patience',
       ranks: ['Trainee', 'Gate keeper', 'Camp host', 'Site warden', 'Camp manager', 'Legend of Vitosha'],
       rankNext: (n, r) => `${n} more for ${r}`, short: (n) => `only ${n} short of your best`,
@@ -61,6 +70,15 @@
       bump: (c) => `Удар: −${c}`,
       gaveUp: 'Гостът се отказа да чака и си тръгна. Минус едно ♥',
       parked: (p, a, s, m) => `+${p}: точност ${a}, бързина ${s}${m > 1 ? `, ×${m}` : ''}`,
+      badge: (n) => `Спечелена значка: ${n}`, badgesTitle: 'Значки', nightBonus: 'Нощна смяна +25%',
+      mine: (b, r, n, of) => `Вашият рекорд: ${b} · ${r} · ${n}/${of} значки`,
+      badges: {
+        first: 'Добре дошли: паркирайте първия си гост', perfect: 'В десетката: перфектно паркиране', caravan: 'На заден: паркирайте каравана чисто',
+        streak5: 'В серия: пет чисти паркирания поред', streak9: 'Неудържим: стигнете множител ×3', night: 'Нощна птица: чисто паркиране по тъмно',
+        vip: 'Червен килим: перфектно паркиране за VIP гост', tips: 'Джобни: десет бакшиша в една смяна', gentle: 'Внимателен шофьор: осем гости без удар и без стреснат човек',
+        ten: 'Пълен къмпинг: десет гости в една смяна', twenty: 'Герой на пиковия час: двайсет гости в една смяна',
+        host: 'Домакин на къмпинга: 1500 точки в една смяна', legend: 'Легенда на Витоша: 8000 точки в една смяна',
+      },
       honk: 'Бийп-бийп!', vip: 'VIP гост: двойни точки, по-малко търпение',
       ranks: ['Стажант', 'Пазач на портала', 'Домакин на къмпинга', 'Управител на терена', 'Директор на къмпинга', 'Легенда на Витоша'],
       rankNext: (n, r) => `още ${n} до „${r}“`, short: (n) => `само ${n} до рекорда ви`,
@@ -407,6 +425,7 @@
       best = now; try { localStorage.setItem('camp-best-score', String(best)); } catch (e) { /* private window */ }
       if (startBest > 0 && !newBestSaid) { newBestSaid = true; toast(L.newBest, 2600); sfx.best(); }
     }
+    if (mode === 'play') scoreBadges(now);
     $('hud-lives').textContent = '♥'.repeat(Math.max(0, lives)) + '♡'.repeat(3 - Math.max(0, lives));
     const m = 1 + Math.min(streak, 8) * 0.25, combo = $('hud-combo'), was = combo.textContent;   // what the next clean parking is worth
     combo.textContent = streak ? `×${m}` : '';
@@ -483,7 +502,7 @@
     for (let tries = 0; tries < 30; tries++) {
       const r = roads[(Math.random() * roads.length) | 0], x = r.x + 1.5 + Math.random() * (r.w - 3), y = r.y + 1.5 + Math.random() * (r.h - 3);
       if (y > 70 || tips.some((t) => Math.hypot(t.x - x, t.y - y) < 14) || (car && Math.hypot(car.x - x, car.y - y) < 12)) continue;
-      tips.push({ x, y, born: clock }); return;
+      tips.push({ x, y, born: clock, time: Math.random() < 0.25 }); return;
     }
   }
   function stepTips() {
@@ -493,7 +512,10 @@
     for (let i = tips.length - 1; i >= 0; i--) {
       const t = tips[i];
       if (!rects.some((r) => rectCircle(r, t.x, t.y, 0.9))) continue;
-      tips.splice(i, 1); total += 25; stats.tips++; sfx.coin(); pop(t.x, t.y, '+25', '#f4c531', 24); hud();
+      tips.splice(i, 1); stats.tips++; sfx.coin();
+      if (t.time) { patience = Math.min(patienceMax, patience + 8); pop(t.x, t.y, '+8 s', '#6fb6d9', 24); }   // a blue one buys time
+      else { total += 25; pop(t.x, t.y, '+25', '#f4c531', 24); }
+      hud();
     }
   }
   function drawTips() {
@@ -501,7 +523,7 @@
       const [x, y] = P(t.x, t.y, 0.6 + 0.25 * Math.sin(clock * 3 + t.x)), [sx, sy] = P(t.x, t.y), k = cam.s;
       const w = Math.abs(Math.cos(clock * 2.4 + t.y)) * 0.75 + 0.2, a = clamp((clock - t.born) * 2, 0, 1);
       ctx.globalAlpha = 0.25 * a; ctx.fillStyle = '#12211a'; ctx.beginPath(); ctx.ellipse(sx, sy, 0.7 * k, 0.4 * k, 0, 0, TAU); ctx.fill();
-      ctx.globalAlpha = a; ctx.fillStyle = '#f4c531'; ctx.strokeStyle = '#12211a'; ctx.lineWidth = 2.5;
+      ctx.globalAlpha = a; ctx.fillStyle = t.time ? '#6fb6d9' : '#f4c531'; ctx.strokeStyle = '#12211a'; ctx.lineWidth = 2.5;
       ctx.beginPath(); ctx.ellipse(x, y, 0.8 * k * w, 0.8 * k, 0, 0, TAU); ctx.fill(); ctx.stroke();
       ctx.fillStyle = '#12211a'; ctx.beginPath(); ctx.ellipse(x, y, 0.3 * k * w, 0.3 * k, 0, 0, TAU); ctx.fill();
       ctx.globalAlpha = 1;
@@ -529,6 +551,42 @@
     if (was > 0 && n > was) parts.push(L.newBest); else if (was > 0 && n < was && was - n <= Math.max(150, was * 0.15)) parts.push(L.short(was - n));
     return parts.join(' · ');
   }
+
+  // ---------- badges ----------
+  // Kept in this browser between visits, so there is always one more to go back for.
+  const earned = new Set();
+  let badgeQ = 0;
+  try { JSON.parse(localStorage.getItem('camp-badges') || '[]').forEach((id) => earned.add(id)); } catch (e) { /* private window */ }
+  function award(id) {
+    if (earned.has(id) || !L.badges[id]) return;
+    earned.add(id);
+    try { localStorage.setItem('camp-badges', JSON.stringify([...earned])); } catch (e) { /* private window */ }
+    badgeQ++;   // several at once take turns
+    setTimeout(() => { badgeQ--; toast(L.badge(L.badges[id].split(':')[0]), 2400); sfx.life(); }, 2200 + (badgeQ - 1) * 2500);
+  }
+  function parkBadges(o) {
+    award('first');
+    if (o.perfect) award('perfect');
+    if (o.clean && o.towing) award('caravan');
+    if (o.clean && o.night) award('night');
+    if (o.perfect && o.vip) award('vip');
+    if (streak >= 5) award('streak5');
+    if (streak >= 9) award('streak9');
+    if (parkedCount >= 10) award('ten');
+    if (parkedCount >= 20) award('twenty');
+    if (parkedCount >= 8 && !stats.bumps && !stats.scares) award('gentle');
+  }
+  function scoreBadges(n) {
+    if (n >= 1500) award('host');
+    if (n >= 8000) award('legend');
+    if (stats.tips >= 10) award('tips');
+  }
+  function mine() {   // on the start card: what there is to beat
+    let i = 0;
+    while (i < RANKS.length - 1 && best >= RANKS[i + 1]) i++;
+    $('mine').textContent = best > 0 ? L.mine(best, L.ranks[i], earned.size, Object.keys(L.badges).length) : '';
+  }
+  mine();
 
   // ---------- simulation ----------
   function step(dt) {
@@ -657,17 +715,20 @@
     // Clean parkings in a row multiply the points: x1, x1.25 ... up to x3. A bump or a crooked parking starts again.
     const clean = bumps === 0 && accuracy >= 60, perfect = clean && accuracy >= 90;
     streak = clean ? streak + 1 : 0;
-    const mult = 1 + Math.min(Math.max(streak - 1, 0), 8) * 0.25, pts = Math.round((accuracy + speed) * mult * (car.vip ? 2 : 1)) + (perfect ? 50 : 0);
+    const mult = 1 + Math.min(Math.max(streak - 1, 0), 8) * 0.25, dark = night > 0.6, pts = Math.round((accuracy + speed) * mult * (car.vip ? 2 : 1) * (dark ? 1.25 : 1)) + (perfect ? 50 : 0);
     total += pts; stats.streak = Math.max(stats.streak, streak); if (perfect) stats.perfect++;
     pop(r.cx, r.cy, `+${pts}`, '#f4c531', 40);
     if (perfect) { pop(r.cx, r.cy, L.perfect, '#f6f1df', 26, 40); confetti(r.cx, r.cy); }
     else if (mult > 1 || car.vip) pop(r.cx, r.cy, `×${mult * (car.vip ? 2 : 1)}`, '#f6f1df', 26, 40);
+    if (dark) pop(r.cx, r.cy, L.nightBonus, '#6fb6d9', 22, 74);
     sfx.park(streak, perfect);
+    const vip = car.vip;
     let back = false;
     if (clean && streak % 5 === 0 && lives < 3) { lives++; back = true; setTimeout(() => sfx.life(), 600); }
     stay.points = pts; stay.stay = 150 + Math.random() * 170;
     target.guest = stay; guests.push(stay);
     parkedCount++; stats.acc += accuracy; stats.spd += speed; stats.top = Math.max(stats.top, stay.points);
+    parkBadges({ clean, perfect, towing, vip, night: dark });
     toast(back ? L.lifeBack : L.parked(pts, accuracy, speed, mult), back ? 2600 : 2000);
     car = null;
     setTimeout(() => { if (mode === 'play' && !car) nextGuest(); }, 1300);
@@ -1424,6 +1485,7 @@
     if (!card.showModal || card.open) return;
     $('card-title').textContent = over === true ? L.overTitle : L.cardTitle;
     $('card-close').textContent = over === true ? L.again : L.close;
+    $('card-again').textContent = L.again; $('card-again').hidden = over !== true;
     const now = score(), top = Math.max(best, now), n = parkedCount, enc = encodeURIComponent;
     const text = L.share(top);
     const set = (id, v) => { $(id).textContent = v; };
@@ -1432,6 +1494,10 @@
     set('st-acc', n ? `${Math.round(stats.acc / n)} / 100` : '–'); set('st-spd', n ? `${Math.round(stats.spd / n)} / 100` : '–');
     set('st-top', n ? stats.top : '–'); set('st-streak', stats.streak); set('st-perfect', stats.perfect); set('st-tips', stats.tips);
     set('st-rank', rankLine(now, startBest));
+    const ids = Object.keys(L.badges), list = $('bd-list');
+    set('bd-title', `${L.badgesTitle} ${ids.filter((id) => earned.has(id)).length}/${ids.length}`);
+    list.textContent = '';
+    ids.forEach((id) => { const li = document.createElement('li'); li.textContent = L.badges[id]; if (earned.has(id)) li.className = 'got'; list.append(li); });
     set('st-bumps', stats.bumps); set('st-scares', stats.scares); set('st-gaveup', stats.gaveUp);
     set('st-time', `${Math.floor(stats.time / 60)}:${String(Math.floor(stats.time % 60)).padStart(2, '0')}`);
     $('sh-fb').href = `https://www.facebook.com/sharer/sharer.php?u=${enc(SITE)}`;
@@ -1463,10 +1529,11 @@
     };
     paused = true; for (const k in keys) keys[k] = false;
     card.showModal();
-    if (over === true) $('card-close').focus();
+    if (over === true) { $('card-again').focus(); card.scrollTop = 0; }
   }
   $('score-btn').addEventListener('click', () => openCard());
   $('card-close').addEventListener('click', () => card.close());
+  $('card-again').addEventListener('click', () => card.close());
   card.addEventListener('click', (e) => { if (e.target === card) card.close(); });   // a click on the backdrop
   card.addEventListener('close', () => { paused = false; last = performance.now(); cv.focus(); if (mode === 'over') start(); });
 
@@ -1484,5 +1551,5 @@
   requestAnimationFrame(tick);
 
   // For automated checks only: /?debug exposes the state.
-  if (location.search.includes('debug')) window.camp = { get car() { return car; }, get target() { return target; }, get parked() { return parkedCount; }, get score() { return score(); }, get night() { return night; }, people, skids, packUp, guests, pitches, stats, rectsOf, rectRect, keys, blocked, livingRect, corners, setClock: (t) => { clock = t; }, setPatience: (t) => { patience = t; }, get lives() { return lives; }, tips, honk, rankLine, get streak() { return streak; }, get mode() { return mode; }, get patienceMax() { return patienceMax; }, pops, bits, give: (kind) => { car = makeVehicle(kind, 61.8, 80.5, -Math.PI / 2); car.born = -9; }, next: () => { car = null; nextGuest(); } };
+  if (location.search.includes('debug')) window.camp = { get car() { return car; }, get target() { return target; }, get parked() { return parkedCount; }, get score() { return score(); }, get night() { return night; }, people, skids, packUp, guests, pitches, stats, rectsOf, rectRect, keys, blocked, livingRect, corners, setClock: (t) => { clock = t; }, setPatience: (t) => { patience = t; }, get lives() { return lives; }, earned, award, tips, honk, rankLine, get streak() { return streak; }, get mode() { return mode; }, get patienceMax() { return patienceMax; }, pops, bits, give: (kind) => { car = makeVehicle(kind, 61.8, 80.5, -Math.PI / 2); car.born = -9; }, next: () => { car = null; nextGuest(); } };
 })();
