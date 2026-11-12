@@ -48,6 +48,7 @@
         wash: 'Squeaky clean: roll slowly through the wash bay',
         collector: 'Spotter: see every rare vehicle',
         pilot: 'Barnstormer: find every one of the pilot\'s secrets',
+        hedgehog: 'After you: wait for the hedgehog to cross',
         goals: 'To-do list: all three goals in one shift',
         errand: 'Room service: five errands in one shift', dog: 'Sausage hero: catch the dog that took the sausages', host: 'Camp host: 1500 points in one shift', legend: 'Legend of Vitosha: 8000 points in one shift',
       },
@@ -134,6 +135,7 @@
       tricks: { circle: 'A full circle', eight: 'A figure of eight', pond: 'A low pass over the pond', flypast: 'A flypast down the main road', lap: 'A lap round the whole camp', night: 'A night flight', balloon: 'A wave to the balloon' },
       sayPlane: ['Wow!', 'Again! Again!', 'Look, a plane!', 'Do another one!'], sayKid: ['A plane!', 'Hello up there!', 'Look! Look!'],
       sayArrive: ['What a lovely spot!', 'Finally, holidays.', 'Kettle on!', 'Thank you, that was easy.', 'I can see the mountain from here.', 'Who has the tent pegs?'],
+      kind: 'Kind driver',
       honk: 'Beep beep!', vip: 'A VIP guest: double points, less patience',
       ranks: ['Trainee', 'Gate keeper', 'Camp host', 'Site warden', 'Camp manager', 'Legend of Vitosha'],
       rankNext: (n, r) => `${n} more for ${r}`, short: (n) => `only ${n} short of your best`,
@@ -168,6 +170,7 @@
         gnomes: 'Ловец на джуджета: намерете десетте скрити джуджета', driftpark: 'Паркиране с ръчна: влезте с плъзгане в чисто паркиране',
         wash: 'Блести от чистота: минете бавно през автомивката',
         pilot: 'Въздушен ас: открийте всички тайни на пилота', collector: 'Наблюдател: вижте всички редки возила',
+        hedgehog: 'След вас: изчакайте таралежа да пресече',
         goals: 'По списък: и трите цели в една смяна',
         errand: 'Рум сървис: пет поръчки в една смяна', dog: 'Герой на наденичките: хванете кучето крадец', host: 'Домакин на къмпинга: 1500 точки в една смяна', legend: 'Легенда на Витоша: 8000 точки в една смяна',
       },
@@ -254,6 +257,7 @@
       tricks: { circle: 'Пълен кръг', eight: 'Осморка', pond: 'Нисък полет над езерцето', flypast: 'Прелитане над главната алея', lap: 'Обиколка на целия къмпинг', night: 'Нощен полет', balloon: 'Поздрав към балона' },
       sayPlane: ['Уау!', 'Пак! Пак!', 'Вижте, самолет!', 'Още веднъж!'], sayKid: ['Самолет!', 'Ехо, там горе!', 'Виж! Виж!'],
       sayArrive: ['Какво хубаво място!', 'Най-после почивка.', 'Слагам кафето!', 'Благодаря, лесно беше.', 'Оттук се вижда планината.', 'У кого са колчетата?'],
+      kind: 'Мил шофьор',
       honk: 'Бийп-бийп!', vip: 'VIP гост: двойни точки, по-малко търпение',
       ranks: ['Стажант', 'Пазач на портала', 'Домакин на къмпинга', 'Управител на терена', 'Директор на къмпинга', 'Легенда на Витоша'],
       rankNext: (n, r) => `още ${n} до „${r}“`, short: (n) => `само ${n} до рекорда ви`,
@@ -1687,7 +1691,7 @@
     tents.push({ x, y, a, c, born: clock, small: true }); nextTent = clock + 90 + Math.random() * 60;
   }
   function stepAmbient(dt) {
-    stepTents(); stepBalloon(dt);
+    stepTents(); stepBalloon(dt); stepHog(dt);
     for (const d of ducks) d.a += d.s * dt;
     if (!flock && clock > nextFlock) { const fromLeft = Math.random() < 0.5; flock = { x: fromLeft ? -12 : W + 12, y: 10 + Math.random() * (H - 30), vx: (fromLeft ? 1 : -1) * 7, vy: 1.2 - Math.random() * 2.4 }; }
     if (flock) { flock.x += flock.vx * dt; flock.y += flock.vy * dt; if (flock.x < -20 || flock.x > W + 20) { flock = null; nextFlock = clock + 45 + Math.random() * 50; } }
@@ -1896,7 +1900,41 @@
     ctx.fillStyle = '#3f7fa6'; ctx.strokeStyle = 'rgba(18,33,26,0.35)'; ctx.lineWidth = 1; ctx.beginPath(); ctx.arc(bx, by, 0.26 * k, 0, TAU); ctx.fill(); ctx.stroke();
     ctx.fillStyle = '#6e4a2c'; ctx.beginPath(); ctx.arc(hx, hy, 0.17 * k, 0, TAU); ctx.fill();
   }
+  // After dark a hedgehog sometimes sets out across the lane ahead of the driver. Nothing happens if it is driven
+  // past, but waiting for it to get across is noticed.
+  let hog = null, nextHog = 40;
+  function stepHog(dt) {
+    if (!hog) {
+      if (night < 0.6 || clock < nextHog || !car || demo || Math.abs(car.v) < 1.5) return;
+      const band = LANE_BAND.find(([a, b]) => car.y > a && car.y < b);
+      if (!band || Math.abs(Math.cos(car.th)) < 0.8) { nextHog = clock + 3; return; }   // only on a lane, and driving along it
+      const dir = Math.sign(Math.cos(car.th)), x = car.x + dir * 13, up = Math.random() < 0.5;
+      if (x < 16 || x > 104 || (x > 54 && x < 66)) { nextHog = clock + 3; return; }
+      hog = { x, y: up ? band[1] + 0.6 : band[0] - 0.6, vy: up ? -0.55 : 0.55, end: up ? band[0] - 0.8 : band[1] + 0.8, waited: 0, curl: 0 };
+      return;
+    }
+    const h = hog, near = car ? Math.hypot(car.x - h.x, car.y - h.y) : 99;
+    h.curl = near < 2.2 ? 1.5 : Math.max(0, h.curl - dt);                    // it rolls up if the vehicle is on top of it
+    if (h.curl <= 0) h.y += h.vy * dt;
+    if (car && near < 12 && Math.abs(car.v) < 0.6) h.waited += dt;
+    if ((h.vy < 0 && h.y <= h.end) || (h.vy > 0 && h.y >= h.end)) {
+      if (h.waited > 4 && near < 14 && mode === 'play') { total += 40; pop(h.x, h.y, `${L.kind} +40`, '#8fd18a', 24); award('hedgehog'); sfx.life(); hud(); }
+      hog = null; nextHog = clock + 80 + Math.random() * 60;
+    }
+  }
+  function drawHog() {
+    if (!hog) return;
+    const [x, y] = P(hog.x, hog.y, 0.1), k = cam.s, a = hog.vy < 0 ? -Math.PI / 2 : Math.PI / 2, wob = hog.curl > 0 ? 0 : Math.sin(clock * 9) * 0.06;
+    if (x < -30 || x > vw + 30 || y < -30 || y > vh + 30) return;
+    ctx.save(); ctx.translate(x, y); ctx.rotate(a + wob);
+    ctx.fillStyle = '#6b4a2f'; ctx.strokeStyle = '#3a2f25'; ctx.lineWidth = 1;
+    ctx.beginPath(); ctx.ellipse(0, 0, (hog.curl > 0 ? 0.3 : 0.36) * k, 0.26 * k, 0, 0, TAU); ctx.fill();
+    for (let i = 0; i < 10; i++) { const q = (i / 10) * TAU; ctx.beginPath(); ctx.moveTo(Math.cos(q) * 0.2 * k, Math.sin(q) * 0.16 * k); ctx.lineTo(Math.cos(q) * 0.42 * k, Math.sin(q) * 0.32 * k); ctx.stroke(); }   // spines
+    if (hog.curl <= 0) { ctx.fillStyle = '#d9bd9a'; ctx.beginPath(); ctx.arc(0.36 * k, 0, 0.11 * k, 0, TAU); ctx.fill(); ctx.fillStyle = '#12211a'; ctx.beginPath(); ctx.arc(0.45 * k, 0, 0.04 * k, 0, TAU); ctx.fill(); }
+    ctx.restore();
+  }
   function drawAmbient(ground) {   // ground: the ducks, drawn with the world; otherwise what is in the air
+    if (ground) drawHog();
     if (ground) drawAngler(); else drawKite();
     if (!ground) drawMist();
     if (!ground) { drawStork(); drawBalloon(); }
@@ -3373,5 +3411,5 @@
   setTimeout(beginDemo, 2500);
 
   // For automated checks only: /?debug exposes the state.
-  if (location.search.includes('debug')) window.camp = { get car() { return car; }, get target() { return target; }, get parked() { return parkedCount; }, get score() { return score(); }, get night() { return night; }, people, skids, packUp, guests, pitches, stats, rectsOf, rectRect, keys, blocked, livingRect, corners, setClock: (t) => { clock = t; }, setPatience: (t) => { patience = t; }, get lives() { return lives; }, postcard, holdNight: (v) => { nightLock = v; }, get balloon() { return balloon; }, callBalloon: () => { nextBalloon = 0; }, get plane() { return plane; }, tricks, get demo() { return demo; }, roamers, respect, owned, get bank() { return bank; }, setBank: (n) => { bank = n; saveShop(); shop(); }, props, get goals() { return goals; }, get ice() { return ice; }, found, GNOMES, get thief() { return thief; }, get rain() { return rain; }, setNext: (o) => { if (o.rain !== undefined) nextRain = o.rain; if (o.thief !== undefined) nextThief = o.thief; }, get job() { return job; }, setNextJob: (t) => { nextJob = t; }, tuneRadio, get station() { return station; }, get heat() { return heat; }, get warden() { return warden; }, trouble, boost, chats, takeBoost, say, addTip, earned, award, tips, honk, rankLine, get streak() { return streak; }, get mode() { return mode; }, get patienceMax() { return patienceMax; }, pops, bits, give: (kind) => { car = makeVehicle(kind, 61.8, 80.5, -Math.PI / 2); car.born = -9; }, next: () => { car = null; nextGuest(); } };
+  if (location.search.includes('debug')) window.camp = { get car() { return car; }, get target() { return target; }, get parked() { return parkedCount; }, get score() { return score(); }, get night() { return night; }, people, skids, packUp, guests, pitches, stats, rectsOf, rectRect, keys, blocked, livingRect, corners, setClock: (t) => { clock = t; }, setPatience: (t) => { patience = t; }, get lives() { return lives; }, get hog() { return hog; }, callHog: () => { nextHog = 0; }, postcard, holdNight: (v) => { nightLock = v; }, get balloon() { return balloon; }, callBalloon: () => { nextBalloon = 0; }, get plane() { return plane; }, tricks, get demo() { return demo; }, roamers, respect, owned, get bank() { return bank; }, setBank: (n) => { bank = n; saveShop(); shop(); }, props, get goals() { return goals; }, get ice() { return ice; }, found, GNOMES, get thief() { return thief; }, get rain() { return rain; }, setNext: (o) => { if (o.rain !== undefined) nextRain = o.rain; if (o.thief !== undefined) nextThief = o.thief; }, get job() { return job; }, setNextJob: (t) => { nextJob = t; }, tuneRadio, get station() { return station; }, get heat() { return heat; }, get warden() { return warden; }, trouble, boost, chats, takeBoost, say, addTip, earned, award, tips, honk, rankLine, get streak() { return streak; }, get mode() { return mode; }, get patienceMax() { return patienceMax; }, pops, bits, give: (kind) => { car = makeVehicle(kind, 61.8, 80.5, -Math.PI / 2); car.born = -9; }, next: () => { car = null; nextGuest(); } };
 })();
