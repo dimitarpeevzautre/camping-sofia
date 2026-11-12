@@ -75,6 +75,14 @@
         ['Your cat is on my roof again.', 'She likes the solar panel.', 'So do I. It was working.'],
         ['Seven Rila Lakes tomorrow?', 'Only if you drive.', 'Only if you park.'],
         ['Lovely evening.', 'Smells like someone is grilling.', 'That is us. Come over.'],
+        ['Is the wifi working for you?', 'Only next to the wash house.', 'So that is why there is a queue.'],
+        ['We are off to Rila Monastery.', 'Take a jumper. And an empty stomach.', 'For the doughnuts?', 'For the doughnuts.'],
+        ['Nice van. What year?', 'Ninety-four. Same as my knees.', 'Both still going.'],
+        ['Did the ice-cream van come by?', 'Twice. Slowly.', 'It only has one speed.'],
+        ['Who took my folding chair?', 'The wind. It went towards the pond.', 'Again?'],
+        ['Is it far to Vitosha Boulevard?', 'Twenty minutes by metro.', 'And back?', 'Depends on the shopska salad.'],
+        ['The new gate keeper is quick.', 'Quick, yes. Careful, we will see.', 'I moved my bins.'],
+        ['Any plans for tonight?', 'Fire, guitar, three chords.', 'Which three?', 'Whichever turn up.'],
       ],
       lbEmpty: 'Nobody yet. Be the first', lbFail: 'The scoreboard cannot be reached right now', lbNote: 'Only your nickname and score are stored.',
       lbPlace: (n, w, a) => `${n}: #${w} this week, #${a} of all time`, lead: (n, s) => `This week\'s best: ${n} with ${s}`,
@@ -104,6 +112,11 @@
       coins: (n) => `${n} coins`,
       perks: { magnet: 'Magnet: tips jump to you from further away', tyres: 'Rain tyres: no slipping in the wet', banitsa: 'Banitsa for the warden: fines are halved',
         calm: 'Camp brochure: guests wait 15% longer', heart: 'Fourth heart: one more guest may give up' },
+      sayRain: ['Rain! Get the washing in!', 'Typical.', 'The awning! The awning!', 'Lovely weather for ducks.'],
+      sayDog: ['My sausages!', 'Stop that dog!', 'That was dinner!'],
+      sayCone: ['Oi! Those were in a line!', 'Nice shot.', 'Somebody tell the warden.'],
+      sayFine: ['Told you so.', 'Saw that coming.', 'He never misses.'],
+      sayIce: ['Ice cream!', 'Two scoops, please!', 'Wait for me!'],
       honk: 'Beep beep!', vip: 'A VIP guest: double points, less patience',
       ranks: ['Trainee', 'Gate keeper', 'Camp host', 'Site warden', 'Camp manager', 'Legend of Vitosha'],
       rankNext: (n, r) => `${n} more for ${r}`, short: (n) => `only ${n} short of your best`,
@@ -166,6 +179,14 @@
         ['Котката ви пак е на покрива ми.', 'Харесва ѝ соларният панел.', 'И на мен. Преди работеше.'],
         ['Утре на Седемте рилски езера?', 'Само ако ти караш.', 'Само ако ти паркираш.'],
         ['Хубава вечер.', 'Мирише на скара.', 'Ние сме. Елате.'],
+        ['При вас има ли уайфай?', 'Само до банята.', 'Затова значи има опашка.'],
+        ['Тръгваме за Рилския манастир.', 'Вземете жилетка. И празен стомах.', 'За мекиците ли?', 'За мекиците.'],
+        ['Хубав ван. Коя година е?', 'Деветдесет и четвърта. Като коленете ми.', 'И двете още вървят.'],
+        ['Мина ли колата за сладолед?', 'Два пъти. Бавно.', 'Тя има само една скорост.'],
+        ['Кой ми взе сгъваемия стол?', 'Вятърът. Замина към езерцето.', 'Пак ли?'],
+        ['Далече ли е булевард „Витоша“?', 'Двайсет минути с метрото.', 'А на връщане?', 'Зависи от шопската салата.'],
+        ['Новият на портала е бърз.', 'Бърз, да. Внимателен, ще видим.', 'Аз си преместих кофите.'],
+        ['Планове за довечера?', 'Огън, китара, три акорда.', 'Кои три?', 'Които дойдат.'],
       ],
       lbEmpty: 'Още няма никого. Бъдете първи', lbFail: 'Класацията е недостъпна в момента', lbNote: 'Пазим само прякора и резултата ви.',
       lbPlace: (n, w, a) => `${n}: №${w} тази седмица, №${a} за всички времена`, lead: (n, s) => `Най-добър тази седмица: ${n} с ${s}`,
@@ -195,6 +216,11 @@
       coins: (n) => `${n} монети`,
       perks: { magnet: 'Магнит: бакшишите скачат към вас отдалеч', tyres: 'Гуми за дъжд: без хлъзгане на мокро', banitsa: 'Баница за управителя: глобите са наполовина',
         calm: 'Брошура на къмпинга: гостите чакат с 15% повече', heart: 'Четвърто сърце: още един гост може да се откаже' },
+      sayRain: ['Дъжд! Прибирайте прането!', 'Как иначе.', 'Тентата! Тентата!', 'Време за патици.'],
+      sayDog: ['Наденичките ми!', 'Спрете това куче!', 'Това беше вечерята!'],
+      sayCone: ['Ей! Те бяха подредени!', 'Добър удар.', 'Някой да каже на управителя.'],
+      sayFine: ['Казах ти.', 'Очакваше се.', 'Той не пропуска.'],
+      sayIce: ['Сладолед!', 'Две топки, моля!', 'Чакайте ме!'],
       honk: 'Бийп-бийп!', vip: 'VIP гост: двойни точки, по-малко търпение',
       ranks: ['Стажант', 'Пазач на портала', 'Домакин на къмпинга', 'Управител на терена', 'Директор на къмпинга', 'Легенда на Витоша'],
       rankNext: (n, r) => `още ${n} до „${r}“`, short: (n) => `само ${n} до рекорда ви`,
@@ -818,6 +844,9 @@
       }
     }
   }
+  function chorus(lines, n) {   // a few campers, wherever they are, say something
+    people.filter((o) => !o.hidden && o.kind !== 'pet' && !o.chat).sort(() => Math.random() - 0.5).slice(0, n).forEach((o) => say(o, pick(lines), 3));
+  }
   function remark(lines, x, y, reach = 12) {   // the nearest camper in earshot says something
     let who = null, best = reach;
     for (const o of people) {
@@ -897,7 +926,7 @@
       const fine = Math.round((40 + 30 * Math.ceil(heat)) * (owned.has('banitsa') ? 0.5 : 1));
       damage += fine; streak = 0; heat = 0; heatStars(); stats.fines++; car.v = 0;
       w.direct = false; w.to = nearNode(w.x, w.y);
-      sfx.lost(); pop(car.x, car.y, `−${fine}`, '#e2553d', 30); toast(L.fined(fine), 2600); banner(L.bFined); boss('fine'); hud();
+      sfx.lost(); pop(car.x, car.y, `−${fine}`, '#e2553d', 30); toast(L.fined(fine), 2600); banner(L.bFined); boss('fine'); remark(L.sayFine, car.x, car.y, 20); hud();
     }
   }
   function drawWarden() {
@@ -992,7 +1021,7 @@
   function stepWeather(dt) {
     if (clock > nextRain) {
       raining = !raining; nextRain = clock + (raining ? 35 + Math.random() * 20 : 90 + Math.random() * 80);
-      if (raining) { toast(L.rainOn, 2400); thud(0.5); }
+      if (raining) { toast(L.rainOn, 2400); thud(0.5); chorus(L.sayRain, 4); }
     }
     rain = clamp(rain + (raining ? dt : -dt) / 4, 0, 1);
   }
@@ -1025,7 +1054,7 @@
       if (clock < nextThief) return;
       const far = Object.keys(NODES).filter((k) => k !== 'G' && nodeGap(k, car.x, car.y) > 30), at = pick(far.length ? far : ['A']);
       thief = { x: NODES[at][0], y: NODES[at][1], at, to: at, until: clock + 50, th: 0 };
-      toast(L.dogOn, 3200); note(520, 0, 0.09, 'square', 0.1); note(390, 0.12, 0.12, 'square', 0.1);
+      toast(L.dogOn, 3200); remark(L.sayDog, NODES[at][0], NODES[at][1], 60); note(520, 0, 0.09, 'square', 0.1); note(390, 0.12, 0.12, 'square', 0.1);
       return;
     }
     const t = thief;
@@ -1137,6 +1166,7 @@
     if (!held && Math.abs(wrap(Math.atan2(gy, gx) - t.th)) < 0.5) { const sp = Math.min(3.2 * dt, gd); t.x += fx * sp; t.y += fy * sp; }
     if (car && (jingleT -= dt) <= 0 && Math.hypot(car.x - t.x, car.y - t.y) < 28) {
       jingleT = 5;
+      if (Math.random() < 0.5) { const kid = people.find((o) => !o.hidden && o.kind === 'kid' && !o.chat && Math.hypot(o.x - t.x, o.y - t.y) < 16); if (kid) say(kid, pick(L.sayIce)); }
       [12, 16, 19, 16, 12, 19, 24].forEach((n, i) => note(hz(n), i * 0.16, 0.14, 'sine', 0.05));
     }
   }
@@ -1210,6 +1240,7 @@
           total += 5; stats.cones++; trouble(0.12); pop(o.x, o.y, '+5', '#f08a3c', 20);
           strikeN = clock - strikeT < 1.2 ? strikeN + 1 : 1; strikeT = clock;
           if (strikeN === 4) { total += 50; banner(L.bStrike); award('strike'); }
+          if (strikeN === 1) remark(L.sayCone, o.x, o.y, 18);
           hud();
         }
       }
