@@ -2246,7 +2246,7 @@
   addEventListener('resize', resize); resize();
 
   function updateCamera(dt) {
-    const base = clamp(Math.min(vw, vh) / 38, 9.5, 26);
+    const base = clamp(Math.min(vw, vh) / 30, 10.5, 30);   // closer than it used to be: the driving is slow now, and the models deserve a look
     let tx, ty, tz;
     if (mode === 'play' && flying && plane) {
       tx = plane.x + Math.cos(plane.th) * 7; ty = plane.y + Math.sin(plane.th) * 7; tz = 0.66;
