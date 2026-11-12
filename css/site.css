@@ -84,6 +84,8 @@ body.sign-away .sign { opacity: 0; transform: translateY(-150%); pointer-events:
   width: min(430px, calc(100vw - 28px));
   background: var(--paper); border: 3px solid var(--ink); border-radius: 12px; box-shadow: 0 5px 0 var(--ink);
   padding: 20px 22px 18px;
+  /* never taller than the space under the name plate: it scrolls inside instead */
+  max-height: calc(100vh - 170px); max-height: calc(100dvh - 170px); overflow-y: auto; overscroll-behavior: contain;
 }
 .start[hidden] { display: none; }
 .start h2 { margin: 0 0 8px; font-size: 1.6rem; font-weight: 900; line-height: 1.08; letter-spacing: -0.01em; text-wrap: balance; }

@@ -653,7 +653,7 @@
     bumps = 0; holdT = 0;
     // Less time with every guest, more for a long drive and for the awkward vehicles.
     const dist = Math.hypot(target.x + target.w / 2 - car.x, target.y + target.d / 2 - car.y);
-    patienceMax = Math.max(18, 50 - parkedCount * 1.6) + dist * 0.35 + (kind === 'combo' ? 22 : kind === 'motorhome' ? 6 : 0);
+    patienceMax = Math.max(14, 50 - parkedCount * 1.6) + dist * 0.35 + (kind === 'combo' ? 22 : kind === 'motorhome' ? 6 : 0);
     if (car.vip) patienceMax *= 0.85;
     if (owned.has('calm')) patienceMax *= 1.15;
     if (respect[kind] <= -3) patienceMax *= 0.85;
