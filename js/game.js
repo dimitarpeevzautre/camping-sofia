@@ -1538,6 +1538,7 @@
     const rate = out ? clamp(wrap(Math.atan2(H / 2 - p.y, W / 2 - p.x) - p.th) * 2, -1, 1) : p.turn;
     p.th = wrap(p.th + rate * dt); p.bank = lerp(p.bank, rate, 1 - Math.exp(-dt * 4));
     p.x += Math.cos(p.th) * p.v * dt; p.y += Math.sin(p.th) * p.v * dt;
+    if (!reduceMotion && (p.puff = (p.puff || 0) - dt) <= 0) { p.puff = 0.09; (p.trail = p.trail || []).push({ x: p.x - Math.cos(p.th) * 3.2, y: p.y - Math.sin(p.th) * 3.2, t: clock }); if (p.trail.length > 160) p.trail.shift(); }
     // a full circle, and a figure of eight when the next circle goes the other way
     if (Math.abs(rate) > 0.45 && !out) { if (Math.sign(rate) !== Math.sign(p.acc)) p.acc = 0; p.acc += rate * dt; p.straight = 0; }
     else if ((p.straight += dt) > 1.5) p.acc = 0;
@@ -1564,6 +1565,12 @@
     if (!plane) return;
     const p = plane, k = cam.s * 1.15, [gx, gy] = P(p.x, p.y);
     if (gx < -200 || gx > vw + 200 || gy < -200 || gy > vh + 200) return;
+    if (p.trail) for (const q of p.trail) {   // the trail hangs in the air for a dozen seconds and thins out
+      const age = (clock - q.t) / 13;
+      if (age >= 1) continue;
+      const [qx, qy] = P(q.x, q.y);
+      ctx.fillStyle = `rgba(255,255,255,${0.5 * (1 - age)})`; ctx.beginPath(); ctx.arc(qx, qy - cam.s * 1.2, cam.s * (0.28 + age * 0.7), 0, TAU); ctx.fill();
+    }
     const shape = (alpha, dx, dy, shadow) => {
       ctx.save(); ctx.translate(gx + dx, gy + dy); ctx.rotate(p.th); ctx.scale(k, k);
       ctx.lineWidth = 2 / k; ctx.lineJoin = 'round'; ctx.strokeStyle = '#12211a'; ctx.globalAlpha = alpha;
@@ -2184,7 +2191,7 @@
       if (o.hidden) continue;
       const [gx, gy] = P(o.x, o.y);
       if (gx < -30 || gx > vw + 30 || gy < -30 || gy > vh + 30) continue;
-      const u = cam.s * o.size * 1.7, walking   // drawn larger than life, or nobody would see them
+      const u = cam.s * o.size * 1.7 * (o.waveT > clock + 23 ? 1 + 0.25 * Math.abs(Math.sin(clock * 9)) : 1), walking   // drawn larger than life, or nobody would see them
       = o.wait <= 0 || o.kind === 'pet', sw = walking ? Math.sin(o.phase) : 0;
       ctx.fillStyle = 'rgba(15,30,20,0.25)'; ctx.beginPath(); ctx.arc(gx + cam.s * 0.18, gy + cam.s * 0.18, u * 0.24, 0, TAU); ctx.fill();
       ctx.save();
