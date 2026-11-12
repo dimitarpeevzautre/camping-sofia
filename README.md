@@ -50,3 +50,7 @@ A shift ends when three guests have given up waiting. Clean parkings in a row mu
 a perfect one adds 50, a VIP is worth double and parking after dark adds a quarter. Tips on the roads give 25 points
 (yellow) or 8 seconds (blue); H honks people out of the way. Best score, badges and the mute choice are kept in
 `localStorage`. Sound is synthesised with Web Audio, so there are no audio files.
+
+Space is the handbrake: above walking pace it swings the back round (not with a caravan on). A purple token on the
+roads is a boost: speed, a time freeze, double points, self-parking or a shield. Campers from different pitches who
+meet stop for a short scripted chat; the scripts are in the language tables at the top of `js/game.js`.
