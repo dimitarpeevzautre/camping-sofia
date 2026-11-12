@@ -2547,6 +2547,23 @@
       poly([RP(r, l0, w0, z), RP(r, l0 + 0.55, w0, z), RP(r, l0 + 0.55, wm, z - 0.35), RP(r, l0, wm, z - 0.35)], i % 2 ? '#f6f1df' : shade(v.paint === '#f2efe6' ? '#d5503c' : v.paint, 0.95));
     }
     if (open >= 1) for (const l of [-0.7, 0.7]) { const [x, y] = RP(r, l, side * (r.hw + 2.9), 0.3); ctx.fillStyle = '#3a2f25'; ctx.beginPath(); ctx.arc(x, y, cam.s * 0.28, 0, TAU); ctx.fill(); }
+    if (open < 1) return;
+    // and each makes the pitch their own: a table, a washing line or a bicycle leaning against the side
+    const own = (v.extra + v.parked.pitch.n) % 3;
+    if (own === 0) {
+      poly(quad(r, -0.4, 0.4, side * (r.hw + 2.55), side * (r.hw + 3.25), 0.72), '#b98a55', EDGE);
+      const [mx, my] = RP(r, 0.1, side * (r.hw + 2.9), 0.76); ctx.fillStyle = '#d5503c'; ctx.beginPath(); ctx.arc(mx, my, cam.s * 0.1, 0, TAU); ctx.fill();   // a mug left on it
+    } else if (own === 1) {
+      const l = -r.hl - 0.35, wa = -side * (r.hw - 0.2), wb = side * (r.hw + 1.9);
+      ctx.strokeStyle = 'rgba(246,241,223,0.8)'; ctx.lineWidth = 1; ctx.beginPath(); ctx.moveTo(...RP(r, l, wa, 1.7)); ctx.lineTo(...RP(r, l, wb, 1.7)); ctx.stroke();
+      ['#d5503c', '#f6f1df', '#3f7fa6', '#f0b83a', '#f6f1df'].forEach((c, i) => { const w0 = lerp(wa, wb, 0.12 + i * 0.17), w1 = w0 + (wb - wa) * 0.11; poly([RP(r, l, w0, 1.7), RP(r, l, w1, 1.7), RP(r, l, w1, 1.15), RP(r, l, w0, 1.15)], c, EDGE); });
+    } else {
+      const w = -side * (r.hw + 0.28), l0 = r.hl - 2.2;
+      ctx.strokeStyle = '#22262a'; ctx.lineWidth = Math.max(1.5, cam.s * 0.07); ctx.lineCap = 'round';
+      for (const l of [l0, l0 + 1.0]) { ctx.beginPath(); ctx.moveTo(...RP(r, l - 0.3, w, 0.35)); ctx.lineTo(...RP(r, l + 0.3, w, 0.35)); ctx.stroke(); }
+      ctx.strokeStyle = accentOf(v); ctx.beginPath(); ctx.moveTo(...RP(r, l0, w, 0.6)); ctx.lineTo(...RP(r, l0 + 1.0, w, 0.6)); ctx.stroke();
+      ctx.lineWidth = 1; ctx.lineCap = 'butt';
+    }
   }
 
   function drawTree(t, fade) {
