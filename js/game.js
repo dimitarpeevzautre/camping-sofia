@@ -614,6 +614,7 @@
   let mode = 'attract';
   let parkedCount = 0, best = 0, damage = 0, night = 0, bumps = 0, holdT = 0, patience = 1, patienceMax = 60, bumpCool = 0, shake = 0;
   let clock = 0, lastNote = 0, metCaravan = false;
+  let nightLock = null;   // for tests and pictures: ?debug can hold the time of day still without touching the clock
   let rushLeft = 0;   // guests still to come in the current rush hour
   let chill = false;   // a day off: no clock, no lives, nothing recorded
   let total = 0, lives = 3, streak = 0, startBest = 0, newBestSaid = false;
@@ -2023,13 +2024,19 @@
   const flies = Array.from({ length: 46 }, () => ({ x: 4 + Math.random() * (W - 8), y: 4 + Math.random() * (H - 8), p: Math.random() * TAU, s: 0.5 + Math.random() }));
   function drawFlies() {
     if (night < 0.5 || reduceMotion) return;
+    const pts = [], lit = (night - 0.5) * 2;
     for (const f of flies) {
-      const x0 = f.x + Math.sin(clock * 0.4 * f.s + f.p) * 3, y0 = f.y + Math.cos(clock * 0.3 * f.s + f.p * 2) * 3, [x, y] = P(x0, y0, 1.2);
-      if (x < 0 || x > vw || y < 0 || y > vh) continue;
-      const a = (night - 0.5) * 2 * (0.5 + 0.5 * Math.sin(clock * 2.2 * f.s + f.p));
-      ctx.fillStyle = `rgba(214,255,150,${0.22 * a})`; ctx.beginPath(); ctx.arc(x, y, 7, 0, TAU); ctx.fill();
-      ctx.fillStyle = `rgba(236,255,190,${a})`; ctx.beginPath(); ctx.arc(x, y, 1.8, 0, TAU); ctx.fill();
+      if (Math.sin(clock * 2.2 * f.s + f.p) < -0.2) continue;   // each one winks on and off
+      const [x, y] = P(f.x + Math.sin(clock * 0.4 * f.s + f.p) * 3, f.y + Math.cos(clock * 0.3 * f.s + f.p * 2) * 3, 1.2);
+      if (x > 0 && x < vw && y > 0 && y < vh) pts.push(x, y);
     }
+    if (!pts.length) return;
+    ctx.fillStyle = `rgba(214,255,150,${0.16 * lit})`; ctx.beginPath();
+    for (let i = 0; i < pts.length; i += 2) { ctx.moveTo(pts[i] + 7, pts[i + 1]); ctx.arc(pts[i], pts[i + 1], 7, 0, TAU); }
+    ctx.fill();
+    ctx.fillStyle = `rgba(236,255,190,${0.85 * lit})`; ctx.beginPath();
+    for (let i = 0; i < pts.length; i += 2) { ctx.moveTo(pts[i] + 1.8, pts[i + 1]); ctx.arc(pts[i], pts[i + 1], 1.8, 0, TAU); }
+    ctx.fill();
   }
 
   // On a day off, V swaps the vehicle being driven for the next kind, where there is room for it.
@@ -2045,7 +2052,7 @@
   // ---------- simulation ----------
   function step(dt) {
     clock += dt;
-    night = clamp((Math.cos(((clock % 200) / 200) * TAU + Math.PI) - 0.25) / 0.5, 0, 1);   // 0 by day, 1 at night; a day lasts a little over three minutes
+    night = nightLock !== null ? nightLock : clamp((Math.cos(((clock % 200) / 200) * TAU + Math.PI) - 0.25) / 0.5, 0, 1);   // 0 by day, 1 at night; a day lasts a little over three minutes
     for (let i = guests.length - 1; i >= 0; i--) {
       const g = guests[i];
       if (!g.family && clock > g.parked.t + 1) spawnFamily(g);
@@ -3052,15 +3059,27 @@
       };
       for (const l of lamps) { const [x, y] = P(l.x, l.y, 1); glow(x, y, cam.s * 11, 'rgba(255,214,130,A)', 0.5); }
       { const [x, y] = P(fire.x, fire.y); glow(x, y, cam.s * (8 + Math.sin(clock * 11) * 0.6), 'rgba(255,150,60,A)', 0.7); }
-      for (const g of guests) { const r = livingRect(g), [x, y] = P(r.cx, r.cy, 1); glow(x, y, cam.s * 4.5, 'rgba(255,200,120,A)', 0.4 * g.alpha); }
+      const seen = (x, y, m) => x > -m && x < vw + m && y > -m && y < vh + m;
+      for (const g of guests) { const r = livingRect(g), [x, y] = P(r.cx, r.cy, 1); if (seen(x, y, cam.s * 5)) glow(x, y, cam.s * 4.5, 'rgba(255,200,120,A)', 0.4 * g.alpha); }
       // fairy lights along the edge of every awning, and a row of bulbs on the beam over the gate
-      const BULBS = ['rgba(255,236,170,A)', 'rgba(255,150,110,A)', 'rgba(150,210,255,A)'];
+      const BULBS = ['255,236,170', '255,150,110', '150,210,255'], strings = [[], [], []], rad = cam.s * 0.2;
       for (const g of guests) {
         if (!g.parked || g.packing || g.leaving || g.kind === 'roofcar' || clock - g.parked.t < 1.5) continue;
-        const r = livingRect(g), z = (g.t.trailer ? g.t.trailer.z : g.t.z) - 0.55, w = g.side * (r.hw + 2.1);
-        for (let i = 0; i < 7; i++) { const [x, y] = RP(r, -1.6 + i * 0.55, w, z); glow(x, y, cam.s * 0.36, BULBS[i % 3], 0.6 + 0.15 * Math.sin(clock * 2.5 + i * 2 + r.cx)); }
+        const r = livingRect(g), [gx, gy] = P(r.cx, r.cy);
+        if (!seen(gx, gy, cam.s * 6)) continue;
+        const z = (g.t.trailer ? g.t.trailer.z : g.t.z) - 0.55, w = g.side * (r.hw + 2.1);
+        for (let i = 0; i < 7; i++) strings[i % 3].push(RP(r, -1.6 + i * 0.55, w, z));
       }
-      for (let i = 0; i < 11; i++) { const [x, y] = P(55.2 + i * 0.96, 85.8, 3.6); glow(x, y, cam.s * 0.36, BULBS[0], 0.7); }
+      for (let i = 0; i < 11; i++) strings[0].push(P(55.2 + i * 0.96, 85.8, 3.6));   // and the row of bulbs on the beam over the gate
+      strings.forEach((pts, i) => {
+        if (!pts.length) return;
+        ctx.fillStyle = `rgba(${BULBS[i]},${0.3 * night})`; ctx.beginPath();          // a soft halo
+        for (const [x, y] of pts) { ctx.moveTo(x + rad * 2.2, y); ctx.arc(x, y, rad * 2.2, 0, TAU); }
+        ctx.fill();
+        ctx.fillStyle = `rgba(${BULBS[i]},${0.9 * night})`; ctx.beginPath();          // and the bulb itself
+        for (const [x, y] of pts) { ctx.moveTo(x + rad, y); ctx.arc(x, y, rad, 0, TAU); }
+        ctx.fill();
+      });
       if (car && car._lights) {
         for (const [x, y] of car._lights) {
           const a = car.th, len = cam.s * 17;
@@ -3290,5 +3309,5 @@
   setTimeout(beginDemo, 2500);
 
   // For automated checks only: /?debug exposes the state.
-  if (location.search.includes('debug')) window.camp = { get car() { return car; }, get target() { return target; }, get parked() { return parkedCount; }, get score() { return score(); }, get night() { return night; }, people, skids, packUp, guests, pitches, stats, rectsOf, rectRect, keys, blocked, livingRect, corners, setClock: (t) => { clock = t; }, setPatience: (t) => { patience = t; }, get lives() { return lives; }, get balloon() { return balloon; }, callBalloon: () => { nextBalloon = 0; }, get plane() { return plane; }, tricks, get demo() { return demo; }, roamers, respect, owned, get bank() { return bank; }, setBank: (n) => { bank = n; saveShop(); shop(); }, props, get goals() { return goals; }, get ice() { return ice; }, found, GNOMES, get thief() { return thief; }, get rain() { return rain; }, setNext: (o) => { if (o.rain !== undefined) nextRain = o.rain; if (o.thief !== undefined) nextThief = o.thief; }, get job() { return job; }, setNextJob: (t) => { nextJob = t; }, tuneRadio, get station() { return station; }, get heat() { return heat; }, get warden() { return warden; }, trouble, boost, chats, takeBoost, say, addTip, earned, award, tips, honk, rankLine, get streak() { return streak; }, get mode() { return mode; }, get patienceMax() { return patienceMax; }, pops, bits, give: (kind) => { car = makeVehicle(kind, 61.8, 80.5, -Math.PI / 2); car.born = -9; }, next: () => { car = null; nextGuest(); } };
+  if (location.search.includes('debug')) window.camp = { get car() { return car; }, get target() { return target; }, get parked() { return parkedCount; }, get score() { return score(); }, get night() { return night; }, people, skids, packUp, guests, pitches, stats, rectsOf, rectRect, keys, blocked, livingRect, corners, setClock: (t) => { clock = t; }, setPatience: (t) => { patience = t; }, get lives() { return lives; }, holdNight: (v) => { nightLock = v; }, get balloon() { return balloon; }, callBalloon: () => { nextBalloon = 0; }, get plane() { return plane; }, tricks, get demo() { return demo; }, roamers, respect, owned, get bank() { return bank; }, setBank: (n) => { bank = n; saveShop(); shop(); }, props, get goals() { return goals; }, get ice() { return ice; }, found, GNOMES, get thief() { return thief; }, get rain() { return rain; }, setNext: (o) => { if (o.rain !== undefined) nextRain = o.rain; if (o.thief !== undefined) nextThief = o.thief; }, get job() { return job; }, setNextJob: (t) => { nextJob = t; }, tuneRadio, get station() { return station; }, get heat() { return heat; }, get warden() { return warden; }, trouble, boost, chats, takeBoost, say, addTip, earned, award, tips, honk, rankLine, get streak() { return streak; }, get mode() { return mode; }, get patienceMax() { return patienceMax; }, pops, bits, give: (kind) => { car = makeVehicle(kind, 61.8, 80.5, -Math.PI / 2); car.born = -9; }, next: () => { car = null; nextGuest(); } };
 })();
