@@ -46,6 +46,7 @@
         ten: 'Full house: ten guests in one shift', twenty: 'Rush hour hero: twenty guests in one shift',
         gnomes: 'Gnome hunter: find all ten hidden gnomes', driftpark: 'Handbrake parking: slide straight into a clean parking',
         wash: 'Squeaky clean: roll slowly through the wash bay',
+        collector: 'Spotter: see all six rare vehicles',
         pilot: 'Barnstormer: find all four of the pilot\'s secrets',
         goals: 'To-do list: all three goals in one shift',
         errand: 'Room service: five errands in one shift', dog: 'Sausage hero: catch the dog that took the sausages', host: 'Camp host: 1500 points in one shift', legend: 'Legend of Vitosha: 8000 points in one shift',
@@ -165,7 +166,7 @@
         ten: 'Пълен къмпинг: десет гости в една смяна', twenty: 'Герой на пиковия час: двайсет гости в една смяна',
         gnomes: 'Ловец на джуджета: намерете десетте скрити джуджета', driftpark: 'Паркиране с ръчна: влезте с плъзгане в чисто паркиране',
         wash: 'Блести от чистота: минете бавно през автомивката',
-        pilot: 'Въздушен ас: открийте и четирите тайни на пилота',
+        pilot: 'Въздушен ас: открийте и четирите тайни на пилота', collector: 'Наблюдател: вижте и шестте редки возила',
         goals: 'По списък: и трите цели в една смяна',
         errand: 'Рум сървис: пет поръчки в една смяна', dog: 'Герой на наденичките: хванете кучето крадец', host: 'Домакин на къмпинга: 1500 точки в една смяна', legend: 'Легенда на Витоша: 8000 точки в една смяна',
       },
@@ -1484,6 +1485,7 @@
       try { localStorage.setItem('camp-spotted', JSON.stringify([...spotted])); } catch (e) { /* private window */ }
     }
     toastQ.push(L.rareSpot(L.rares[key], spotted.size, RARE_ALL.length));
+    if (spotted.size === RARE_ALL.length) award('collector');
   }
   function rareRows() {
     const ul = $('rare-list');
