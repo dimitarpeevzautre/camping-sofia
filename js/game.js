@@ -2097,19 +2097,23 @@
   const flies = Array.from({ length: 46 }, () => ({ x: 4 + Math.random() * (W - 8), y: 4 + Math.random() * (H - 8), p: Math.random() * TAU, s: 0.5 + Math.random() }));
   function drawFlies() {
     if (night < 0.5 || reduceMotion) return;
-    const pts = [], lit = (night - 0.5) * 2;
+    const groups = [[], []], lit = (night - 0.5) * 2;   // [faint, bright]
     for (const f of flies) {
-      if (Math.sin(clock * 2.2 * f.s + f.p) < -0.2) continue;   // each one winks on and off
+      const glow = Math.sin(clock * 2.2 * f.s + f.p);
+      if (glow < -0.3) continue;
       const [x, y] = P(f.x + Math.sin(clock * 0.4 * f.s + f.p) * 3, f.y + Math.cos(clock * 0.3 * f.s + f.p * 2) * 3, 1.2);
-      if (x > 0 && x < vw && y > 0 && y < vh) pts.push(x, y);
+      if (x > 0 && x < vw && y > 0 && y < vh) groups[glow > 0.35 ? 1 : 0].push(x, y);
     }
-    if (!pts.length) return;
-    ctx.fillStyle = `rgba(214,255,150,${0.16 * lit})`; ctx.beginPath();
-    for (let i = 0; i < pts.length; i += 2) { ctx.moveTo(pts[i] + 7, pts[i + 1]); ctx.arc(pts[i], pts[i + 1], 7, 0, TAU); }
-    ctx.fill();
-    ctx.fillStyle = `rgba(236,255,190,${0.85 * lit})`; ctx.beginPath();
-    for (let i = 0; i < pts.length; i += 2) { ctx.moveTo(pts[i] + 1.8, pts[i + 1]); ctx.arc(pts[i], pts[i + 1], 1.8, 0, TAU); }
-    ctx.fill();
+    groups.forEach((pts, i) => {
+      if (!pts.length) return;
+      const a = i ? 1 : 0.45;
+      ctx.fillStyle = `rgba(214,255,150,${0.16 * lit * a})`; ctx.beginPath();
+      for (let j = 0; j < pts.length; j += 2) { ctx.moveTo(pts[j] + 7, pts[j + 1]); ctx.arc(pts[j], pts[j + 1], 7, 0, TAU); }
+      ctx.fill();
+      ctx.fillStyle = `rgba(236,255,190,${0.85 * lit * a})`; ctx.beginPath();
+      for (let j = 0; j < pts.length; j += 2) { ctx.moveTo(pts[j] + 1.8, pts[j + 1]); ctx.arc(pts[j], pts[j + 1], 1.8, 0, TAU); }
+      ctx.fill();
+    });
   }
 
   // On a day off, V swaps the vehicle being driven for the next kind, where there is room for it.
@@ -3028,6 +3032,14 @@
       ctx.strokeStyle = shade(b.roof, 0.7); ctx.lineWidth = Math.max(1.5, cam.s * 0.1); ctx.beginPath(); ctx.moveTo(...RP(r, -r.hl, 0, b.z + 0.9)); ctx.lineTo(...RP(r, r.hl, 0, b.z + 0.9)); ctx.stroke(); ctx.lineWidth = 1;
       const ch = { cx: r.cx + r.hl * 0.55, cy: r.cy - r.hw * 0.45, hl: 0.45, hw: 0.45, a: 0 }, co = box(-0.45, 0.45, -0.45, 0.45);
       solid(ch, co, b.z + 0.3, co, b.z + 1.5, '#b98a70', '#8f6a55');                                // chimney
+      if (b.label === 'Reception') {   // a cat asleep on the sunny side of the roof
+        const [cx, cy] = RP(r, -r.hl * 0.45, r.hw * 0.55, b.z + 0.45), q = cam.s;
+        ctx.fillStyle = '#c98f4a'; ctx.strokeStyle = 'rgba(18,33,26,0.45)'; ctx.lineWidth = 1;
+        ctx.beginPath(); ctx.ellipse(cx, cy, 0.42 * q, 0.3 * q, 0.3, 0, TAU); ctx.fill(); ctx.stroke();                 // curled up
+        ctx.beginPath(); ctx.arc(cx + 0.3 * q, cy - 0.16 * q, 0.17 * q, 0, TAU); ctx.fill(); ctx.stroke();              // head tucked in
+        ctx.strokeStyle = '#a9722f'; ctx.lineWidth = Math.max(1.5, q * 0.08); ctx.lineCap = 'round';
+        ctx.beginPath(); ctx.arc(cx, cy, 0.5 * q, 1.2, 2.9); ctx.stroke(); ctx.lineCap = 'butt'; ctx.lineWidth = 1;   // tail wrapped round
+      }
       if (b.label === 'Reception') {   // a striped canopy over the door, on the side that faces the road
         for (let i = 0; i < 8; i++) { const w0 = -r.hw * 0.7 + i * (r.hw * 1.4 / 8), w1 = w0 + r.hw * 1.4 / 8; poly([RP(r, -r.hl, w0, 2.5), RP(r, -r.hl, w1, 2.5), RP(r, -r.hl - 1.7, w1, 2.05), RP(r, -r.hl - 1.7, w0, 2.05)], i % 2 ? '#f6f1df' : '#f4c531', EDGE); }
       }
