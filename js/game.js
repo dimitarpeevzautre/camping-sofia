@@ -2649,10 +2649,27 @@
       if (b.label) {
         poly([RP(r, -r.hl, 0, b.z + 0.9), RP(r, r.hl, 0, b.z + 0.9), top[2], top[3]], shade(b.roof, 1.12));     // sunny side of a pitched roof
         poly([RP(r, -r.hl, 0, b.z + 0.9), RP(r, r.hl, 0, b.z + 0.9), top[1], top[0]], shade(b.roof, 0.9));
+        // courses of tiles, a ridge, and the two gable ends closing the roof
+        ctx.strokeStyle = 'rgba(18,33,26,0.16)'; ctx.lineWidth = 1;
+        for (const side of [-1, 1]) for (let i = 1; i < 4; i++) { const w = side * r.hw * (i / 4), z = b.z + 0.9 * (1 - i / 4); ctx.beginPath(); ctx.moveTo(...RP(r, -r.hl, w, z)); ctx.lineTo(...RP(r, r.hl, w, z)); ctx.stroke(); }
+        for (const end of [-1, 1]) poly([RP(r, end * r.hl, -r.hw, b.z), RP(r, end * r.hl, r.hw, b.z), RP(r, end * r.hl, 0, b.z + 0.9)], shade(b.wall, end > 0 ? 0.95 : 0.8));
+        ctx.strokeStyle = shade(b.roof, 0.7); ctx.lineWidth = Math.max(1.5, cam.s * 0.1); ctx.beginPath(); ctx.moveTo(...RP(r, -r.hl, 0, b.z + 0.9)); ctx.lineTo(...RP(r, r.hl, 0, b.z + 0.9)); ctx.stroke(); ctx.lineWidth = 1;
+        const ch = { cx: r.cx + r.hl * 0.55, cy: r.cy - r.hw * 0.45, hl: 0.45, hw: 0.45, a: 0 }, co = box(-0.45, 0.45, -0.45, 0.45);
+        solid(ch, co, b.z + 0.3, co, b.z + 1.5, '#b98a70', '#8f6a55');                                // chimney
+        if (b.label === 'Reception') {   // a striped canopy over the door, on the side that faces the road
+          for (let i = 0; i < 8; i++) { const w0 = -r.hw * 0.7 + i * (r.hw * 1.4 / 8), w1 = w0 + r.hw * 1.4 / 8; poly([RP(r, -r.hl, w0, 2.5), RP(r, -r.hl, w1, 2.5), RP(r, -r.hl - 1.7, w1, 2.05), RP(r, -r.hl - 1.7, w0, 2.05)], i % 2 ? '#f6f1df' : '#f4c531', EDGE); }
+        }
         const [x, y] = RP(r, 0, r.hw * 0.5, b.z + 0.45);
         ctx.fillStyle = '#f6f1df'; ctx.font = `800 ${Math.round(cam.s * 1.15)}px Overpass, sans-serif`; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
         ctx.fillText(L.labels[b.label] || b.label, x, y);
       }
+    }
+    // the entrance: a timber beam across the two gate posts, carrying the name
+    {
+      const g = { cx: 60, cy: 85.8, hl: 5.4, hw: 0.5, a: 0 }, beam = box(-5.4, 5.4, -0.5, 0.5);
+      solid(g, beam, 2.9, beam, 3.5, '#8a6a45', '#a98458');
+      const [x, y] = RP(g, 0, 0, 3.52);
+      ctx.fillStyle = '#f4c531'; ctx.font = `900 ${Math.round(cam.s * 0.62)}px Overpass, sans-serif`; ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; ctx.fillText('CAMPING SOFIA', x, y);
     }
     // lamp posts
     for (const l of lamps) {
