@@ -46,7 +46,7 @@
         ten: 'Full house: ten guests in one shift', twenty: 'Rush hour hero: twenty guests in one shift',
         gnomes: 'Gnome hunter: find all ten hidden gnomes', driftpark: 'Handbrake parking: slide straight into a clean parking',
         wash: 'Squeaky clean: roll slowly through the wash bay',
-        collector: 'Spotter: see all six rare vehicles',
+        collector: 'Spotter: see every rare vehicle',
         pilot: 'Barnstormer: find all four of the pilot\'s secrets',
         goals: 'To-do list: all three goals in one shift',
         errand: 'Room service: five errands in one shift', dog: 'Sausage hero: catch the dog that took the sausages', host: 'Camp host: 1500 points in one shift', legend: 'Legend of Vitosha: 8000 points in one shift',
@@ -128,7 +128,7 @@
       dayOff: 'A day off: no clock. V swaps your vehicle', swapped: (v) => `Now driving ${v}`,
       washed: 'Squeaky clean', washSlow: 'Slower through the wash bay',
       bAir: 'BIG AIR!',
-      rares: { bus: 'a 1960s camper bus', beetle: 'a little old car with a roof tent', woodie: 'a wood-panelled estate', firetruck: 'a fire engine turned camper', airstream: 'a polished aluminium caravan', teardrop: 'a teardrop caravan' },
+      rares: { bus: 'a 1960s camper bus', beetle: 'a little old car with a roof tent', woodie: 'a wood-panelled estate', firetruck: 'a fire engine turned camper', airstream: 'a polished aluminium caravan', teardrop: 'a teardrop caravan', landy: 'an old green four-by-four', schoolbus: 'a school bus turned camper', bubble: 'a little round caravan from the sixties' },
       rareSpot: (name, n, of) => `A rare sight: ${name}! ${n} of ${of} spotted`, rareTitle: 'Rare vehicles spotted',
       flyHint: 'Steer left and right. It cannot stop. The children are watching', trickNew: (n) => `You found one: ${n}`, secretsTitle: 'Pilot\'s secrets',
       tricks: { circle: 'A full circle', eight: 'A figure of eight', pond: 'A low pass over the pond', flypast: 'A flypast down the main road' },
@@ -166,7 +166,7 @@
         ten: 'Пълен къмпинг: десет гости в една смяна', twenty: 'Герой на пиковия час: двайсет гости в една смяна',
         gnomes: 'Ловец на джуджета: намерете десетте скрити джуджета', driftpark: 'Паркиране с ръчна: влезте с плъзгане в чисто паркиране',
         wash: 'Блести от чистота: минете бавно през автомивката',
-        pilot: 'Въздушен ас: открийте и четирите тайни на пилота', collector: 'Наблюдател: вижте и шестте редки возила',
+        pilot: 'Въздушен ас: открийте и четирите тайни на пилота', collector: 'Наблюдател: вижте всички редки возила',
         goals: 'По списък: и трите цели в една смяна',
         errand: 'Рум сървис: пет поръчки в една смяна', dog: 'Герой на наденичките: хванете кучето крадец', host: 'Домакин на къмпинга: 1500 точки в една смяна', legend: 'Легенда на Витоша: 8000 точки в една смяна',
       },
@@ -247,7 +247,7 @@
       dayOff: 'Почивен ден: без часовник. V сменя возилото', swapped: (v) => `Сега карате ${v}`,
       washed: 'Блести от чистота', washSlow: 'По-бавно през автомивката',
       bAir: 'ПОЛЕТ!',
-      rares: { bus: 'кемпер бус от 60-те', beetle: 'малка стара кола с палатка на покрива', woodie: 'комби с дървени панели', firetruck: 'пожарна, превърната в кемпер', airstream: 'лъскава алуминиева каравана', teardrop: 'каравана капка' },
+      rares: { bus: 'кемпер бус от 60-те', beetle: 'малка стара кола с палатка на покрива', woodie: 'комби с дървени панели', firetruck: 'пожарна, превърната в кемпер', airstream: 'лъскава алуминиева каравана', teardrop: 'каравана капка', landy: 'стар зелен джип', schoolbus: 'училищен автобус, превърнат в кемпер', bubble: 'малка кръгла каравана от шейсетте' },
       rareSpot: (name, n, of) => `Рядка гледка: ${name}! Забелязани ${n} от ${of}`, rareTitle: 'Забелязани редки возила',
       flyHint: 'Завивайте наляво и надясно. Не може да спре. Децата гледат', trickNew: (n) => `Открихте: ${n}`, secretsTitle: 'Тайните на пилота',
       tricks: { circle: 'Пълен кръг', eight: 'Осморка', pond: 'Нисък полет над езерцето', flypast: 'Прелитане над главната алея' },
@@ -1405,9 +1405,9 @@
   // ---------- more models ----------
   // A car with a tent on its roof: folded flat while it drives, opened to one side once it is parked.
   function drawRoofCar(b, v) {
-    const hl = b.hl, hw = b.hw, bug = v.rare === 'beetle', wood = v.rare === 'woodie', p = bug ? '#e8c35a' : wood ? '#efe3c2' : v.paint;
+    const hl = b.hl, hw = b.hw, bug = v.rare === 'beetle', wood = v.rare === 'woodie', landy = v.rare === 'landy', p = bug ? '#e8c35a' : wood ? '#efe3c2' : landy ? '#5d7a4f' : v.paint;
     for (const w of [-1, 1]) { wheel(b, hl - 0.9, w * (hw - 0.1), v.steer); wheel(b, -hl + 0.9, w * (hw - 0.1)); }
-    const rf = bug ? 0.85 : 0.5, rb = bug ? 0.8 : 0.3;
+    const rf = bug ? 0.85 : landy ? 0.16 : 0.5, rb = bug ? 0.8 : landy ? 0.12 : 0.3;
     const wall = wood ? (nl, nw) => (Math.abs(nw) > 0.5 ? '#a9763f' : p) : shade(p, 0.84);
     solid(b, hull(-hl, hl, hw, rf, rb), 0.28, hull(-hl + 0.04, hl - 0.06, hw - 0.05, rf, rb), 0.86, wall, p);
     for (const w of [-1, 1]) {
@@ -1417,7 +1417,8 @@
     }
     solid(b, hull(-hl + 0.2, hl - 1.3, hw - 0.1, bug ? 0.6 : 0.3), 0.86, hull(-hl + 0.5, hl - 1.9, hw - 0.24, bug ? 0.5 : 0.25), 1.46, GLASS, shade(p, 1.06));
     const open = v.parked ? clamp((clock - v.parked.t) / 1.2, 0, 1) * (v.packing ? 1 - clamp((clock - v.packing - 2) / 1.5, 0, 1) : 1) : 0;
-    const tent = bug ? '#d5503c' : '#6f8f5a', l0 = -hl + 0.6, l1 = hl - 2.0, base = box(l0, l1, -(hw - 0.3), hw - 0.3);
+    if (landy) disc(b, hl - 0.75, 0, 0.9, 0.34, '#22262a');   // the spare wheel on the bonnet
+    const tent = bug ? '#d5503c' : landy ? '#c9a66b' : '#6f8f5a', l0 = -hl + 0.6, l1 = hl - 2.0, base = box(l0, l1, -(hw - 0.3), hw - 0.3);
     solid(b, base, 1.5, base, 1.74, '#3a3f3a', shade(tent, 0.9));
     if (open > 0.05) {
       const s = v.side, w0 = -s * (hw - 0.3), w1 = s * (hw - 0.3 + 1.3 * open), ridge = (w0 + w1) / 2, zt = 1.74 + 1.15 * open;
@@ -1479,8 +1480,8 @@
   // ---------- rare vehicles ----------
   // Now and then something unusual turns up at the gate. Each kind is worth a hundred the first time it is seen,
   // and the album on the score card remembers them between visits.
-  const RARE_FOR = { van: ['bus'], roofcar: ['beetle', 'woodie'], motorhome: ['firetruck'], combo: ['airstream', 'teardrop'] };
-  const RARE_ALL = ['bus', 'beetle', 'woodie', 'firetruck', 'airstream', 'teardrop'];
+  const RARE_FOR = { van: ['bus'], roofcar: ['beetle', 'woodie', 'landy'], motorhome: ['firetruck', 'schoolbus'], combo: ['airstream', 'teardrop', 'bubble'] };
+  const RARE_ALL = ['bus', 'beetle', 'woodie', 'landy', 'firetruck', 'schoolbus', 'airstream', 'teardrop', 'bubble'];
   const spotted = new Set();
   try { JSON.parse(localStorage.getItem('camp-spotted') || '[]').forEach((k) => spotted.add(k)); } catch (e) { /* private window */ }
   function spot(key) {
@@ -2564,8 +2565,8 @@
   }
 
   function drawMotorhome(b, v) {
-    const fire = v.rare === 'firetruck', hl = b.hl, hw = b.hw, p = fire ? '#c8372d' : v.paint, acc = fire ? '#f6f1df' : accentOf(v);
-    const SHELL_WALL = fire ? '#c8372d' : '#ddd8c9', SHELL = fire ? '#b3322a' : '#f3f0e6';   // a retired fire engine keeps its red
+    const fire = v.rare === 'firetruck', school = v.rare === 'schoolbus', hl = b.hl, hw = b.hw, p = fire ? '#c8372d' : school ? '#f0b83a' : v.paint, acc = fire ? '#f6f1df' : school ? '#22262a' : accentOf(v);
+    const SHELL_WALL = fire ? '#c8372d' : school ? '#f0b83a' : '#ddd8c9', SHELL = fire ? '#b3322a' : school ? '#e2a528' : '#f3f0e6';   // a retired fire engine keeps its red
     for (const w of [-1, 1]) { wheel(b, hl - 1.6, w * (hw - 0.12), v.steer); wheel(b, -hl + 1.6, w * (hw - 0.1)); }
     const cab = hull(hl - 2.4, hl, hw - 0.1, 0.45, 0.1);
     solid(b, cab, 0.3, cab, 1.2, shade(p, 0.86), p);
@@ -2588,7 +2589,7 @@
     const [dx, dy] = RP(b, -hl + 0.7, -v.side * 0.45, 3.0);                                            // satellite dome
     ctx.fillStyle = '#e4e2da'; ctx.strokeStyle = EDGE; ctx.beginPath(); ctx.arc(dx, dy, cam.s * 0.36, 0, TAU); ctx.fill(); ctx.stroke();
     awningCase(b, v, -2.7, 1.3, 2.9);
-    if (!fire && v.extra !== 1) {   // two bicycles on the rack at the back
+    if (!fire && !school && v.extra !== 1) {   // two bicycles on the rack at the back
       ctx.lineCap = 'round';
       [['#d5503c', 0.18], ['#3f7fa6', 0.42]].forEach(([c, d]) => {
         const l = -hl - d;
@@ -2608,8 +2609,8 @@
 
   // r is the caravan body; its drawbar reaches 1.3 m ahead of it, to the tow ball.
   function drawCaravan(r, v) {
-    const air = v.rare === 'airstream', tear = v.rare === 'teardrop', hl = r.hl, hw = r.hw, acc = air ? '#9aa3a9' : tear ? '#f6f1df' : accentOf(v);
-    const SHELL_WALL = air ? '#c3c9ce' : tear ? '#b98a55' : '#ddd8c9', SHELL = air ? '#e6eaed' : '#f3f0e6';
+    const bubble = v.rare === 'bubble', air = v.rare === 'airstream' || bubble, tear = v.rare === 'teardrop', hl = r.hl, hw = r.hw, acc = bubble ? '#f6f1df' : air ? '#9aa3a9' : tear ? '#f6f1df' : accentOf(v);
+    const SHELL_WALL = bubble ? '#d5503c' : air ? '#c3c9ce' : tear ? '#b98a55' : '#ddd8c9', SHELL = bubble ? '#f6f1df' : air ? '#e6eaed' : '#f3f0e6';
     ctx.strokeStyle = TRIM; ctx.lineWidth = Math.max(2, cam.s * 0.14); ctx.lineJoin = 'round';         // A-frame
     ctx.beginPath(); ctx.moveTo(...RP(r, hl, -0.7, 0.45)); ctx.lineTo(...RP(r, hl + 1.3, 0, 0.45)); ctx.lineTo(...RP(r, hl, 0.7, 0.45)); ctx.stroke();
     ctx.lineWidth = 1;
