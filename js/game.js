@@ -549,7 +549,7 @@
   }
   function drawFx() {
     ctx.save();
-    drawAmbient(false);
+    drawAmbient(false); drawFireside(false);
     if (mode === 'play') drawTips();
     if (car && car.vip) {   // a gold star rides above a VIP
       const [x, y] = P(car.x, car.y, 3.2);
@@ -1603,6 +1603,35 @@
     if (night > 0.2 && !reduceMotion && (smokeT -= dt) <= 0) { smokeT = 0.35; smoke.push({ x: fire.x + (Math.random() - 0.5) * 0.4, y: fire.y, z: 0.6, life: 4.5, d: Math.random() - 0.5 }); }
     for (let i = smoke.length - 1; i >= 0; i--) { const s = smoke[i]; s.z += 1.1 * dt; s.x += (0.35 + s.d * 0.3) * dt; if ((s.life -= dt) <= 0) smoke.splice(i, 1); }
   }
+  // In the evening a few campers sit round the fire and somebody plays the guitar: three or four soft notes now
+  // and then, heard only from nearby, and a note or two drifting up with the smoke.
+  const circle = [[0.4, '#d5503c'], [1.7, '#3f7fa6'], [3.0, '#f0b83a'], [4.4, '#5f9070'], [5.5, '#8b6fae']];
+  const notes = [];
+  let strumT = 4;
+  function stepFireside(dt) {
+    for (let i = notes.length - 1; i >= 0; i--) { const n = notes[i]; n.z += 0.9 * dt; n.x += 0.3 * dt; if ((n.life -= dt) <= 0) notes.splice(i, 1); }
+    if (night < 0.35 || (strumT -= dt) > 0) return;
+    strumT = 5 + Math.random() * 5;
+    if (!reduceMotion) notes.push({ x: fire.x + 2.2, y: fire.y - 0.6, z: 1.2, life: 3.5, s: Math.random() < 0.5 ? '♪' : '♫' });
+    const who = flying && plane ? plane : car;
+    if (who && Math.hypot(who.x - fire.x, who.y - fire.y) < 26) [0, 4, 7, 12].forEach((n, i) => note(hz(n - 12 + [0, 5, 7, 3][(clock | 0) % 4]), i * 0.22, 0.9, 'triangle', 0.045));
+  }
+  function drawFireside(ground) {
+    const k = cam.s;
+    if (ground && night > 0.2) for (const [a, shirt] of circle) {   // seated in a ring, facing the flames
+      const x0 = fire.x + Math.cos(a) * 2.3, y0 = fire.y + Math.sin(a) * 2.3, [x, y] = P(x0, y0, 0.4), [hx, hy] = P(x0 - Math.cos(a) * 0.25, y0 - Math.sin(a) * 0.25, 0.8);
+      ctx.globalAlpha = clamp((night - 0.2) * 4, 0, 1);
+      ctx.fillStyle = '#6b4a2f'; ctx.beginPath(); ctx.arc(...P(x0 + Math.cos(a) * 0.35, y0 + Math.sin(a) * 0.35, 0.2), k * 0.42, 0, TAU); ctx.fill();   // a log to sit on
+      ctx.fillStyle = shirt; ctx.strokeStyle = 'rgba(18,33,26,0.35)'; ctx.lineWidth = 1; ctx.beginPath(); ctx.arc(x, y, k * 0.36, 0, TAU); ctx.fill(); ctx.stroke();
+      ctx.fillStyle = '#e2b48c'; ctx.beginPath(); ctx.arc(hx, hy, k * 0.2, 0, TAU); ctx.fill();
+      ctx.globalAlpha = 1;
+    }
+    if (!ground) for (const n of notes) {
+      const [x, y] = P(n.x, n.y, n.z);
+      ctx.globalAlpha = clamp(n.life / 1.2, 0, 1) * 0.9; ctx.fillStyle = '#f6f1df'; ctx.font = `800 ${Math.round(k * 0.9)}px Overpass, sans-serif`; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+      ctx.fillText(n.s, x, y); ctx.globalAlpha = 1;
+    }
+  }
   function drawAmbient(ground) {   // ground: the ducks, drawn with the world; otherwise what is in the air
     const k = cam.s;
     ctx.lineJoin = 'round';
@@ -1802,7 +1831,7 @@
       }
     }
     for (let i = ghosts.length - 1; i >= 0; i--) { ghosts[i].alpha -= dt / 1.2; if (ghosts[i].alpha <= 0) ghosts.splice(i, 1); }
-    stepPeople(dt); stepChats(dt); stepProps(dt); stepAmbient(dt);
+    stepPeople(dt); stepChats(dt); stepProps(dt); stepAmbient(dt); stepFireside(dt);
     if (mode === 'play') { stepWarden(dt); stepWeather(dt); stepIce(dt); stepRoamers(dt); }
     if (mode === 'play') stats.time += dt;
     if (mode === 'play' && flying && plane) { stepPlane(dt); return; }
@@ -2641,7 +2670,7 @@
       } else drawVehicle(v);
     }
     drawPeople();
-    drawAmbient(true);
+    drawAmbient(true); drawFireside(true);
     if (mode === 'play') { drawWash(); drawGnomes(); drawIce(); drawRoamers(); drawThief(); }
 
     // tents
