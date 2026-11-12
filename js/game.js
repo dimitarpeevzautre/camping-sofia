@@ -280,7 +280,7 @@
         lgTip: 'Жълта монета: 25 точки.', lgBoost: 'Лилав жетон: бонус. Двойни точки, автопаркиране или щит.',
         lgJob: 'Зелен знак: поръчка. Вземете я и я закарайте до мястото за 120 точки.', lgDog: 'Кучето с наденичките: настигнете го за 200 точки.',
         lgWarden: 'Червени звезди: управителят ви гони. Глобата боли, чистото паркиране го успокоява.', lgRain: 'В дъжд и по тъмно паркирането носи повече, но пътят е хлъзгав.', stErrands: 'Изпълнени поръчки', stFines: 'Глоби от управителя', lbTitle: 'Най-добрите къмпингари', lbWeek: 'Тази седмица', lbAll: 'За всички времена', lbPost: 'Запишете резултата ми', stTips: 'Събрани бакшиши', stBumps: 'Удари', stScares: 'Стреснати хора', stGaveUp: 'Гости, които се отказаха да чакат',
-        stTime: 'Време зад волана', shareTitle: 'Споделете резултата', shareNative: 'Споделете', savePic: 'Запазете картинката', close: 'Обратно към паркирането',
+        stTime: 'Време зад волана', shareTitle: 'Споделете резултата', shareNative: 'Споделете', savePic: 'Запазете картинката', postcard: 'Запазете картичка от къмпинга', close: 'Обратно към паркирането',
       },
       aria: {
         camp: 'Къмпинг, гледан отгоре. Закарайте всеки пристигащ гост до мястото му.',
@@ -1179,7 +1179,7 @@
   // ---------- the little map ----------
   // Top left, once the name plate has stepped aside: roads, the pitch to reach and everything worth chasing.
   let playT = 0;
-  const SHOT = location.search.includes('shot');   // ?debug&shot: no map, goals or pointer, for taking the preview picture
+  let SHOT = location.search.includes('shot');   // ?debug&shot: no map, goals or pointer, for taking the preview picture
   function drawMap() {
     if (SHOT || mode !== 'play' || clock - playT < 5.6) return;
     const k = Math.min(1.15, (vw * 0.34) / W), x0 = 12, y0 = 12, mw = W * k, mh = H * k;
@@ -3292,6 +3292,35 @@
     });
   }
 
+  // ---------- a postcard ----------
+  // The camp as it is at this moment, without the map, goals or pointer, with the name along the bottom: a picture
+  // to keep or send. Made on a canvas of its own so the game's canvas is left alone.
+  function postcard() {
+    const was = SHOT;
+    SHOT = true;
+    try { frame(night); } finally { SHOT = was; }
+    const out = document.createElement('canvas'), g = out.getContext('2d'), w = cv.width, h = cv.height, bar = Math.round(h * 0.085);
+    out.width = w; out.height = h;
+    g.drawImage(cv, 0, 0);
+    g.fillStyle = '#f4c531'; g.fillRect(0, h - bar, w, bar);
+    g.fillStyle = '#12211a'; g.fillRect(0, h - bar - Math.max(3, Math.round(bar * 0.08)), w, Math.max(3, Math.round(bar * 0.08)));
+    g.font = `900 ${Math.round(bar * 0.46)}px Overpass, "Segoe UI", sans-serif`; g.textBaseline = 'middle';
+    g.textAlign = 'left'; g.fillText('Camping Sofia', Math.round(bar * 0.5), h - bar / 2);
+    g.textAlign = 'right'; g.font = `700 ${Math.round(bar * 0.36)}px Overpass, "Segoe UI", sans-serif`; g.fillText('camping-sofia.com', w - Math.round(bar * 0.5), h - bar / 2);
+    frame(night);   // put the game's own picture back as it was
+    return out;
+  }
+  $('sh-card').addEventListener('click', () => {
+    try {
+      postcard().toBlob((b) => {
+        if (!b) return;
+        const a = document.createElement('a'), url = URL.createObjectURL(b);
+        a.href = url; a.download = 'camping-sofia-postcard.jpg'; document.body.append(a); a.click(); a.remove();
+        setTimeout(() => URL.revokeObjectURL(url), 5000);
+      }, 'image/jpeg', 0.9);
+    } catch (e) { /* no picture: nothing else is affected */ }
+  });
+
   // ---------- loop ----------
   let last = performance.now();
   function tick(now) {
@@ -3309,5 +3338,5 @@
   setTimeout(beginDemo, 2500);
 
   // For automated checks only: /?debug exposes the state.
-  if (location.search.includes('debug')) window.camp = { get car() { return car; }, get target() { return target; }, get parked() { return parkedCount; }, get score() { return score(); }, get night() { return night; }, people, skids, packUp, guests, pitches, stats, rectsOf, rectRect, keys, blocked, livingRect, corners, setClock: (t) => { clock = t; }, setPatience: (t) => { patience = t; }, get lives() { return lives; }, holdNight: (v) => { nightLock = v; }, get balloon() { return balloon; }, callBalloon: () => { nextBalloon = 0; }, get plane() { return plane; }, tricks, get demo() { return demo; }, roamers, respect, owned, get bank() { return bank; }, setBank: (n) => { bank = n; saveShop(); shop(); }, props, get goals() { return goals; }, get ice() { return ice; }, found, GNOMES, get thief() { return thief; }, get rain() { return rain; }, setNext: (o) => { if (o.rain !== undefined) nextRain = o.rain; if (o.thief !== undefined) nextThief = o.thief; }, get job() { return job; }, setNextJob: (t) => { nextJob = t; }, tuneRadio, get station() { return station; }, get heat() { return heat; }, get warden() { return warden; }, trouble, boost, chats, takeBoost, say, addTip, earned, award, tips, honk, rankLine, get streak() { return streak; }, get mode() { return mode; }, get patienceMax() { return patienceMax; }, pops, bits, give: (kind) => { car = makeVehicle(kind, 61.8, 80.5, -Math.PI / 2); car.born = -9; }, next: () => { car = null; nextGuest(); } };
+  if (location.search.includes('debug')) window.camp = { get car() { return car; }, get target() { return target; }, get parked() { return parkedCount; }, get score() { return score(); }, get night() { return night; }, people, skids, packUp, guests, pitches, stats, rectsOf, rectRect, keys, blocked, livingRect, corners, setClock: (t) => { clock = t; }, setPatience: (t) => { patience = t; }, get lives() { return lives; }, postcard, holdNight: (v) => { nightLock = v; }, get balloon() { return balloon; }, callBalloon: () => { nextBalloon = 0; }, get plane() { return plane; }, tricks, get demo() { return demo; }, roamers, respect, owned, get bank() { return bank; }, setBank: (n) => { bank = n; saveShop(); shop(); }, props, get goals() { return goals; }, get ice() { return ice; }, found, GNOMES, get thief() { return thief; }, get rain() { return rain; }, setNext: (o) => { if (o.rain !== undefined) nextRain = o.rain; if (o.thief !== undefined) nextThief = o.thief; }, get job() { return job; }, setNextJob: (t) => { nextJob = t; }, tuneRadio, get station() { return station; }, get heat() { return heat; }, get warden() { return warden; }, trouble, boost, chats, takeBoost, say, addTip, earned, award, tips, honk, rankLine, get streak() { return streak; }, get mode() { return mode; }, get patienceMax() { return patienceMax; }, pops, bits, give: (kind) => { car = makeVehicle(kind, 61.8, 80.5, -Math.PI / 2); car.born = -9; }, next: () => { car = null; nextGuest(); } };
 })();
