@@ -874,12 +874,12 @@
     for (let i = chats.length - 1; i >= 0; i--) {
       const c = chats[i], gone = c.a.hidden || c.b.hidden || c.a.flee > 0 || c.b.flee > 0 || Math.hypot(c.a.x - c.b.x, c.a.y - c.b.y) > 6;
       if (gone || (clock >= c.t && c.i >= c.lines.length)) {
-        c.a.chat = c.b.chat = false; c.a.chatCool = c.b.chatCool = clock + 45; chats.splice(i, 1); continue;
+        c.a.chat = c.b.chat = false; c.a.chatCool = c.b.chatCool = clock + 150; chats.splice(i, 1); continue;
       }
       if (clock >= c.t) { say(c.i % 2 ? c.b : c.a, c.lines[c.i], 2.7); c.i++; c.t = clock + 2.9; }
     }
-    if ((chatT -= dt) > 0 || chats.length >= 3) return;
-    chatT = 1.5;
+    if ((chatT -= dt) > 0 || chats.length >= 1) return;   // one conversation at a time, and a pause between them
+    chatT = 10;
     for (let i = 0; i < people.length; i++) {
       const a = people[i];
       if (!talker(a)) continue;
@@ -895,6 +895,7 @@
     }
   }
   function chorus(lines, n) {   // a few campers, wherever they are, say something
+    n = Math.min(n, 2);
     people.filter((o) => !o.hidden && o.kind !== 'pet' && !o.chat).sort(() => Math.random() - 0.5).slice(0, n).forEach((o) => say(o, pick(lines), 3));
   }
   function remark(lines, x, y, reach = 12) {   // the nearest camper in earshot says something
@@ -1278,7 +1279,8 @@
   }
   function drawRoamers() {
     for (const t of roamers) {
-      const r = roamRect(t);
+      const r = roamRect(t), [qx, qy] = P(t.x, t.y);
+      if (qx < -90 || qx > vw + 90 || qy < -90 || qy > vh + 90) continue;
       if (t.kind === 'tractor') drawTractor(r);
       else if (t.kind === 'biker') drawBiker(r, t);
       else if (t.kind === 'cyclist') drawCyclist(r, t);
@@ -1959,7 +1961,7 @@
     if (clean && clock - lastDrift < 4) { total += 50; pop(r.cx, r.cy, `${L.driftPark} +50`, '#f6f1df', 22, quick ? 126 : 100); award('driftpark'); }
     total += pts; stats.streak = Math.max(stats.streak, streak); if (perfect) stats.perfect++;
     pop(r.cx, r.cy, `+${pts}`, '#f4c531', 40);
-    if (perfect) { pop(r.cx, r.cy, L.perfect, '#f6f1df', 26, 40); confetti(r.cx, r.cy); remark(L.nice, r.cx, r.cy); }
+    if (perfect) { pop(r.cx, r.cy, L.perfect, '#f6f1df', 26, 40); confetti(r.cx, r.cy); if (Math.random() < 0.3) remark(L.nice, r.cx, r.cy); }
     else if (mult > 1 || car.vip) pop(r.cx, r.cy, `×${mult * (car.vip ? 2 : 1)}`, '#f6f1df', 26, 40);
     if (dark) pop(r.cx, r.cy, L.nightBonus, '#6fb6d9', 22, 74); else if (rain > 0.3) pop(r.cx, r.cy, L.rainBonus, '#6fb6d9', 22, 74);
     sfx.park(streak, perfect);
@@ -2426,7 +2428,7 @@
       nl /= len; nw /= len;
       const raw = typeof wall === 'function' ? wall(nl, nw) : wall;
       const col = raw === GLASS ? GLASS : shade(raw, 0.84 + 0.2 * ((c * nl - s * nw) * SUN[0] + (s * nl + c * nw) * SUN[1]));
-      poly([A[i], A[j], B[j], B[i]], col, col);
+      poly([A[i], A[j], B[j], B[i]], col, cam.s > 22 ? col : null);
     }
     if (top) poly(B, top, EDGE);
   }
@@ -2569,7 +2571,7 @@
 
   function drawVehicle(v) {
     const b = bodyRect(v);
-    const [sx, sy] = P(b.cx, b.cy), far = cam.s * 14;
+    const [sx, sy] = P(b.cx, b.cy), far = cam.s * (v.t.trailer ? 11 : 7.5);
     if (sx < -far || sx > vw + far || sy < -far || sy > vh + far) return;
     ctx.globalAlpha = clamp(v.alpha, 0, 1);
     ctx.lineWidth = 1; ctx.lineJoin = 'round';
