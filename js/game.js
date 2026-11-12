@@ -2450,6 +2450,11 @@
     poly(quad(b, 0.0, 0.7, -0.4, 0.4, 2.31), SKYLIGHT, EDGE);
     if (v.extra === 1) panel(b, -hl + 0.7, -0.4, -0.55, 0.55, 2.31, 3);
     awningCase(b, v, -1.7, 1.0, 2.1);
+    if (!bus && v.extra === 0) {   // a kayak strapped to the roof
+      const k0 = hull(-hl + 0.25, hl - 1.6, 0.34, 0.34).map(([l, w]) => [l, w + 0.45 * v.side]), k1 = hull(-hl + 0.5, hl - 1.85, 0.2, 0.2).map(([l, w]) => [l, w + 0.45 * v.side]);
+      solid(b, k0, 2.32, k1, 2.62, '#c8553d', '#e8855f');
+      poly(k1.map(([l, w]) => RP(b, l * 0.45 - 0.5, (w - 0.45 * v.side) * 0.7 + 0.45 * v.side, 2.63)), '#2b2f33');   // the cockpit
+    }
     if (bus) {   // a surfboard on the roof
       const board = hull(-hl + 0.3, hl - 1.5, 0.3, 0.3);
       solid(b, board.map(([l, w]) => [l, w - 0.5]), 2.32, board.map(([l, w]) => [l, w - 0.5]), 2.42, '#d9a13b', '#f4c531');
@@ -2482,6 +2487,16 @@
     const [dx, dy] = RP(b, -hl + 0.7, -v.side * 0.45, 3.0);                                            // satellite dome
     ctx.fillStyle = '#e4e2da'; ctx.strokeStyle = EDGE; ctx.beginPath(); ctx.arc(dx, dy, cam.s * 0.36, 0, TAU); ctx.fill(); ctx.stroke();
     awningCase(b, v, -2.7, 1.3, 2.9);
+    if (!fire && v.extra !== 1) {   // two bicycles on the rack at the back
+      ctx.lineCap = 'round';
+      [['#d5503c', 0.18], ['#3f7fa6', 0.42]].forEach(([c, d]) => {
+        const l = -hl - d;
+        ctx.strokeStyle = '#22262a'; ctx.lineWidth = Math.max(1.5, cam.s * 0.08);
+        for (const w of [-0.5, 0.5]) { ctx.beginPath(); ctx.moveTo(...RP(b, l, w - 0.32, 1.0)); ctx.lineTo(...RP(b, l, w + 0.32, 1.0)); ctx.stroke(); }
+        ctx.strokeStyle = c; ctx.lineWidth = Math.max(1.2, cam.s * 0.06); ctx.beginPath(); ctx.moveTo(...RP(b, l, -0.5, 1.25)); ctx.lineTo(...RP(b, l, 0.5, 1.25)); ctx.stroke();
+      });
+      ctx.lineWidth = 1; ctx.lineCap = 'butt';
+    }
     if (fire) {   // the ladder it never gave back
       ctx.strokeStyle = '#d6dee0'; ctx.lineWidth = Math.max(1.5, cam.s * 0.07);
       for (const w of [0.5, 0.95]) { ctx.beginPath(); ctx.moveTo(...RP(b, -hl + 0.5, w * -v.side, 3.02)); ctx.lineTo(...RP(b, hl - 2.6, w * -v.side, 3.02)); ctx.stroke(); }
