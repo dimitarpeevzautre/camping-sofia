@@ -1862,7 +1862,42 @@
       ctx.restore();
     }
   }
+  // Somebody fishing off the end of the jetty, and by day a child on the meadow flying a kite.
+  function drawAngler() {
+    const [x, y] = P(94.5, 16.7, 0.5), k = cam.s;
+    if (x < -80 || x > vw + 80 || y < -80 || y > vh + 80) return;
+    const bob = reduceMotion ? 0 : Math.sin(clock * 1.7) * 0.06, [tx, ty] = P(92.3, 14.4, 1.4), [fx, fy] = P(91.9, 13.5 + bob, 0);
+    ctx.strokeStyle = '#3a2f25'; ctx.lineWidth = Math.max(1.5, k * 0.07); ctx.lineCap = 'round';
+    ctx.beginPath(); ctx.moveTo(x, y); ctx.lineTo(tx, ty); ctx.stroke();                                    // the rod
+    ctx.strokeStyle = 'rgba(246,241,223,0.7)'; ctx.lineWidth = 1; ctx.beginPath(); ctx.moveTo(tx, ty); ctx.lineTo(fx, fy); ctx.stroke();   // the line
+    ctx.fillStyle = '#d5503c'; ctx.beginPath(); ctx.arc(fx, fy, 0.14 * k, 0, TAU); ctx.fill();               // the float
+    ctx.lineCap = 'butt';
+    ctx.fillStyle = '#5f9070'; ctx.strokeStyle = 'rgba(18,33,26,0.35)'; ctx.beginPath(); ctx.ellipse(x, y, 0.3 * k, 0.42 * k, 0, 0, TAU); ctx.fill(); ctx.stroke();   // shoulders
+    const [hx, hy] = P(94.5, 16.6, 1.0);
+    ctx.fillStyle = '#e6cf8a'; ctx.beginPath(); ctx.arc(hx, hy, 0.34 * k, 0, TAU); ctx.fill(); ctx.stroke();  // a straw hat
+    ctx.fillStyle = '#d9bd72'; ctx.beginPath(); ctx.arc(hx, hy, 0.2 * k, 0, TAU); ctx.fill();
+  }
+  function drawKite() {
+    if (night > 0.4 || rain > 0.3) return;
+    const k = cam.s, t = reduceMotion ? 0 : clock, kx = 55.5 + Math.sin(t * 0.5) * 2.2, ky = 74.5 + Math.cos(t * 0.37) * 1.4;
+    const [hx, hy] = P(50, 79, 0.9), [x0, y0] = P(kx, ky, 9), x = x0, y = y0 - k * 2;
+    if (x < -120 || x > vw + 120 || y < -120 || y > vh + 120) return;
+    ctx.strokeStyle = 'rgba(246,241,223,0.75)'; ctx.lineWidth = 1; ctx.beginPath(); ctx.moveTo(hx, hy); ctx.quadraticCurveTo((hx + x) / 2, (hy + y) / 2 + k * 1.2, x, y); ctx.stroke();   // the string, sagging
+    const a = Math.atan2(y - hy, x - hx) + Math.sin(t * 2.1) * 0.12;
+    ctx.save(); ctx.translate(x, y); ctx.rotate(a);
+    ctx.strokeStyle = '#12211a'; ctx.lineWidth = 1.5; ctx.lineJoin = 'round';
+    ctx.fillStyle = '#d5503c'; ctx.beginPath(); ctx.moveTo(1.1 * k, 0); ctx.lineTo(0, -0.7 * k); ctx.lineTo(-0.8 * k, 0); ctx.closePath(); ctx.fill();
+    ctx.fillStyle = '#f4c531'; ctx.beginPath(); ctx.moveTo(1.1 * k, 0); ctx.lineTo(0, 0.7 * k); ctx.lineTo(-0.8 * k, 0); ctx.closePath(); ctx.fill();
+    ctx.beginPath(); ctx.moveTo(1.1 * k, 0); ctx.lineTo(0, -0.7 * k); ctx.lineTo(-0.8 * k, 0); ctx.lineTo(0, 0.7 * k); ctx.closePath(); ctx.stroke();
+    for (let i = 1; i <= 3; i++) { ctx.fillStyle = i % 2 ? '#3f7fa6' : '#f6f1df'; ctx.beginPath(); ctx.arc(-(0.8 + i * 0.55) * k, Math.sin(t * 3 + i) * 0.18 * k, 0.14 * k, 0, TAU); ctx.fill(); }   // the tail
+    ctx.restore();
+    // the child holding it
+    const [bx, by] = P(50, 79, 0.4);
+    ctx.fillStyle = '#3f7fa6'; ctx.strokeStyle = 'rgba(18,33,26,0.35)'; ctx.lineWidth = 1; ctx.beginPath(); ctx.arc(bx, by, 0.26 * k, 0, TAU); ctx.fill(); ctx.stroke();
+    ctx.fillStyle = '#6e4a2c'; ctx.beginPath(); ctx.arc(hx, hy, 0.17 * k, 0, TAU); ctx.fill();
+  }
   function drawAmbient(ground) {   // ground: the ducks, drawn with the world; otherwise what is in the air
+    if (ground) drawAngler(); else drawKite();
     if (!ground) drawMist();
     if (!ground) { drawStork(); drawBalloon(); }
     if (!ground) drawCloudShadows();
