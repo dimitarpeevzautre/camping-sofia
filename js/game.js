@@ -2691,6 +2691,8 @@
       drawTree(t, car && Math.hypot(car.x - t.x, car.y - t.y) < t.r + 3.5 ? 0.4 : 1);
     }
 
+    // dusk and dawn: a warm wash over everything for the few moments between day and night
+    if (night > 0.02 && night < 0.62) { ctx.fillStyle = `rgba(255,148,66,${0.2 * clamp(1 - Math.abs(night - 0.3) / 0.32, 0, 1)})`; ctx.fillRect(-20, -20, vw + 40, vh + 40); }
     // night: darken, then add light back
     if (night > 0.01) {
       ctx.fillStyle = `rgba(8,14,44,${night * 0.66})`; ctx.fillRect(-20, -20, vw + 40, vh + 40);
