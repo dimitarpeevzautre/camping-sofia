@@ -19,7 +19,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Overpass:wght@400;600;800;900&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="/css/site.css?v=22">
+<link rel="stylesheet" href="/css/site.css?v=23">
 </head>
 <body>
 <canvas id="camp" data-a="camp" aria-label="A top-down view of a campsite. Drive each arriving camper to its pitch."></canvas>
@@ -54,22 +54,19 @@
 <section class="start" id="start">
   <button type="button" class="lang" id="lang">Български</button>
   <h2 data-t="h2">We're still building the real camp.</h2>
-  <p data-t="intro">Until it opens, the guests keep coming to this one. Drive each of them to the pitch that lights up. Park square and quickly for points; clean parkings in a row multiply them. Bumps cost you and bring the warden after you; three guests who give up waiting end your shift.</p>
+  <p data-t="intro">Until it opens, the guests keep coming to this one. Drive each of them to the pitch that lights up, in your own time. Park square for points; clean parkings in a row multiply them. Finish the shift whenever you like from the Score plate.</p>
   <button id="play" type="button" data-t="play">Start parking</button>
-  <button id="play-chill" type="button" data-t="chill">Day off: no clock</button>
+  <button id="play-chill" type="button" data-t="chill" hidden>Day off: no clock</button>
   <details class="legend">
     <summary data-t="legendTitle">What is on the roads</summary>
     <ul>
-      <li data-t="lgTip">Yellow coin: 25 points. Blue: 8 more seconds.</li>
-      <li data-t="lgBoost">Purple token: a boost. Speed, time freeze, double points, self-parking, a shield or a tip rush.</li>
+      <li data-t="lgTip">Yellow coin: 25 points.</li>
+      <li data-t="lgBoost">Purple token: a boost. Double points, self-parking or a shield.</li>
       <li data-t="lgJob">Green marker: an errand. Pick it up and take it to the pitch for 120 points.</li>
       <li data-t="lgDog">The dog with the sausages: catch up with it for 200 points.</li>
-      <li data-t="lgWarden">Red stars: the warden is after you. A fine hurts; a clean parking calms him down.</li>
       <li data-t="lgIce">The ice-cream van and the tractor are slow, and the postman on the moped is always late. Go round them.</li>
-      <li data-t="lgCone">Cones fly when you hit them: 5 points each, but the warden notices.</li>
       <li data-t="lgClub">The three clubs remember you: park their members cleanly and they pay more.</li>
       <li data-t="lgWash">The blue stripes on the west lane are a wash bay: roll through slowly for 30 points and a calmer warden.</li>
-      <li data-t="lgRamp">Wooden ramps lie in the lanes: hit one fast and straight for big air.</li>
       <li data-t="lgGnome">Ten garden gnomes are hidden around the camp. They are worth finding.</li>
       <li data-t="lgRain">Parking in the rain or after dark pays more, but the road is slippery.</li>
     </ul>
@@ -121,10 +118,8 @@
       <div><dt data-t="stErrands">Errands run</dt><dd id="st-errands">0</dd></div>
       <div><dt data-t="stGnomes">Hidden gnomes found</dt><dd id="st-gnomes">0</dd></div>
       <div><dt data-t="stBank">Coins for the camp shop</dt><dd id="st-bank">0</dd></div>
-      <div><dt data-t="stFines">Fines from the warden</dt><dd id="st-fines">0</dd></div>
       <div><dt data-t="stBumps">Bumps</dt><dd id="st-bumps">0</dd></div>
       <div><dt data-t="stScares">People you startled</dt><dd id="st-scares">0</dd></div>
-      <div><dt data-t="stGaveUp">Guests who gave up waiting</dt><dd id="st-gaveup">0</dd></div>
       <div><dt data-t="stTime">Time at the wheel</dt><dd id="st-time">0:00</dd></div>
     </dl>
     <h3 data-t="clubsTitle">What the clubs think</h3>
@@ -143,6 +138,7 @@
       <a id="sh-pic" download="camping-sofia-score.png" data-t="savePic" hidden>Save picture</a>
     </div>
     <button type="button" id="card-close" data-t="close">Back to parking</button>
+    <button type="button" id="card-finish" data-t="finish">Finish the shift and bank the points</button>
     <button type="button" id="card-restart" data-t="restart">Back to the gate</button>
     <p class="by" data-t="by">Camping Sofia is a project by <a href="https://thestable.bg" target="_blank" rel="noopener">thestable.bg</a></p>
   </div>
@@ -164,6 +160,6 @@
 <footer class="note" data-t="note">This camp is made up. The real one is on its way to Sofia, from <a href="https://thestable.bg" target="_blank" rel="noopener">thestable.bg</a>.</footer>
 
 <noscript><p class="noscript">Camping Sofia is coming soon. Your base to enjoy Sofia.</p></noscript>
-<script src="/js/game.js?v=39" defer></script>
+<script src="/js/game.js?v=40" defer></script>
 </body>
 </html>
