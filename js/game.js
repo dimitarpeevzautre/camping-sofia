@@ -1602,7 +1602,16 @@
   const flutter = Array.from({ length: 16 }, (_, i) => ({ x: 6 + Math.random() * (W - 12), y: 6 + Math.random() * (H - 12), p: Math.random() * TAU, c: ['#f6f1df', '#f4c531', '#e8855f', '#9fd3ee'][i % 4] }));
   const smoke = [];
   let flock = null, nextFlock = 20, smokeT = 0;
+  // Backpackers put their tents up in the field by the fire: one more every couple of minutes, up to six.
+  const TENT_SPOTS = [[24, 72, 0.4, '#d5503c'], [46, 74, -0.9, '#5f9070'], [28, 83, 1.3, '#f0b83a'], [87, 83, 0.2, '#8b6fae'], [93, 72, -0.4, '#3f7fa6'], [47, 85, 2.2, '#e8855f']];
+  let nextTent = 60, pitched = 0;
+  function stepTents() {
+    if (pitched >= TENT_SPOTS.length || clock < nextTent || mode !== 'play') return;
+    const [x, y, a, c] = TENT_SPOTS[pitched++];
+    tents.push({ x, y, a, c, born: clock, small: true }); nextTent = clock + 90 + Math.random() * 60;
+  }
   function stepAmbient(dt) {
+    stepTents();
     for (const d of ducks) d.a += d.s * dt;
     if (!flock && clock > nextFlock) { const fromLeft = Math.random() < 0.5; flock = { x: fromLeft ? -12 : W + 12, y: 10 + Math.random() * (H - 30), vx: (fromLeft ? 1 : -1) * 7, vy: 1.2 - Math.random() * 2.4 }; }
     if (flock) { flock.x += flock.vx * dt; flock.y += flock.vy * dt; if (flock.x < -20 || flock.x > W + 20) { flock = null; nextFlock = clock + 45 + Math.random() * 50; } }
@@ -2775,9 +2784,12 @@
 
     // tents
     for (const t of tents) {
-      const r = { cx: t.x, cy: t.y, hl: 1.7, hw: 1.3, a: t.a }, base = quad(r, -1.7, 1.7, -1.3, 1.3, 0);
-      const r0 = RP(r, -1.7, 0, 1.5), r1 = RP(r, 1.7, 0, 1.5);
-      poly([base[0], base[1], r1, r0], shade(t.c, 0.8)); poly([base[3], base[2], r1, r0], t.c);
+      const g = t.born ? clamp((clock - t.born) / 2, 0.05, 1) : 1, hl = 1.7 * (t.small ? 0.75 : 1), hw = 1.3 * (t.small ? 0.75 : 1), zt = 1.5 * g * (t.small ? 0.8 : 1);   // a new tent goes up over a couple of seconds
+      const r = { cx: t.x, cy: t.y, hl, hw, a: t.a }, base = quad(r, -hl, hl, -hw, hw, 0);
+      const r0 = RP(r, -hl, 0, zt), r1 = RP(r, hl, 0, zt);
+      poly([base[0], base[1], r1, r0], shade(t.c, 0.8), EDGE); poly([base[3], base[2], r1, r0], t.c, EDGE);
+      poly([base[1], base[2], r1], shade(t.c, 0.62), EDGE);                                              // the end with the door
+      poly([RP(r, hl, -hw * 0.28, 0), RP(r, hl, hw * 0.28, 0), RP(r, hl, 0, zt * 0.72)], '#26343d');
     }
     // buildings
     for (const b of buildings) {
