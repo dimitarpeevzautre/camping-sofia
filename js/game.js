@@ -1864,16 +1864,16 @@
   }
   // Somebody fishing off the end of the jetty, and by day a child on the meadow flying a kite.
   function drawAngler() {
-    const [x, y] = P(94.5, 16.7, 0.5), k = cam.s;
+    const [x, y] = P(94.5, 17.7, 0.5), k = cam.s;   // sitting well back on the jetty, clear of where the ducks swim
     if (x < -80 || x > vw + 80 || y < -80 || y > vh + 80) return;
-    const bob = reduceMotion ? 0 : Math.sin(clock * 1.7) * 0.06, [tx, ty] = P(92.3, 14.4, 1.4), [fx, fy] = P(91.9, 13.5 + bob, 0);
+    const bob = reduceMotion ? 0 : Math.sin(clock * 1.7) * 0.06, [tx, ty] = P(92.6, 15.6, 1.4), [fx, fy] = P(92.2, 14.9 + bob, 0);
     ctx.strokeStyle = '#3a2f25'; ctx.lineWidth = Math.max(1.5, k * 0.07); ctx.lineCap = 'round';
     ctx.beginPath(); ctx.moveTo(x, y); ctx.lineTo(tx, ty); ctx.stroke();                                    // the rod
     ctx.strokeStyle = 'rgba(246,241,223,0.7)'; ctx.lineWidth = 1; ctx.beginPath(); ctx.moveTo(tx, ty); ctx.lineTo(fx, fy); ctx.stroke();   // the line
     ctx.fillStyle = '#d5503c'; ctx.beginPath(); ctx.arc(fx, fy, 0.14 * k, 0, TAU); ctx.fill();               // the float
     ctx.lineCap = 'butt';
     ctx.fillStyle = '#5f9070'; ctx.strokeStyle = 'rgba(18,33,26,0.35)'; ctx.beginPath(); ctx.ellipse(x, y, 0.3 * k, 0.42 * k, 0, 0, TAU); ctx.fill(); ctx.stroke();   // shoulders
-    const [hx, hy] = P(94.5, 16.6, 1.0);
+    const [hx, hy] = P(94.5, 17.6, 1.0);
     ctx.fillStyle = '#e6cf8a'; ctx.beginPath(); ctx.arc(hx, hy, 0.34 * k, 0, TAU); ctx.fill(); ctx.stroke();  // a straw hat
     ctx.fillStyle = '#d9bd72'; ctx.beginPath(); ctx.arc(hx, hy, 0.2 * k, 0, TAU); ctx.fill();
   }
