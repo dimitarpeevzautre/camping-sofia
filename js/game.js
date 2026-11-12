@@ -122,6 +122,7 @@
       clubBonus: 'Club bonus +25%', trap: 'Flash! Ten an hour past reception. The warden has the photo',
       runGuests: (n) => `${n} guests`, bHour: 'RUSH HOUR!', rushOn: 'Rush hour: the next three guests are in a hurry and pay double',
       shareRank: (n, r) => `I scored ${n} parking campers at Camping Sofia and made ${r}. Can you beat it?`,
+      dayOff: 'A day off: no clock. V swaps your vehicle', swapped: (v) => `Now driving ${v}`,
       honk: 'Beep beep!', vip: 'A VIP guest: double points, less patience',
       ranks: ['Trainee', 'Gate keeper', 'Camp host', 'Site warden', 'Camp manager', 'Legend of Vitosha'],
       rankNext: (n, r) => `${n} more for ${r}`, short: (n) => `only ${n} short of your best`,
@@ -231,6 +232,7 @@
       clubBonus: 'Клубен бонус +25%', trap: 'Светкавица! Десет в час покрай рецепцията. Управителят има снимката',
       runGuests: (n) => `${n} гости`, bHour: 'ПИКОВ ЧАС!', rushOn: 'Пиков час: следващите трима гости бързат и плащат двойно',
       shareRank: (n, r) => `Събрах ${n} точки с паркиране на кемпери в Camping Sofia и станах „${r}“. Ще ме биеш ли?`,
+      dayOff: 'Почивен ден: без часовник. V сменя возилото', swapped: (v) => `Сега карате ${v}`,
       honk: 'Бийп-бийп!', vip: 'VIP гост: двойни точки, по-малко търпение',
       ranks: ['Стажант', 'Пазач на портала', 'Домакин на къмпинга', 'Управител на терена', 'Директор на къмпинга', 'Легенда на Витоша'],
       rankNext: (n, r) => `още ${n} до „${r}“`, short: (n) => `само ${n} до рекорда ви`,
@@ -681,7 +683,7 @@
     audioOn();
     nextGuest(true);
     setTimeout(() => document.body.classList.add('sign-away'), 5000);   // the name plate steps aside once the driving starts
-    toast(L.first(target.n), 2200); toastQ.length = 0; boss('start');
+    toast(L.first(target.n), 2200); toastQ.length = 0; if (chill) toastQ.push(L.dayOff); else boss('start');
     cv.focus();
   }
   $('play').addEventListener('click', () => start());
@@ -1344,6 +1346,16 @@
       ctx.fillStyle = `rgba(236,255,190,${a})`; ctx.beginPath(); ctx.arc(x, y, 1.8, 0, TAU); ctx.fill();
     }
   }
+
+  // On a day off, V swaps the vehicle being driven for the next kind, where there is room for it.
+  addEventListener('keydown', (e) => {
+    if (e.code !== 'KeyV' || e.repeat || !chill || mode !== 'play' || paused || !car || car.auto) return;
+    const kinds = ['van', 'motorhome', 'combo'], old = car, kind = kinds[(kinds.indexOf(old.kind) + 1) % kinds.length];
+    car = makeVehicle(kind, old.x, old.y, old.th);
+    car.born = old.born; car.vh = old.th; car.v = 0;
+    if (blocked(car)) { car = old; return; }
+    sfx.next(); toast(L.swapped(L.names[kind]), 1600);
+  });
 
   // ---------- simulation ----------
   function step(dt) {
