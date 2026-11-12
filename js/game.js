@@ -179,7 +179,10 @@
         note: `Този къмпинг е измислен. Истинският идва в София, от ${BY}.`,
         cardTitle: 'Вашият къмпинг дотук',
         stParked: 'Паркирани гости', stOnsite: 'В къмпинга сега', stAcc: 'Средна точност', stSpd: 'Средна бързина',
-        stTop: 'Най-добро паркиране', stStreak: 'Най-дълга чиста серия', stPerfect: 'Перфектни паркирания', stErrands: 'Изпълнени поръчки', stFines: 'Глоби от управителя', lbTitle: 'Най-добрите къмпингари', lbWeek: 'Тази седмица', lbAll: 'За всички времена', lbPost: 'Запиши резултата ми', stTips: 'Събрани бакшиши', stBumps: 'Удари', stScares: 'Стреснати хора', stGaveUp: 'Гости, които се отказаха да чакат',
+        stTop: 'Най-добро паркиране', stStreak: 'Най-дълга чиста серия', stPerfect: 'Перфектни паркирания', legendTitle: 'Какво има по пътищата',
+        lgTip: 'Жълта монета: 25 точки. Синя: 8 секунди повече.', lgBoost: 'Лилав жетон: бонус. Ускорение, спряно време, двойни точки, автопаркиране, щит или дъжд от бакшиши.',
+        lgJob: 'Зелен знак: поръчка. Вземете и закарайте до мястото за 120 точки.', lgDog: 'Кучето с наденичките: настигнете го за 200 точки.',
+        lgWarden: 'Червени звезди: управителят ви гони. Глобата боли, чистото паркиране го успокоява.', lgRain: 'В дъжд и по тъмно паркирането носи повече, но пътят се хлъзга.', stErrands: 'Изпълнени поръчки', stFines: 'Глоби от управителя', lbTitle: 'Най-добрите къмпингари', lbWeek: 'Тази седмица', lbAll: 'За всички времена', lbPost: 'Запиши резултата ми', stTips: 'Събрани бакшиши', stBumps: 'Удари', stScares: 'Стреснати хора', stGaveUp: 'Гости, които се отказаха да чакат',
         stTime: 'Време зад волана', shareTitle: 'Споделете резултата', shareNative: 'Сподели', savePic: 'Запази картинката', close: 'Обратно към паркирането',
       },
       aria: {
@@ -457,7 +460,7 @@
       ctx.lineWidth = 6; ctx.strokeStyle = '#12211a'; ctx.strokeText(p.text, x, y - 34 - p.o - up);
       ctx.fillStyle = p.c; ctx.fillText(p.text, x, y - 34 - p.o - up);
     }
-    ctx.globalAlpha = 1; drawJob(); drawThief(); drawWarden(); drawRain(); drawBubbles();
+    ctx.globalAlpha = 1; drawJob(); drawThief(); drawWarden(); drawRain(); drawBubbles(); drawMap();
     ctx.restore();
   }
 
@@ -565,7 +568,7 @@
     $('start').hidden = true; $('hud').hidden = false;
     if (matchMedia('(pointer: coarse)').matches) $('pad').hidden = false;
     parkedCount = 0; damage = 0; Object.keys(stats).forEach((k) => { stats[k] = 0; });
-    posted = false; thief = null; nextThief = clock + 50; raining = false; nextRain = clock + 70; job = null; nextJob = clock + 25; heat = 0; warden = null; heatStars(); tips.length = 0; Object.keys(boost).forEach((k) => { boost[k] = 0; }); nextBoost = clock + 8; boostChips(); total = 0; lives = 3; streak = 0; startBest = best; newBestSaid = false; car = null;
+    playT = clock; posted = false; thief = null; nextThief = clock + 50; raining = false; nextRain = clock + 70; job = null; nextJob = clock + 25; heat = 0; warden = null; heatStars(); tips.length = 0; Object.keys(boost).forEach((k) => { boost[k] = 0; }); nextBoost = clock + 8; boostChips(); total = 0; lives = 3; streak = 0; startBest = best; newBestSaid = false; car = null;
     audioOn();
     nextGuest(true);
     setTimeout(() => document.body.classList.add('sign-away'), 5000);   // the name plate steps aside once the driving starts
@@ -986,6 +989,31 @@
       ctx.beginPath(); ctx.moveTo(15, 0); ctx.lineTo(-9, -12); ctx.lineTo(-3, 0); ctx.lineTo(-9, 12); ctx.closePath(); ctx.fill(); ctx.stroke();
       ctx.restore();
     }
+  }
+
+  // ---------- the little map ----------
+  // Top left, once the name plate has stepped aside: roads, the pitch to reach and everything worth chasing.
+  let playT = 0;
+  function drawMap() {
+    if (mode !== 'play' || clock - playT < 5.6) return;
+    const k = Math.min(1.15, (vw * 0.34) / W), x0 = 12, y0 = 12, mw = W * k, mh = H * k;
+    const dot = (x, y, r, c) => { ctx.fillStyle = c; ctx.beginPath(); ctx.arc(x0 + x * k, y0 + y * k, r, 0, TAU); ctx.fill(); };
+    ctx.save();
+    ctx.globalAlpha = 0.85; ctx.fillStyle = '#12211a';
+    ctx.beginPath(); if (ctx.roundRect) ctx.roundRect(x0 - 4, y0 - 4, mw + 8, mh + 8, 8); else ctx.rect(x0 - 4, y0 - 4, mw + 8, mh + 8); ctx.fill();
+    ctx.globalAlpha = 1; ctx.fillStyle = '#4c6b58';
+    for (const r of roads) ctx.fillRect(x0 + r.x * k, y0 + r.y * k, r.w * k, r.h * k);
+    for (const t of tips) dot(t.x, t.y, t.boost ? 3 : 1.6, t.boost ? '#b98ce0' : t.time ? '#6fb6d9' : '#f4c531');
+    if (target) { ctx.fillStyle = Math.sin(clock * 6) > 0 ? '#f4c531' : '#f6f1df'; ctx.fillRect(x0 + target.x * k - 1, y0 + target.y * k - 1, target.w * k + 2, target.d * k + 2); }
+    if (job) dot(job.carry ? job.dx : job.x, job.carry ? job.dy : job.y, 3.5, '#8fd18a');
+    if (thief) dot(thief.x, thief.y, 3.5, '#c98a55');
+    if (warden) dot(warden.x, warden.y, 3.5, heat > 0 && Math.sin(clock * 14) > 0 ? '#e2553d' : '#7fa6ff');
+    if (car) {
+      const cx = x0 + car.x * k, cy = y0 + car.y * k, c = Math.cos(car.th), s = Math.sin(car.th);
+      ctx.fillStyle = '#fff'; ctx.strokeStyle = '#12211a'; ctx.lineWidth = 1.5;
+      ctx.beginPath(); ctx.moveTo(cx + c * 6, cy + s * 6); ctx.lineTo(cx - c * 4 - s * 4, cy - s * 4 + c * 4); ctx.lineTo(cx - c * 4 + s * 4, cy - s * 4 - c * 4); ctx.closePath(); ctx.fill(); ctx.stroke();
+    }
+    ctx.restore();
   }
 
   // ---------- simulation ----------

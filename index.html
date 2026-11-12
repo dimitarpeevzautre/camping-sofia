@@ -19,7 +19,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Overpass:wght@400;600;800;900&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="/css/site.css?v=14">
+<link rel="stylesheet" href="/css/site.css?v=15">
 </head>
 <body>
 <canvas id="camp" data-a="camp" aria-label="A top-down view of a campsite. Drive each arriving camper to its pitch."></canvas>
@@ -55,6 +55,17 @@
   <h2 data-t="h2">We're still building the real camp.</h2>
   <p data-t="intro">Until it opens, the guests keep coming to this one. Drive each of them to the pitch that lights up. Park square and quickly for points; clean parkings in a row multiply them. Bumps cost you and bring the warden after you; three guests who give up waiting end your shift.</p>
   <button id="play" type="button" data-t="play">Start parking</button>
+  <details class="legend">
+    <summary data-t="legendTitle">What is on the roads</summary>
+    <ul>
+      <li data-t="lgTip">Yellow coin: 25 points. Blue: 8 more seconds.</li>
+      <li data-t="lgBoost">Purple token: a boost. Speed, time freeze, double points, self-parking, a shield or a tip rush.</li>
+      <li data-t="lgJob">Green marker: an errand. Pick it up and take it to the pitch for 120 points.</li>
+      <li data-t="lgDog">The dog with the sausages: catch up with it for 200 points.</li>
+      <li data-t="lgWarden">Red stars: the warden is after you. A fine hurts; a clean parking calms him down.</li>
+      <li data-t="lgRain">Parking in the rain or after dark pays more, but the road is slippery.</li>
+    </ul>
+  </details>
   <p class="mine" id="mine"></p>
   <p class="mine" id="lead"></p>
   <p class="keys" id="keys" data-t="keys">Arrow keys or WASD to drive. Space is the handbrake: at speed it swings the back round. H honks, M mutes, R tunes the radio.</p>
@@ -132,6 +143,6 @@
 <footer class="note" data-t="note">This camp is made up. The real one is on its way to Sofia, from <a href="https://thestable.bg" target="_blank" rel="noopener">thestable.bg</a>.</footer>
 
 <noscript><p class="noscript">Camping Sofia is coming soon. Your base to enjoy Sofia.</p></noscript>
-<script src="/js/game.js?v=18" defer></script>
+<script src="/js/game.js?v=19" defer></script>
 </body>
 </html>
