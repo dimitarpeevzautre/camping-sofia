@@ -2126,10 +2126,15 @@
         ctx.beginPath(); ctx.ellipse(u * 0.14 * sw, -u * 0.1, u * 0.11, u * 0.07, 0, 0, TAU); ctx.ellipse(-u * 0.14 * sw, u * 0.1, u * 0.11, u * 0.07, 0, 0, TAU); ctx.fill();
         ctx.restore(); ctx.save();
         ctx.translate(...P(o.x, o.y, 0.5 * o.size)); ctx.rotate(o.dir);
-        ctx.fillStyle = o.shirt; ctx.beginPath(); ctx.ellipse(0, 0, u * 0.15, u * 0.27, 0, 0, TAU); ctx.fill();            // shoulders
+        ctx.fillStyle = '#e2b48c';                                                                                          // hands, swinging as they walk
+        ctx.beginPath(); ctx.arc(-u * 0.12 * sw, -u * 0.3, u * 0.06, 0, TAU); ctx.arc(u * 0.12 * sw, u * 0.3, u * 0.06, 0, TAU); ctx.fill();
+        ctx.fillStyle = o.shirt; ctx.strokeStyle = 'rgba(18,33,26,0.35)'; ctx.lineWidth = 1;
+        ctx.beginPath(); ctx.ellipse(0, 0, u * 0.15, u * 0.27, 0, 0, TAU); ctx.fill(); ctx.stroke();                         // shoulders
         ctx.restore(); ctx.save();
         ctx.translate(...P(o.x, o.y, 0.9 * o.size));
-        ctx.fillStyle = o.hair; ctx.beginPath(); ctx.arc(0, 0, u * 0.13, 0, TAU); ctx.fill();                              // head
+        const hat = o.shirt.charCodeAt(3) % 3 === 0;                                                                       // one in three wears a sun hat
+        if (hat) { ctx.fillStyle = o.kind === 'kid' ? '#f6f1df' : '#e6cf8a'; ctx.strokeStyle = 'rgba(18,33,26,0.35)'; ctx.lineWidth = 1; ctx.beginPath(); ctx.arc(0, 0, u * 0.2, 0, TAU); ctx.fill(); ctx.stroke(); }
+        ctx.fillStyle = hat ? (o.kind === 'kid' ? '#d5503c' : '#d9bd72') : o.hair; ctx.beginPath(); ctx.arc(0, 0, u * 0.13, 0, TAU); ctx.fill();   // head, or the crown of the hat
       }
       ctx.restore();
     }
