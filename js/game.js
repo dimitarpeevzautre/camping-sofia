@@ -46,8 +46,7 @@
         ten: 'Full house: ten guests in one shift', twenty: 'Rush hour hero: twenty guests in one shift',
         gnomes: 'Gnome hunter: find all ten hidden gnomes', driftpark: 'Handbrake parking: slide straight into a clean parking',
         wash: 'Squeaky clean: roll slowly through the wash bay',
-        air: 'Big air: fly ten metres off a ramp',
-        goals: 'To-do list: all three goals in one shift', strike: 'Strike: knock over four cones in one go',
+        goals: 'To-do list: all three goals in one shift',
         errand: 'Room service: five errands in one shift', dog: 'Sausage hero: catch the dog that took the sausages', host: 'Camp host: 1500 points in one shift', legend: 'Legend of Vitosha: 8000 points in one shift',
       },
       quick: 'Lightning!', close2: 'Just in time!', wave: (n) => `${n} guests parked. The next ones are in more of a hurry`,
@@ -108,7 +107,7 @@
         over: ['Baba Ginka: Tomorrow you start with the wheelbarrow.', 'Baba Ginka: Not bad. Not good. Not bad.', 'Baba Ginka: The guests asked for you by name. Mostly politely.',
           'Baba Ginka: I am putting your photo up at reception.', 'Baba Ginka: Take the big office. I never liked it.', 'Baba Ginka: They will name a pitch after you.'],
       },
-      goalNames: { tips: 'Tips', errands: 'Errands', perfect: 'Perfect parkings', dogs: 'Catch the dog', streak: 'Clean streak', parked: 'Guests parked', boosts: 'Boosts', honks: 'Honks' },
+      goalNames: { washes: 'Wash the van', tips: 'Tips', errands: 'Errands', perfect: 'Perfect parkings', dogs: 'Catch the dog', streak: 'Clean streak', parked: 'Guests parked', boosts: 'Boosts', honks: 'Honks' },
       goalDone: (g) => `Goal done: ${g}. +150`, bGoals: 'ALL GOALS!',
       bStrike: 'STRIKE!',
       coins: (n) => `${n} coins`,
@@ -160,8 +159,7 @@
         ten: 'Пълен къмпинг: десет гости в една смяна', twenty: 'Герой на пиковия час: двайсет гости в една смяна',
         gnomes: 'Ловец на джуджета: намерете десетте скрити джуджета', driftpark: 'Паркиране с ръчна: влезте с плъзгане в чисто паркиране',
         wash: 'Блести от чистота: минете бавно през автомивката',
-        air: 'Полет: прелетете десет метра от рампа',
-        goals: 'По списък: и трите цели в една смяна', strike: 'Страйк: съборете четири конуса наведнъж',
+        goals: 'По списък: и трите цели в една смяна',
         errand: 'Рум сървис: пет поръчки в една смяна', dog: 'Герой на наденичките: хванете кучето крадец', host: 'Домакин на къмпинга: 1500 точки в една смяна', legend: 'Легенда на Витоша: 8000 точки в една смяна',
       },
       quick: 'Светкавично!', close2: 'В последната секунда!', wave: (n) => `${n} паркирани гости. Следващите бързат повече`,
@@ -222,7 +220,7 @@
         over: ['Баба Гинка: Утре започваш с ръчната количка.', 'Баба Гинка: Не е зле. Не е и добре. Не е зле.', 'Баба Гинка: Гостите питаха за теб по име. Повечето учтиво.',
           'Баба Гинка: Слагам снимката ти на рецепцията.', 'Баба Гинка: Вземи големия кабинет. И без това не го харесвах.', 'Баба Гинка: Ще кръстят място на твое име.'],
       },
-      goalNames: { tips: 'Бакшиши', errands: 'Поръчки', perfect: 'Перфектни паркирания', dogs: 'Хванете кучето', streak: 'Чиста серия', parked: 'Паркирани гости', boosts: 'Бонуси', honks: 'Клаксон' },
+      goalNames: { washes: 'Измийте вана', tips: 'Бакшиши', errands: 'Поръчки', perfect: 'Перфектни паркирания', dogs: 'Хванете кучето', streak: 'Чиста серия', parked: 'Паркирани гости', boosts: 'Бонуси', honks: 'Клаксон' },
       goalDone: (g) => `Изпълнена цел: ${g}. +150`, bGoals: 'ВСИЧКИ ЦЕЛИ!',
       bStrike: 'СТРАЙК!',
       coins: (n) => `${n} монети`,
@@ -256,15 +254,15 @@
         tagline: 'Очаквайте скоро. Вашата база за София.',
         pitch: 'Място', score: 'Точки', best: 'Рекорд',
         h2: 'Истинският къмпинг още се строи.',
-        intro: 'Дотогава гостите идват в този. Закарайте всеки до мястото, което свети. Паркирайте право и бързо за точки; чистите паркирания поред ги умножават. Ударите струват скъпо и докарват управителя, а трима гости, които се откажат да чакат, слагат край на смяната.',
+        intro: 'Дотогава гостите идват в този. Закарайте всеки до мястото, което свети, без да бързате. Паркирайте право за точки; чистите паркирания поред ги умножават. Приключете смяната, когато решите, от табелата с точките.',
         play: 'Започнете да паркирате',
         keys: 'Стрелки или WASD за шофиране. Интервал е ръчната спирачка: на скорост завърта задницата. H е клаксон, M спира звука, R сменя радиото, P е пауза. Работи и с геймпад.',
         by: `Camping Sofia е проект на ${BY}`,
         note: `Този къмпинг е измислен. Истинският идва в София, от ${BY}.`,
         cardTitle: 'Вашият къмпинг дотук',
         stParked: 'Паркирани гости', stOnsite: 'В къмпинга сега', stAcc: 'Средна точност', stSpd: 'Средна бързина',
-        stTop: 'Най-добро паркиране', stStreak: 'Най-дълга чиста серия', stPerfect: 'Перфектни паркирания', lgRamp: 'Дървените рампи по алеите: минете бързо и направо, и ще полетите.', lgWash: 'Сините ивици на западната алея са автомивка: минете бавно за 30 точки и по-спокоен управител.', runsTitle: 'Най-добрите ви смени', clubsTitle: 'Какво мислят клубовете', lgClub: 'Трите клуба ви помнят: паркирайте членовете им чисто и плащат повече.', shopTitle: 'Магазинът на къмпинга', shopNote: 'Всяка точка става монета в края на смяната.', stBank: 'Монети за магазина', chill: 'Почивен ден: без часовник', restart: 'Обратно към портала', lgCone: 'Конусите летят, ако ги ударите: по 5 точки, но управителят забелязва.', lgIce: 'Колата за сладолед и тракторът карат бавно, а пощальонът с мотопеда вечно закъснява. Заобикаляйте ги.', stGnomes: 'Намерени скрити джуджета', lgGnome: 'Из къмпинга са скрити десет градински джуджета. Струва си да ги намерите.', legendTitle: 'Какво има по пътищата',
-        lgTip: 'Жълта монета: 25 точки. Синя: 8 секунди повече.', lgBoost: 'Лилав жетон: бонус. Ускорение, спряно време, двойни точки, автопаркиране, щит или дъжд от бакшиши.',
+        stTop: 'Най-добро паркиране', stStreak: 'Най-дълга чиста серия', stPerfect: 'Перфектни паркирания', finish: 'Приключете смяната и приберете точките', lgRamp: 'Дървените рампи по алеите: минете бързо и направо, и ще полетите.', lgWash: 'Сините ивици на западната алея са автомивка: минете бавно за 30 точки и по-спокоен управител.', runsTitle: 'Най-добрите ви смени', clubsTitle: 'Какво мислят клубовете', lgClub: 'Трите клуба ви помнят: паркирайте членовете им чисто и плащат повече.', shopTitle: 'Магазинът на къмпинга', shopNote: 'Всяка точка става монета в края на смяната.', stBank: 'Монети за магазина', chill: 'Почивен ден: без часовник', restart: 'Обратно към портала', lgCone: 'Конусите летят, ако ги ударите: по 5 точки, но управителят забелязва.', lgIce: 'Колата за сладолед и тракторът карат бавно, а пощальонът с мотопеда вечно закъснява. Заобикаляйте ги.', stGnomes: 'Намерени скрити джуджета', lgGnome: 'Из къмпинга са скрити десет градински джуджета. Струва си да ги намерите.', legendTitle: 'Какво има по пътищата',
+        lgTip: 'Жълта монета: 25 точки.', lgBoost: 'Лилав жетон: бонус. Двойни точки, автопаркиране или щит.',
         lgJob: 'Зелен знак: поръчка. Вземете и закарайте до мястото за 120 точки.', lgDog: 'Кучето с наденичките: настигнете го за 200 точки.',
         lgWarden: 'Червени звезди: управителят ви гони. Глобата боли, чистото паркиране го успокоява.', lgRain: 'В дъжд и по тъмно паркирането носи повече, но пътят се хлъзга.', stErrands: 'Изпълнени поръчки', stFines: 'Глоби от управителя', lbTitle: 'Най-добрите къмпингари', lbWeek: 'Тази седмица', lbAll: 'За всички времена', lbPost: 'Запишете резултата ми', stTips: 'Събрани бакшиши', stBumps: 'Удари', stScares: 'Стреснати хора', stGaveUp: 'Гости, които се отказаха да чакат',
         stTime: 'Време зад волана', shareTitle: 'Споделете резултата', shareNative: 'Споделете', savePic: 'Запазете картинката', close: 'Обратно към паркирането',
@@ -372,9 +370,9 @@
 
   // ---------- vehicles ----------
   const TYPES = {
-    van: { name: 'campervan', L: 5.6, Wd: 2.1, wb: 3.3, rear: 1.0, vmax: 10, z: 2.3 },
-    motorhome: { name: 'motorhome', L: 7.2, Wd: 2.35, wb: 4.0, rear: 1.6, vmax: 8.5, z: 2.9 },
-    combo: { name: 'car and caravan', L: 4.5, Wd: 1.85, wb: 2.7, rear: 0.9, vmax: 8.5, z: 1.5, trailer: { hitch: 1.2, bar: 1.3, L: 5.2, Wd: 2.25, axle: 4.2, z: 2.6 } },
+    van: { name: 'campervan', L: 5.6, Wd: 2.1, wb: 3.3, rear: 1.0, vmax: 6.5, z: 2.3 },
+    motorhome: { name: 'motorhome', L: 7.2, Wd: 2.35, wb: 4.0, rear: 1.6, vmax: 5.5, z: 2.9 },
+    combo: { name: 'car and caravan', L: 4.5, Wd: 1.85, wb: 2.7, rear: 0.9, vmax: 5.5, z: 1.5, trailer: { hitch: 1.2, bar: 1.3, L: 5.2, Wd: 2.25, axle: 4.2, z: 2.6 } },
     car: { name: 'car', L: 4.5, Wd: 1.85, wb: 2.7, rear: 0.9, vmax: 8.5, z: 1.5 },   // a tow car once it has unhitched
     caravan: { name: 'caravan', L: 5.2, Wd: 2.25, wb: 0, rear: 2.3, vmax: 0, z: 2.6 },   // unhitched, its car away in town
   };
@@ -496,12 +494,11 @@
   function engineSound(dt) {
     if (!eng) return;
     const on = mode === 'play' && car && !paused, v = on ? Math.abs(car.v) : 0, t = AC.currentTime, gas = on && (keys.up || keys.down);
-    eng.g.gain.setTargetAtTime(on ? 0.05 + v * 0.006 + (gas ? 0.03 : 0) : 0, t, 0.08);
+    eng.g.gain.setTargetAtTime(on ? 0.022 + v * 0.004 + (gas ? 0.012 : 0) : 0, t, 0.12);
     eng.o.frequency.setTargetAtTime(48 + v * 11 + (gas ? 8 : 0), t, 0.1);
     eng.f.frequency.setTargetAtTime(260 + v * 70, t, 0.1);
     if (!on) return;
     if (car.reversing && (beepT -= dt) <= 0) { beepT = 0.75; sfx.beep(); }
-    if (patience < 10 && (tickT -= dt) <= 0) { tickT = patience < 5 ? 0.5 : 1; sfx.tick(patience < 5); }
   }
   function setMute(m) {
     muted = m;
@@ -555,7 +552,7 @@
 
   // ---------- the camp shop ----------
   // Every point of a finished shift becomes a coin. Coins buy small permanent advantages, kept in this browser.
-  const PERKS = { magnet: 1500, tyres: 2000, banitsa: 2500, calm: 3500, heart: 5000 };
+  const PERKS = { magnet: 1500, tyres: 2000, calm: 3500 };
   const owned = new Set();
   let bank = 0;
   try { bank = +localStorage.getItem('camp-bank') || 0; JSON.parse(localStorage.getItem('camp-perks') || '[]').forEach((k) => owned.add(k)); } catch (e) { /* private window */ }
@@ -660,14 +657,15 @@
       car = null; setTimeout(() => { if (mode === 'play' && !car) nextGuest(); }, 400); return;
     }
     car.born = clock; car.vip = parkedCount >= 3 && rnd() < 0.14;
-    if (!chill && !demo && parkedCount > 0 && parkedCount % 8 === 6 && !rushLeft) { rushLeft = 3; banner(L.bHour); toastQ.push(L.rushOn); }
+    if (false) {   // rush hour is gone
+ rushLeft = 3; banner(L.bHour); toastQ.push(L.rushOn); }
     car.rush = rushLeft > 0; if (car.rush) rushLeft--;
     const options = freePitches();
     target = options[(rnd() * options.length) | 0];
     bumps = 0; holdT = 0;
     // Less time with every guest, more for a long drive and for the awkward vehicles.
     const dist = Math.hypot(target.x + target.w / 2 - car.x, target.y + target.d / 2 - car.y);
-    patienceMax = Math.max(14, 50 - parkedCount * 1.6) + dist * 0.35 + (kind === 'combo' ? 22 : kind === 'motorhome' ? 6 : 0);
+    patienceMax = 70 + dist * 0.6 + (kind === 'combo' ? 22 : kind === 'motorhome' ? 6 : 0);
     if (car.vip) patienceMax *= 0.85;
     if (owned.has('calm')) patienceMax *= 1.15;
     if (respect[kind] <= -3) patienceMax *= 0.85;
@@ -692,7 +690,7 @@
     $('start').hidden = true; $('hud').hidden = false;
     if (matchMedia('(pointer: coarse)').matches) $('pad').hidden = false;
     parkedCount = 0; damage = 0; Object.keys(stats).forEach((k) => { stats[k] = 0; });
-    rushLeft = 0; Object.keys(respect).forEach((k) => { respect[k] = 0; }); drawGoals(); playT = clock; posted = false; thief = null; nextThief = clock + 50; raining = false; nextRain = clock + 70; job = null; nextJob = clock + 25; heat = 0; warden = null; heatStars(); tips.length = 0; Object.keys(boost).forEach((k) => { boost[k] = 0; }); nextBoost = clock + 8; boostChips(); total = 0; lives = maxLives(); streak = 0; startBest = best; newBestSaid = false; car = null;
+    rushLeft = 0; Object.keys(respect).forEach((k) => { respect[k] = 0; }); drawGoals(); playT = clock; posted = false; thief = null; nextThief = clock + 200; raining = false; nextRain = clock + 70; job = null; nextJob = clock + 75; heat = 0; warden = null; heatStars(); tips.length = 0; Object.keys(boost).forEach((k) => { boost[k] = 0; }); nextBoost = clock + 45; boostChips(); total = 0; lives = maxLives(); streak = 0; startBest = best; newBestSaid = false; car = null;
     audioOn();
     nextGuest(true);
     setTimeout(() => document.body.classList.add('sign-away'), 5000);   // the name plate steps aside once the driving starts
@@ -710,12 +708,12 @@
     for (let tries = 0; tries < 30; tries++) {
       const r = roads[(Math.random() * roads.length) | 0], x = r.x + 1.5 + Math.random() * (r.w - 3), y = r.y + 1.5 + Math.random() * (r.h - 3);
       if (y > 70 || tips.some((t) => Math.hypot(t.x - x, t.y - y) < (until ? 5 : 14)) || (car && Math.hypot(car.x - x, car.y - y) < 12)) continue;
-      tips.push({ x, y, born: clock, time: !kind && !until && Math.random() < 0.25, boost: kind, until }); return;
+      tips.push({ x, y, born: clock, time: false, boost: kind, until }); return;
     }
   }
   function stepTips() {
     for (let n = tips.filter((t) => !t.boost && !t.until).length; n < 4; n++) addTip();
-    if (clock > nextBoost && !tips.some((t) => t.boost)) addTip(pick(['speed', 'freeze', 'double', 'auto', 'shield', 'rush']));
+    if (clock > nextBoost && !tips.some((t) => t.boost)) addTip(pick(['double', 'auto', 'shield']));
     if (!car) return;
     const rects = rectsOf(car);
     for (let i = tips.length - 1; i >= 0; i--) {
@@ -815,7 +813,7 @@
     if (kind === 'speed') boost.speed = 10; else if (kind === 'freeze') boost.freeze = 12;
     else if (kind === 'rush') { for (let i = 0; i < 18; i++) addTip('', clock + 20); banner(L.bRush); }
     else boost[kind]++;
-    stats.boosts++; nextBoost = clock + 12; sfx.best(); toast(L.boosts[kind], 2600);
+    stats.boosts++; nextBoost = clock + 70; sfx.best(); toast(L.boosts[kind], 2600);
   }
   function boostChips() {
     const parts = [];
@@ -924,6 +922,8 @@
   }
   // The banners are read out too, in a deep announcer's voice, when the browser has a voice for the language.
   function shout(text) {
+    return;   // the announcer is off: too much for a quiet camp
+    // eslint-disable-next-line no-unreachable
     const synth = window.speechSynthesis;
     if (muted || !synth || !window.SpeechSynthesisUtterance) return;
     try {
@@ -945,6 +945,8 @@
     if (s !== lastStars) { lastStars = s; $('hud-heat').textContent = s; }
   }
   function trouble(n) {
+    return;   // the warden has retired: a bump costs its points and that is all
+    // eslint-disable-next-line no-unreachable
     heat = Math.min(3, heat + n); calm = 0; heatStars();
     if (!warden && heat >= 1) { warden = { x: 60, y: 86, th: -Math.PI / 2, at: 'G', to: 'G', direct: false }; toast(L.wardenOn, 2600); banner(L.bWarden); }
   }
@@ -998,7 +1000,7 @@
       toast(L.jobAsk(p.n, L.items[item], L.spots[s[2]]), 3600); sfx.next();
       return;
     }
-    if (clock > job.until || job.g.packing || job.g.leaving) { toast(L.jobLate, 2000); job = null; nextJob = clock + 20; return; }
+    if (clock > job.until || job.g.packing || job.g.leaving) { toast(L.jobLate, 2000); job = null; nextJob = clock + 110; return; }
     const gx = job.carry ? job.dx : job.x, gy = job.carry ? job.dy : job.y;
     if (!rectsOf(car).some((r) => rectCircle(r, gx, gy, job.carry ? 2.6 : 1.3))) return;
     if (!job.carry) {
@@ -1007,7 +1009,7 @@
       total += 120; patience = Math.min(patienceMax, patience + 5); stats.errands++; sfx.park(4, false);
       pop(gx, gy, '+120', '#8fd18a', 30); remark(L.thanks, job.dx, job.dy, 14);
       if (stats.errands >= 5) award('errand');
-      job = null; nextJob = clock + 25; hud();
+      job = null; nextJob = clock + 110; hud();
     }
   }
   function drawJob() {
@@ -1034,7 +1036,7 @@
     { name: 'Radio Lager', step: 0.26, len: 8, root: 0, scale: [0, 2, 4, 7, 9], bass: [0, -1, 2, -1, 3, -1, 2, -1], kick: [0, 4], wave: 'triangle' },
     { name: 'Night Drive', step: 0.21, len: 8, root: -3, scale: [0, 3, 5, 7, 10], bass: [0, 0, -1, 0, 3, 3, -1, 2], kick: [0, 3, 6], wave: 'sawtooth' },
   ];
-  let station = 1, radioT = 0, radioStep = 0, tune = [];
+  let station = 2, radioT = 0, radioStep = 0, tune = [];
   try { const v = localStorage.getItem('camp-radio'); if (v !== null) station = clamp(+v || 0, 0, STATIONS.length - 1); } catch (e) { /* private window */ }
   function stepRadio(dt) {
     const s = STATIONS[station];
@@ -1098,7 +1100,7 @@
     if (!thief) {
       if (clock < nextThief || job) return;
       const far = Object.keys(NODES).filter((k) => k !== 'G' && nodeGap(k, car.x, car.y) > 30), at = pick(far.length ? far : ['A']);
-      thief = { x: NODES[at][0], y: NODES[at][1], at, to: at, until: clock + 50, th: 0 };
+      thief = { x: NODES[at][0], y: NODES[at][1], at, to: at, until: clock + 80, th: 0 };
       toast(L.dogOn, 3200); remark(L.sayDog, NODES[at][0], NODES[at][1], 60); note(520, 0, 0.09, 'square', 0.1); note(390, 0.12, 0.12, 'square', 0.1);
       return;
     }
@@ -1110,12 +1112,12 @@
       for (const k of ways) { const sc = nodeGap(k, car.x, car.y) - (k === from ? 25 : 0) + Math.random() * 10; if (sc > bestScore) { bestScore = sc; bestWay = k; } }
       t.to = bestWay;
     }
-    const gx = NODES[t.to][0] - t.x, gy = NODES[t.to][1] - t.y, gd = Math.hypot(gx, gy), sp = Math.min(7.2 * dt, gd);
+    const gx = NODES[t.to][0] - t.x, gy = NODES[t.to][1] - t.y, gd = Math.hypot(gx, gy), sp = Math.min(4.6 * dt, gd);
     if (gd > 0.01) { t.x += (gx / gd) * sp; t.y += (gy / gd) * sp; t.th = Math.atan2(gy, gx); }
     if (Math.hypot(car.x - t.x, car.y - t.y) < 2.8) {
       total += 200; stats.dogs++; award('dog'); sfx.park(6, true); pop(t.x, t.y, '+200', '#f4c531', 34); toast(L.dogWon, 2600); banner(L.bDog); boss('dog');
-      thief = null; nextThief = clock + 75; hud();
-    } else if (clock > t.until) { toast(L.dogLost, 2200); thief = null; nextThief = clock + 60; }
+      thief = null; nextThief = clock + 300; hud();
+    } else if (clock > t.until) { toast(L.dogLost, 2200); thief = null; nextThief = clock + 300; }
   }
   function drawThief() {
     if (!thief || mode !== 'play') return;
@@ -1209,7 +1211,7 @@
     // it waits for anything in front of it: the driver, guests driving out, people
     const fx = Math.cos(t.th), fy = Math.sin(t.th), ahead = (x, y, far) => { const dx = x - t.x, dy = y - t.y, a = dx * fx + dy * fy; return a > 0 && a < far && Math.abs(dx * fy - dy * fx) < 2.6; };
     const held = (car && (ahead(car.x, car.y, 10) || Math.hypot(car.x - t.x, car.y - t.y) < 5)) || guests.some((g) => g.leave && ahead(g.x, g.y, 10)) || people.some((o) => !o.hidden && ahead(o.x, o.y, 5));
-    if (!held && Math.abs(wrap(Math.atan2(gy, gx) - t.th)) < 0.5) { const sp = Math.min(3.2 * dt, gd); t.x += fx * sp; t.y += fy * sp; }
+    if (!held && Math.abs(wrap(Math.atan2(gy, gx) - t.th)) < 0.5) { const sp = Math.min(2.2 * dt, gd); t.x += fx * sp; t.y += fy * sp; }
     if (car && (jingleT -= dt) <= 0 && Math.hypot(car.x - t.x, car.y - t.y) < 28) {
       jingleT = 5;
       if (Math.random() < 0.5) { const kid = people.find((o) => !o.hidden && o.kind === 'kid' && !o.chat && Math.hypot(o.x - t.x, o.y - t.y) < 16); if (kid) say(kid, pick(L.sayIce)); }
@@ -1230,8 +1232,8 @@
   // A tractor that mows at walking pace and a postman on a moped who is always late. Like the ice-cream van they
   // keep to the lanes, wait for whatever is in front of them and are solid to the driver.
   const roamers = [
-    { kind: 'tractor', x: NODES.A[0], y: NODES.A[1], th: Math.PI / 2, at: 'A', to: 'D', sp: 2.2, hl: 1.9, hw: 1.0 },
-    { kind: 'moped', x: NODES.F[0], y: NODES.F[1], th: Math.PI, at: 'F', to: 'E', sp: 6.5, hl: 0.95, hw: 0.4 },
+    { kind: 'tractor', x: NODES.A[0], y: NODES.A[1], th: Math.PI / 2, at: 'A', to: 'D', sp: 1.6, hl: 1.9, hw: 1.0 },
+    { kind: 'moped', x: NODES.F[0], y: NODES.F[1], th: Math.PI, at: 'F', to: 'E', sp: 3, hl: 0.95, hw: 0.4 },
   ];
   const roamRect = (t) => ({ cx: t.x, cy: t.y, hl: t.hl, hw: t.hw, a: t.th });
   function stepRoamers(dt) {
@@ -1290,7 +1292,7 @@
   // ---------- ramps ----------
   // Two plank ramps lie in the lanes. Hit one fast and straight and the vehicle flies: nothing can touch it in the
   // air, and the longer the flight the bigger the bonus. Not with a caravan on.
-  const RAMPS = [{ x: 38, y: 54.4, w: 3, h: 3.2 }, { x: 82, y: 20.4, w: 3, h: 3.2 }];
+  const RAMPS = [];   // taken out: the camp is a calm place now
   function checkRamp() {
     if (car.air || car.t.trailer || Math.abs(car.v) < 7 || Math.abs(Math.cos(car.th)) < 0.85) return;
     const nx = car.x + Math.cos(car.th) * car.t.wb, ny = car.y + Math.sin(car.th) * car.t.wb;   // the front axle
@@ -1337,7 +1339,7 @@
     const cx = p.x + p.w / 2, laneY = p.laneBelow ? p.y + p.d + 5 : p.y - 4.5, into = p.laneBelow ? -1 : 1, side = cx < 60 ? -1 : 1;
     const far = laneY - into * 2.4, endY = into > 0 ? p.y + p.d - 0.8 : p.y + 0.8;
     const fx = car.x + Math.cos(car.th) * car.t.wb, fy = car.y + Math.sin(car.th) * car.t.wb;
-    if ((demoT += dt) > 70) { car = null; demoI = 0; demoT = 0; nextGuest(true); return; }
+    if ((demoT += dt) > 120) { car = null; demoI = 0; demoT = 0; nextGuest(true); return; }
     let tx = 60, ty = far + (far < 70 ? 1 : 0), want = 7;
     if (demoI === 0 && Math.hypot(tx - fx, ty - fy) < 4.5) demoI = 1;
     if (demoI === 1) {
@@ -1361,7 +1363,7 @@
       demoPts = [[60, laneY + 1.5], [cx - side * 6.5, laneY - into * 1.2], [cx, laneY + into * 4.5], [cx, p.y + p.d / 2 + into * 3]];
       demoI = 0; demoT = 0; demoBack = 0; demoRef = null;
     }
-    if ((demoT += dt) > 70) { car = null; demoPts = []; nextGuest(true); return; }   // it lost its way: send the next one
+    if ((demoT += dt) > 120) { car = null; demoPts = []; nextGuest(true); return; }   // it lost its way: send the next one
     const fx = car.x + Math.cos(car.th) * car.t.wb, fy = car.y + Math.sin(car.th) * car.t.wb;
     let [tx, ty] = demoPts[demoI];
     if (demoI < demoPts.length - 1 && Math.hypot(tx - fx, ty - fy) < (demoI === 0 ? 5 : 2.5)) { demoI++; [tx, ty] = demoPts[demoI]; }
@@ -1391,7 +1393,7 @@
 
   // ---------- goals for the shift ----------
   // Three small aims drawn at the start of every shift and listed under the map: 150 points each, 300 more for all three.
-  const GOAL_POOL = [['tips', 8], ['errands', 2], ['perfect', 3], ['dogs', 1], ['streak', 5], ['parked', 8], ['boosts', 3], ['honks', 5]];
+  const GOAL_POOL = [['tips', 8], ['errands', 1], ['perfect', 3], ['streak', 4], ['parked', 6], ['boosts', 1], ['washes', 1]];
   let goals = [];
   const goalNow = (g) => Math.min(g.n, g.key === 'parked' ? parkedCount : stats[g.key]);
   function drawGoals() {
@@ -1418,9 +1420,6 @@
   // Cones, a couple of bins and stray footballs. They fly when hit and wander back to their places after a while.
   // A cone is worth five points and a little of the warden's attention; four in one go is a strike.
   const props = [];
-  [[58, 40], [40, 26.5], [85, 52], [12, 45]].forEach(([x, y]) => [[0, 0], [0.9, 0.5], [0.9, -0.5], [1.8, 1], [1.8, 0], [1.8, -1]].forEach(([dx, dy]) => props.push({ kind: 'cone', hx: x + dx, hy: y + dy })));
-  [[65.6, 72], [30.5, 21]].forEach(([x, y]) => props.push({ kind: 'bin', hx: x, hy: y }));
-  [[30, 53], [95, 25], [61, 66]].forEach(([x, y]) => props.push({ kind: 'ball', hx: x, hy: y }));
   props.forEach((o) => Object.assign(o, { x: o.hx, y: o.hy, vx: 0, vy: 0, z: 0, vz: 0, a: 0, spin: 0, away: 0 }));
   let strikeN = 0, strikeT = 0;
   function stepProps(dt) {
@@ -1479,7 +1478,6 @@
     if (!(kind in respect)) return;
     const was = respect[kind];
     respect[kind] = clamp(was + d, -5, 5);
-    if (respect[kind] !== was && car) pop(car.x, car.y, `${L.clubs[kind]} ${d > 0 ? '+1' : '−1'}`, d > 0 ? '#8fd18a' : '#e2553d', 18, 130);
     if (was < 3 && respect[kind] >= 3) toast(L.clubUp(L.clubs[kind]), 2600);
     if (was > -3 && respect[kind] <= -3) toast(L.clubDown(L.clubs[kind]), 2600);
   }
@@ -1552,7 +1550,7 @@
 
     hornCool -= dt;
     if (keys.horn && hornCool <= 0) honk();
-    stepTips(); stepJobs(); stepThief(dt); stepGnomes(); stepTrap(dt); stepWash(dt);
+    stepTips(); stepJobs(); stepThief(dt); stepGnomes(); stepWash(dt);
     boost.speed -= dt; boost.freeze -= dt; driftCool -= dt; boostChips();
     if (car.auto) { stepAuto(dt); return; }
     if (car.air) { stepAir(dt); return; }
@@ -1560,15 +1558,15 @@
     const t = car.t, v0 = car.v;
     const onRoad = onRoadOrPitch(car.x, car.y);
     // The handbrake locks the rear wheels: at speed the back swings round and the vehicle slides. Not with a caravan on.
-    const fast = boost.speed > 0 ? 1.5 : 1, vmax = (onRoad ? t.vmax : 4.5) * fast, hb = keys.brake && !t.trailer && Math.abs(car.v) > 2.5;
+    const fast = boost.speed > 0 ? 1.5 : 1, vmax = (onRoad ? t.vmax : 3.5) * fast, hb = keys.brake && !t.trailer && Math.abs(car.v) > 2.5;
     if (keys.brake) car.v -= Math.sign(car.v) * Math.min(Math.abs(car.v), (hb ? 5 : rain > 0.3 && !owned.has('tyres') ? 9 : 16) * dt);
-    else if (keys.up) car.v += (car.v < 0 ? 14 : 6.5 * fast) * dt;
+    else if (keys.up) car.v += (car.v < 0 ? 10 : 3.6 * fast) * dt;
     else if (keys.down) car.v -= (car.v > 0 ? 14 : 4.5) * dt;
     else car.v -= Math.sign(car.v) * Math.min(Math.abs(car.v), (onRoad ? 2.6 : 5) * dt);
     car.braking = keys.brake || (keys.down && car.v > 0.3) || (keys.up && car.v < -0.3);
     car.reversing = car.v < -0.2;
     car.v = clamp(car.v, -3.6, vmax);
-    if (!onRoad && Math.abs(car.v) > 4.5) car.v *= 0.96;
+    if (!onRoad && Math.abs(car.v) > 3.5) car.v *= 0.96;
 
     const steerMax = 0.62 / (1 + (car.v * car.v) / 70);
     const want = ((keys.right ? 1 : 0) - (keys.left ? 1 : 0)) * steerMax;
@@ -1577,7 +1575,7 @@
     const sub = 3, h = dt / sub;
     for (let i = 0; i < sub; i++) {
       const px = car.x, py = car.y, pth = car.th, pph = car.ph, pvh = car.vh === undefined ? car.th : car.vh;
-      const dth = (car.v / t.wb) * Math.tan(car.steer) * h * (hb ? 2.6 : 1);
+      const dth = (car.v / t.wb) * Math.tan(car.steer) * h * (hb ? 2.1 : 1);
       car.th = wrap(car.th + dth);
       // the direction of travel follows the nose; on the handbrake it lags a long way behind
       car.vh = t.trailer ? car.th : wrap(pvh + wrap(car.th - pvh) * (1 - Math.exp(-h * (hb ? 1.4 : rain > 0.3 && !owned.has('tyres') ? 5 : 22))));
@@ -1630,12 +1628,8 @@
     if (boost.freeze <= 0 && !chill) patience -= dt;
     const bar = $('hud-patience');
     bar.style.transform = `scaleX(${clamp(patience / patienceMax, 0, 1)})`;
-    bar.classList.toggle('low', patience < 10);
-    if (patience <= 0) {   // one guest let down; the third ends the shift
-      stats.gaveUp++; lives--; streak = 0; car = null; sfx.lost();
-      if (lives <= 0) gameOver(); else { toast(L.gaveUp, 2400); boss('gaveUp'); setTimeout(() => { if (mode === 'play' && !car) nextGuest(); }, 1600); }
-      hud();
-    }
+    bar.classList.toggle('low', false);
+    if (patience < 0) patience = 0;   // nobody leaves: a slow parking simply earns no speed points
   }
 
   function gameOver() {
@@ -1668,10 +1662,9 @@
     const clean = bumps === 0 && accuracy >= 60, perfect = clean && accuracy >= 90;
     streak = clean ? streak + 1 : 0;
     const mult = 1 + Math.min(Math.max(streak - 1, 0), 8) * 0.25, dark = night > 0.6, pts = Math.round((accuracy + speed) * mult * (car.vip ? 2 : 1) * (dark ? 1.25 : 1) * (boost.double ? 2 : 1) * (rain > 0.3 ? 1.2 : 1) * (respect[car.kind] >= 3 ? 1.25 : 1) * (car.rush ? 2 : 1)) + (perfect ? 50 : 0);
-    if (respect[car.kind] >= 3) pop(r.cx, r.cy, L.clubBonus, '#8fd18a', 20, 152);
     regard(car.kind, clean ? 1 : -1);
     if (boost.double) boost.double--;
-    const quick = chill ? '' : speed >= 85 ? L.quick : speed <= 12 ? L.close2 : '';   // very fast, or at the last second: a little extra
+    const quick = '';   // very fast, or at the last second: a little extra
     if (quick) { total += 30; pop(r.cx, r.cy, `${quick} +30`, '#f6f1df', 22, dark ? 100 : 74); }
     if (clean && clock - lastDrift < 4) { total += 50; pop(r.cx, r.cy, `${L.driftPark} +50`, '#f6f1df', 22, quick ? 126 : 100); award('driftpark'); }
     total += pts; stats.streak = Math.max(stats.streak, streak); if (perfect) stats.perfect++;
@@ -1681,7 +1674,7 @@
     if (dark) pop(r.cx, r.cy, L.nightBonus, '#6fb6d9', 22, 74); else if (rain > 0.3) pop(r.cx, r.cy, L.rainBonus, '#6fb6d9', 22, 74);
     sfx.park(streak, perfect);
     if (clean) { heat = Math.max(0, heat - 0.5); heatStars(); }
-    if (streak === 9) banner(L.bMax); else if (streak === 5) { banner(L.bRoll); boss('roll'); } else if (perfect) banner(L.bPerfect);
+    if (streak === 5) boss('roll');
     const vip = car.vip;
     let back = false;
     if (clean && streak % 5 === 0 && lives < maxLives()) { lives++; back = true; setTimeout(() => sfx.life(), 600); }
@@ -2456,7 +2449,7 @@
     $('card-title').textContent = over === true ? L.overTitle : L.cardTitle;
     $('card-close').textContent = over === true ? L.again : L.close;
     $('card-again').textContent = L.again; $('card-again').hidden = over !== true;
-    $('card-restart').hidden = over === true;
+    $('card-restart').hidden = over === true; $('card-finish').hidden = over === true || chill;
     const now = score(), top = Math.max(best, now), n = parkedCount, enc = encodeURIComponent;
     let ri = 0;
     while (ri < RANKS.length - 1 && top >= RANKS[ri + 1]) ri++;
@@ -2465,7 +2458,7 @@
     set('st-score', now); set('st-best', top);
     set('st-parked', n); set('st-onsite', guests.filter((g) => !g.packing && !g.leaving).length);
     set('st-acc', n ? `${Math.round(stats.acc / n)} / 100` : '–'); set('st-spd', n ? `${Math.round(stats.spd / n)} / 100` : '–');
-    set('st-top', n ? stats.top : '–'); set('st-streak', stats.streak); set('st-perfect', stats.perfect); set('st-tips', stats.tips); set('st-fines', stats.fines); set('st-errands', stats.errands); set('st-bank', bank); set('st-gnomes', `${found.size}/${GNOMES.length}`);
+    set('st-top', n ? stats.top : '–'); set('st-streak', stats.streak); set('st-perfect', stats.perfect); set('st-tips', stats.tips); set('st-errands', stats.errands); set('st-bank', bank); set('st-gnomes', `${found.size}/${GNOMES.length}`);
     set('st-rank', rankLine(now, startBest));
     { let i = 0; while (i < RANKS.length - 1 && now >= RANKS[i + 1]) i++; set('st-boss', over === true ? L.boss.over[i] : ''); }
     boardFor(over); clubRows(); runRows(now);
@@ -2473,7 +2466,7 @@
     set('bd-title', `${L.badgesTitle} ${ids.filter((id) => earned.has(id)).length}/${ids.length}`);
     list.textContent = '';
     ids.forEach((id) => { const li = document.createElement('li'); li.textContent = L.badges[id]; if (earned.has(id)) li.className = 'got'; list.append(li); });
-    set('st-bumps', stats.bumps); set('st-scares', stats.scares); set('st-gaveup', stats.gaveUp);
+    set('st-bumps', stats.bumps); set('st-scares', stats.scares);
     set('st-time', `${Math.floor(stats.time / 60)}:${String(Math.floor(stats.time % 60)).padStart(2, '0')}`);
     $('sh-fb').href = `https://www.facebook.com/sharer/sharer.php?u=${enc(SITE)}`;
     $('sh-x').href = `https://twitter.com/intent/tweet?text=${enc(text)}&url=${enc(SITE)}`;
@@ -2510,9 +2503,11 @@
   $('card-close').addEventListener('click', () => card.close());
   $('card-again').addEventListener('click', () => card.close());
   $('card-restart').addEventListener('click', () => location.reload());
+  let finishing = false;
+  $('card-finish').addEventListener('click', () => { finishing = true; card.close(); });
   addEventListener('keydown', (e) => { if ((e.code === 'KeyP' || e.code === 'Escape') && mode === 'play' && !paused && !demo) { e.preventDefault(); openCard(); } });
   card.addEventListener('click', (e) => { if (e.target === card) card.close(); });   // a click on the backdrop
-  card.addEventListener('close', () => { paused = false; last = performance.now(); cv.focus(); if (mode === 'over') start(chill); });
+  card.addEventListener('close', () => { paused = false; last = performance.now(); cv.focus(); if (finishing) { finishing = false; gameOver(); } else if (mode === 'over') start(chill); });
 
   // ---------- leaderboard ----------
   // A small service on Google Cloud keeps the best scores (see the `backend` branch). It stores a nickname and the

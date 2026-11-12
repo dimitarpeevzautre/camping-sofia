@@ -177,6 +177,9 @@ button.plate:active { transform: translateY(3px); box-shadow: none; }
 .badges li.got::before { content: '★'; }
 .mine { margin: 12px 0 0 !important; font-size: 0.9rem !important; font-weight: 800; }
 .mine:empty { display: none; }
+#play-chill[hidden], #card-finish[hidden] { display: none; }
+.lives { visibility: hidden; }
+#card-finish { display: block; width: 100%; margin: 12px 0 0; font: inherit; font-weight: 900; padding: 10px 12px; color: var(--ink); background: var(--plate); border: 3px solid var(--ink); border-radius: 10px; box-shadow: 0 4px 0 var(--ink); cursor: pointer; }
 #play-chill, #card-restart { display: block; margin: 10px 0 0; font: inherit; font-size: 0.9rem; font-weight: 800; padding: 6px 12px; color: var(--ink); background: var(--paper); border: 3px solid var(--ink); border-radius: 8px; box-shadow: 0 3px 0 var(--ink); cursor: pointer; }
 #card-restart { margin: 12px auto 0; }
 #card-restart[hidden] { display: none; }
