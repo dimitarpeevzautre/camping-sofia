@@ -522,6 +522,20 @@
     if (!on) return;
     if (car.reversing && (beepT -= dt) <= 0) { beepT = 0.75; sfx.beep(); }
   }
+  // The camp itself, very quietly: a bird now and then by day, crickets after dark.
+  let natureT = 3;
+  function natureSound(dt) {
+    if (!AC || paused || mode !== 'play' || (natureT -= dt) > 0) return;
+    if (night < 0.4) {
+      natureT = 3 + Math.random() * 6;
+      const f = 2300 + Math.random() * 1500, n = 2 + ((Math.random() * 3) | 0), up = Math.random() < 0.5 ? 1.12 : 0.9;
+      for (let i = 0; i < n; i++) note(f * Math.pow(up, i), i * 0.1, 0.07, 'sine', 0.016, f * Math.pow(up, i) * 1.18);
+    } else if (night > 0.6) {
+      natureT = 1.2 + Math.random() * 2.5;
+      const f = 4100 + Math.random() * 500;
+      for (let i = 0; i < 7; i++) note(f, i * 0.055, 0.03, 'sine', 0.01);
+    } else natureT = 2;
+  }
   function setMute(m) {
     muted = m;
     try { localStorage.setItem('camp-mute', m ? '1' : '0'); } catch (e) { /* private window */ }
@@ -3175,7 +3189,7 @@
     pollPad();
     if (demo && !paused) stepDemo(dt);
     if (!paused) { step(dt); stepFx(dt); stepToasts(); }
-    engineSound(dt); stepRadio(dt); rainSound();
+    engineSound(dt); stepRadio(dt); rainSound(); natureSound(dt);
     updateCamera(dt);
     frame(night);
     requestAnimationFrame(tick);
