@@ -76,6 +76,8 @@
       ],
       lbEmpty: 'Nobody yet. Be the first', lbFail: 'The scoreboard cannot be reached right now', lbNote: 'Only your nickname and score are stored.',
       lbPlace: (n, w, a) => `${n}: #${w} this week, #${a} of all time`, lead: (n, s) => `This week\'s best: ${n} with ${s}`,
+      wardenOn: 'The warden has heard about your driving. Keep clear of the cart', fined: (n) => `The warden caught you. Fine: −${n}`,
+      bWarden: 'WARDEN!', bFined: 'FINED!', bPerfect: 'PERFECT!', bRoll: 'ON A ROLL!', bMax: '×3!', bOver: 'SHIFT OVER', bBest: 'NEW BEST!',
       honk: 'Beep beep!', vip: 'A VIP guest: double points, less patience',
       ranks: ['Trainee', 'Gate keeper', 'Camp host', 'Site warden', 'Camp manager', 'Legend of Vitosha'],
       rankNext: (n, r) => `${n} more for ${r}`, short: (n) => `only ${n} short of your best`,
@@ -139,6 +141,8 @@
       ],
       lbEmpty: 'Още няма никого. Бъдете първи', lbFail: 'Класацията е недостъпна в момента', lbNote: 'Пазим само прякора и резултата ви.',
       lbPlace: (n, w, a) => `${n}: №${w} тази седмица, №${a} за всички времена`, lead: (n, s) => `Най-добър тази седмица: ${n} с ${s}`,
+      wardenOn: 'Управителят чу как карате. Стойте далеч от количката', fined: (n) => `Управителят ви хвана. Глоба: −${n}`,
+      bWarden: 'УПРАВИТЕЛЯТ!', bFined: 'ГЛОБА!', bPerfect: 'ПЕРФЕКТНО!', bRoll: 'В СЕРИЯ!', bMax: '×3!', bOver: 'КРАЙ НА СМЯНАТА', bBest: 'НОВ РЕКОРД!',
       honk: 'Бийп-бийп!', vip: 'VIP гост: двойни точки, по-малко търпение',
       ranks: ['Стажант', 'Пазач на портала', 'Домакин на къмпинга', 'Управител на терена', 'Директор на къмпинга', 'Легенда на Витоша'],
       rankNext: (n, r) => `още ${n} до „${r}“`, short: (n) => `само ${n} до рекорда ви`,
@@ -161,7 +165,7 @@
         note: `Този къмпинг е измислен. Истинският идва в София, от ${BY}.`,
         cardTitle: 'Вашият къмпинг дотук',
         stParked: 'Паркирани гости', stOnsite: 'В къмпинга сега', stAcc: 'Средна точност', stSpd: 'Средна бързина',
-        stTop: 'Най-добро паркиране', stStreak: 'Най-дълга чиста серия', stPerfect: 'Перфектни паркирания', lbTitle: 'Най-добрите къмпингари', lbWeek: 'Тази седмица', lbAll: 'За всички времена', lbPost: 'Запиши резултата ми', stTips: 'Събрани бакшиши', stBumps: 'Удари', stScares: 'Стреснати хора', stGaveUp: 'Гости, които се отказаха да чакат',
+        stTop: 'Най-добро паркиране', stStreak: 'Най-дълга чиста серия', stPerfect: 'Перфектни паркирания', stFines: 'Глоби от управителя', lbTitle: 'Най-добрите къмпингари', lbWeek: 'Тази седмица', lbAll: 'За всички времена', lbPost: 'Запиши резултата ми', stTips: 'Събрани бакшиши', stBumps: 'Удари', stScares: 'Стреснати хора', stGaveUp: 'Гости, които се отказаха да чакат',
         stTime: 'Време зад волана', shareTitle: 'Споделете резултата', shareNative: 'Сподели', savePic: 'Запази картинката', close: 'Обратно към паркирането',
       },
       aria: {
@@ -439,7 +443,7 @@
       ctx.lineWidth = 6; ctx.strokeStyle = '#12211a'; ctx.strokeText(p.text, x, y - 34 - p.o - up);
       ctx.fillStyle = p.c; ctx.fillText(p.text, x, y - 34 - p.o - up);
     }
-    ctx.globalAlpha = 1; drawBubbles();
+    ctx.globalAlpha = 1; drawWarden(); drawBubbles();
     ctx.restore();
   }
 
@@ -484,7 +488,7 @@
     const now = score();
     if (mode === 'play' && now > best) {
       best = now; try { localStorage.setItem('camp-best-score', String(best)); } catch (e) { /* private window */ }
-      if (startBest > 0 && !newBestSaid) { newBestSaid = true; toast(L.newBest, 2600); sfx.best(); }
+      if (startBest > 0 && !newBestSaid) { newBestSaid = true; toast(L.newBest, 2600); sfx.best(); banner(L.bBest); }
     }
     if (mode === 'play') scoreBadges(now);
     $('hud-lives').textContent = '♥'.repeat(Math.max(0, lives)) + '♡'.repeat(3 - Math.max(0, lives));
@@ -547,7 +551,7 @@
     $('start').hidden = true; $('hud').hidden = false;
     if (matchMedia('(pointer: coarse)').matches) $('pad').hidden = false;
     parkedCount = 0; damage = 0; Object.keys(stats).forEach((k) => { stats[k] = 0; });
-    posted = false; tips.length = 0; Object.keys(boost).forEach((k) => { boost[k] = 0; }); nextBoost = clock + 8; boostChips(); total = 0; lives = 3; streak = 0; startBest = best; newBestSaid = false; car = null;
+    posted = false; heat = 0; warden = null; heatStars(); tips.length = 0; Object.keys(boost).forEach((k) => { boost[k] = 0; }); nextBoost = clock + 8; boostChips(); total = 0; lives = 3; streak = 0; startBest = best; newBestSaid = false; car = null;
     audioOn();
     nextGuest(true);
     setTimeout(() => document.body.classList.add('sign-away'), 5000);   // the name plate steps aside once the driving starts
@@ -752,6 +756,69 @@
     ctx.globalAlpha = 1;
   }
 
+  // ---------- the warden ----------
+  // Bumps and scares raise the heat (up to three stars). While there is heat the warden's cart comes after the
+  // driver along the roads; being caught costs a fine. Heat cools with time and with clean parkings.
+  const NODES = { A: [11.5, 24], B: [60, 24], C: [108.5, 24], D: [11.5, 54], E: [60, 54], F: [108.5, 54], G: [60, 84] };
+  const LINKS = { A: 'BD', B: 'ACE', C: 'BF', D: 'AE', E: 'BDFG', F: 'CE', G: 'E' };
+  let heat = 0, calm = 0, warden = null, sirenT = 0, lastStars = '';
+  const nodeGap = (k, x, y) => Math.hypot(NODES[k][0] - x, NODES[k][1] - y);
+  const nearNode = (x, y) => Object.keys(NODES).reduce((b, k) => (nodeGap(k, x, y) < nodeGap(b, x, y) ? k : b), 'G');
+  function nextNode(from, to) {   // the first step of the shortest way round
+    if (from === to) return to;
+    const prev = { [from]: null }, q = [from];
+    while (q.length) { const n = q.shift(); for (const m of LINKS[n]) if (!(m in prev)) { prev[m] = n; q.push(m); } }
+    let n = to;
+    while (prev[n] !== from) n = prev[n];
+    return n;
+  }
+  function banner(text) {
+    const el = $('banner');
+    el.textContent = text; el.classList.remove('on'); void el.offsetWidth; el.classList.add('on');
+  }
+  function heatStars() {
+    const s = heat > 0 ? '★'.repeat(Math.ceil(heat)) : '';
+    if (s !== lastStars) { lastStars = s; $('hud-heat').textContent = s; }
+  }
+  function trouble(n) {
+    heat = Math.min(3, heat + n); calm = 0; heatStars();
+    if (!warden && heat >= 1) { warden = { x: 60, y: 86, th: -Math.PI / 2, at: 'G', to: 'G', direct: false }; toast(L.wardenOn, 2600); banner(L.bWarden); }
+  }
+  function stepWarden(dt) {
+    if (!warden) { if (heat > 0) { heat = Math.max(0, heat - dt / 15); heatStars(); } return; }
+    calm += dt;
+    if (calm > 10) { heat = Math.max(0, heat - dt / 7); heatStars(); }
+    const w = warden, hot = heat > 0 && car, d = car ? Math.hypot(car.x - w.x, car.y - w.y) : 99;
+    let goal;
+    if (hot && (d < 11 || (w.direct && d < 18) || (w.at === nearNode(car.x, car.y) && nodeGap(w.at, w.x, w.y) < 0.5))) { goal = [car.x, car.y]; w.direct = true; }
+    else {
+      if (w.direct) { w.direct = false; w.to = nearNode(w.x, w.y); }
+      if (nodeGap(w.to, w.x, w.y) < 0.4) {
+        w.at = w.to;
+        const dest = hot ? nearNode(car.x, car.y) : 'G';
+        if (w.at !== dest) w.to = nextNode(w.at, dest); else if (heat <= 0) { warden = null; return; }
+      }
+      goal = NODES[w.to];
+    }
+    const gx = goal[0] - w.x, gy = goal[1] - w.y, gd = Math.hypot(gx, gy), sp = (heat > 0 ? 6 + heat * 0.9 : 5) * dt;
+    if (gd > 0.05) { w.x += (gx / gd) * Math.min(sp, gd); w.y += (gy / gd) * Math.min(sp, gd); w.th = wrap(w.th + clamp(wrap(Math.atan2(gy, gx) - w.th), -6 * dt, 6 * dt)); }
+    if (heat > 0 && (sirenT -= dt) <= 0) { sirenT = 0.45; w.hi = !w.hi; if (d < 45) note(w.hi ? 740 : 587, 0, 0.2, 'square', 0.035); }
+    if (hot && d < 2.7 && clock - car.born > 2 && !car.auto) {   // caught
+      const fine = 40 + 30 * Math.ceil(heat);
+      damage += fine; streak = 0; heat = 0; heatStars(); stats.fines++; car.v = 0;
+      w.direct = false; w.to = nearNode(w.x, w.y);
+      sfx.lost(); pop(car.x, car.y, `−${fine}`, '#e2553d', 30); toast(L.fined(fine), 2600); banner(L.bFined); hud();
+    }
+  }
+  function drawWarden() {
+    if (!warden) return;
+    const r = { cx: warden.x, cy: warden.y, hl: 1.35, hw: 0.8, a: warden.th };
+    drawBox(r, 1.5, '#e8efe6', '#2f5d49');
+    const [x, y] = P(warden.x, warden.y, 2), on = heat > 0 && Math.sin(clock * 14) > 0;
+    ctx.fillStyle = on ? '#e2553d' : '#f4c531'; ctx.strokeStyle = '#12211a'; ctx.lineWidth = 2;
+    ctx.beginPath(); ctx.arc(x, y, on ? 6 : 4.5, 0, TAU); ctx.fill(); ctx.stroke();
+  }
+
   // ---------- simulation ----------
   function step(dt) {
     clock += dt;
@@ -775,6 +842,7 @@
     }
     for (let i = ghosts.length - 1; i >= 0; i--) { ghosts[i].alpha -= dt / 1.2; if (ghosts[i].alpha <= 0) ghosts.splice(i, 1); }
     stepPeople(dt); stepChats(dt);
+    if (mode === 'play') stepWarden(dt);
     if (mode === 'play') stats.time += dt;
     if (mode !== 'play' || !car) return;
 
@@ -824,7 +892,7 @@
           const cost = Math.round(10 + Math.abs(v0) * 4);
           bumpCool = 0.5; shake = reduceMotion ? 0 : Math.min(1, Math.abs(v0) / 6);
           if (boost.shield) { boost.shield--; sfx.bump(Math.abs(v0)); pop(car.x, car.y, L.shielded, '#b98ce0', 26); }
-          else { bumps++; damage += cost; stats.bumps++; streak = 0; sfx.bump(Math.abs(v0)); pop(car.x, car.y, `−${cost}`, '#e2553d', 26); toast(L.bump(cost), 1100); hud(); }
+          else { trouble(0.7); bumps++; damage += cost; stats.bumps++; streak = 0; sfx.bump(Math.abs(v0)); pop(car.x, car.y, `−${cost}`, '#e2553d', 26); toast(L.bump(cost), 1100); hud(); }
         }
         car.v = -car.v * 0.25;
         break;
@@ -864,7 +932,7 @@
   }
 
   function gameOver() {
-    mode = 'over'; target = null; sfx.over(); toast(L.overTitle, 2000);
+    mode = 'over'; target = null; sfx.over(); banner(L.bOver);
     setTimeout(() => openCard(true), 1100);
   }
 
@@ -901,6 +969,8 @@
     else if (mult > 1 || car.vip) pop(r.cx, r.cy, `×${mult * (car.vip ? 2 : 1)}`, '#f6f1df', 26, 40);
     if (dark) pop(r.cx, r.cy, L.nightBonus, '#6fb6d9', 22, 74);
     sfx.park(streak, perfect);
+    if (clean) { heat = Math.max(0, heat - 0.5); heatStars(); }
+    if (streak === 9) banner(L.bMax); else if (streak === 5) banner(L.bRoll); else if (perfect) banner(L.bPerfect);
     const vip = car.vip;
     let back = false;
     if (clean && streak % 5 === 0 && lives < 3) { lives++; back = true; setTimeout(() => sfx.life(), 600); }
@@ -1004,7 +1074,7 @@
   // The car ran into someone, or nearly: it stops dead, they jump clear, and it costs points.
   function startle(o) {
     const safe = boost.shield > 0;
-    if (safe) { boost.shield--; pop(o.x, o.y, L.shielded, '#b98ce0', 26); } else { damage += 60; stats.scares++; streak = 0; pop(o.x, o.y, '−60', '#e2553d', 26); }
+    if (safe) { boost.shield--; pop(o.x, o.y, L.shielded, '#b98ce0', 26); } else { trouble(1.2); damage += 60; stats.scares++; streak = 0; pop(o.x, o.y, '−60', '#e2553d', 26); }
     sfx.startle(); say(o, pick(L.ouch)); o.cool = 2.5; o.flee = 1.2; o.wait = 0;
     car.v = 0; shake = reduceMotion ? 0 : 0.6;
     const a = Math.atan2(o.y - car.y, o.x - car.x);
@@ -1623,7 +1693,7 @@
 
   // ---------- score card ----------
   // Pressing the Score plate pauses the game and opens a card with the figures behind the score and ways to share it.
-  const stats = { acc: 0, spd: 0, top: 0, bumps: 0, scares: 0, gaveUp: 0, time: 0, streak: 0, perfect: 0, tips: 0, honks: 0, boosts: 0 };
+  const stats = { acc: 0, spd: 0, top: 0, bumps: 0, scares: 0, gaveUp: 0, time: 0, streak: 0, perfect: 0, tips: 0, honks: 0, boosts: 0, fines: 0 };
   const card = $('card'), SITE = 'https://camping-sofia.com/';
   let paused = false, pic = null, picUrl = '';
   // A 1200 x 630 picture of the score for sharing: the camp as it looks right now, behind a plate with the figures.
@@ -1673,7 +1743,7 @@
     set('st-score', now); set('st-best', top);
     set('st-parked', n); set('st-onsite', guests.filter((g) => !g.packing && !g.leaving).length);
     set('st-acc', n ? `${Math.round(stats.acc / n)} / 100` : '–'); set('st-spd', n ? `${Math.round(stats.spd / n)} / 100` : '–');
-    set('st-top', n ? stats.top : '–'); set('st-streak', stats.streak); set('st-perfect', stats.perfect); set('st-tips', stats.tips);
+    set('st-top', n ? stats.top : '–'); set('st-streak', stats.streak); set('st-perfect', stats.perfect); set('st-tips', stats.tips); set('st-fines', stats.fines);
     set('st-rank', rankLine(now, startBest));
     boardFor(over);
     const ids = Object.keys(L.badges), list = $('bd-list');
@@ -1783,5 +1853,5 @@
   requestAnimationFrame(tick);
 
   // For automated checks only: /?debug exposes the state.
-  if (location.search.includes('debug')) window.camp = { get car() { return car; }, get target() { return target; }, get parked() { return parkedCount; }, get score() { return score(); }, get night() { return night; }, people, skids, packUp, guests, pitches, stats, rectsOf, rectRect, keys, blocked, livingRect, corners, setClock: (t) => { clock = t; }, setPatience: (t) => { patience = t; }, get lives() { return lives; }, boost, chats, takeBoost, say, addTip, earned, award, tips, honk, rankLine, get streak() { return streak; }, get mode() { return mode; }, get patienceMax() { return patienceMax; }, pops, bits, give: (kind) => { car = makeVehicle(kind, 61.8, 80.5, -Math.PI / 2); car.born = -9; }, next: () => { car = null; nextGuest(); } };
+  if (location.search.includes('debug')) window.camp = { get car() { return car; }, get target() { return target; }, get parked() { return parkedCount; }, get score() { return score(); }, get night() { return night; }, people, skids, packUp, guests, pitches, stats, rectsOf, rectRect, keys, blocked, livingRect, corners, setClock: (t) => { clock = t; }, setPatience: (t) => { patience = t; }, get lives() { return lives; }, get heat() { return heat; }, get warden() { return warden; }, trouble, boost, chats, takeBoost, say, addTip, earned, award, tips, honk, rankLine, get streak() { return streak; }, get mode() { return mode; }, get patienceMax() { return patienceMax; }, pops, bits, give: (kind) => { car = makeVehicle(kind, 61.8, 80.5, -Math.PI / 2); car.born = -9; }, next: () => { car = null; nextGuest(); } };
 })();
