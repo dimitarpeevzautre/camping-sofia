@@ -44,6 +44,7 @@
         streak5: 'On a roll: five clean parkings in a row', streak9: 'Unstoppable: reach the ×3 multiplier', night: 'Night owl: a clean parking after dark',
         vip: 'Red carpet: a perfect parking for a VIP', tips: 'Pocket money: ten tips in one shift', gentle: 'Gentle driver: eight guests without a bump or a scare',
         ten: 'Full house: ten guests in one shift', twenty: 'Rush hour hero: twenty guests in one shift',
+        gnomes: 'Gnome hunter: find all ten hidden gnomes', driftpark: 'Handbrake parking: slide straight into a clean parking',
         errand: 'Room service: five errands in one shift', dog: 'Sausage hero: catch the dog that took the sausages', host: 'Camp host: 1500 points in one shift', legend: 'Legend of Vitosha: 8000 points in one shift',
       },
       quick: 'Lightning!', close2: 'Just in time!', wave: (n) => `${n} guests parked. The next ones are in more of a hurry`,
@@ -85,6 +86,7 @@
       radioOff: 'Radio off',
       rainOn: 'Rain! The roads are slippery', rainBonus: 'Rain +20%', bRush: 'TIP RUSH!', bDog: 'GOOD DOG!',
       dogOn: 'A dog has run off with the sausages! Catch up with it for a reward', dogWon: 'Sausages rescued! +200', dogLost: 'The dog got away with the sausages',
+      gnome: (n, of) => `You found a garden gnome! ${n} of ${of}`, bGnomes: 'ALL THE GNOMES!', driftPark: 'Handbrake parking',
       honk: 'Beep beep!', vip: 'A VIP guest: double points, less patience',
       ranks: ['Trainee', 'Gate keeper', 'Camp host', 'Site warden', 'Camp manager', 'Legend of Vitosha'],
       rankNext: (n, r) => `${n} more for ${r}`, short: (n) => `only ${n} short of your best`,
@@ -116,6 +118,7 @@
         streak5: 'В серия: пет чисти паркирания поред', streak9: 'Неудържим: стигнете множител ×3', night: 'Нощна птица: чисто паркиране по тъмно',
         vip: 'Червен килим: перфектно паркиране за VIP гост', tips: 'Джобни: десет бакшиша в една смяна', gentle: 'Внимателен шофьор: осем гости без удар и без стреснат човек',
         ten: 'Пълен къмпинг: десет гости в една смяна', twenty: 'Герой на пиковия час: двайсет гости в една смяна',
+        gnomes: 'Ловец на джуджета: намерете десетте скрити джуджета', driftpark: 'Паркиране с ръчна: влезте с плъзгане в чисто паркиране',
         errand: 'Рум сървис: пет поръчки в една смяна', dog: 'Герой на наденичките: хванете кучето крадец', host: 'Домакин на къмпинга: 1500 точки в една смяна', legend: 'Легенда на Витоша: 8000 точки в една смяна',
       },
       quick: 'Светкавично!', close2: 'В последната секунда!', wave: (n) => `${n} паркирани гости. Следващите бързат повече`,
@@ -157,6 +160,7 @@
       radioOff: 'Радиото е изключено',
       rainOn: 'Дъжд! Пътищата са хлъзгави', rainBonus: 'Дъжд +20%', bRush: 'БАКШИШИ!', bDog: 'ДОБРО КУЧЕ!',
       dogOn: 'Куче избяга с наденичките! Настигнете го за награда', dogWon: 'Наденичките са спасени! +200', dogLost: 'Кучето избяга с наденичките',
+      gnome: (n, of) => `Намерихте градинско джудже! ${n} от ${of}`, bGnomes: 'ВСИЧКИ ДЖУДЖЕТА!', driftPark: 'Паркиране с ръчна',
       honk: 'Бийп-бийп!', vip: 'VIP гост: двойни точки, по-малко търпение',
       ranks: ['Стажант', 'Пазач на портала', 'Домакин на къмпинга', 'Управител на терена', 'Директор на къмпинга', 'Легенда на Витоша'],
       rankNext: (n, r) => `още ${n} до „${r}“`, short: (n) => `само ${n} до рекорда ви`,
@@ -179,7 +183,7 @@
         note: `Този къмпинг е измислен. Истинският идва в София, от ${BY}.`,
         cardTitle: 'Вашият къмпинг дотук',
         stParked: 'Паркирани гости', stOnsite: 'В къмпинга сега', stAcc: 'Средна точност', stSpd: 'Средна бързина',
-        stTop: 'Най-добро паркиране', stStreak: 'Най-дълга чиста серия', stPerfect: 'Перфектни паркирания', legendTitle: 'Какво има по пътищата',
+        stTop: 'Най-добро паркиране', stStreak: 'Най-дълга чиста серия', stPerfect: 'Перфектни паркирания', stGnomes: 'Намерени скрити джуджета', lgGnome: 'Из къмпинга са скрити десет градински джуджета. Струва си да ги намерите.', legendTitle: 'Какво има по пътищата',
         lgTip: 'Жълта монета: 25 точки. Синя: 8 секунди повече.', lgBoost: 'Лилав жетон: бонус. Ускорение, спряно време, двойни точки, автопаркиране, щит или дъжд от бакшиши.',
         lgJob: 'Зелен знак: поръчка. Вземете и закарайте до мястото за 120 точки.', lgDog: 'Кучето с наденичките: настигнете го за 200 точки.',
         lgWarden: 'Червени звезди: управителят ви гони. Глобата боли, чистото паркиране го успокоява.', lgRain: 'В дъжд и по тъмно паркирането носи повече, но пътят се хлъзга.', stErrands: 'Изпълнени поръчки', stFines: 'Глоби от управителя', lbTitle: 'Най-добрите къмпингари', lbWeek: 'Тази седмица', lbAll: 'За всички времена', lbPost: 'Запиши резултата ми', stTips: 'Събрани бакшиши', stBumps: 'Удари', stScares: 'Стреснати хора', stGaveUp: 'Гости, които се отказаха да чакат',
@@ -446,7 +450,7 @@
   }
   function drawFx() {
     ctx.save();
-    if (mode === 'play') drawTips();
+    if (mode === 'play') { drawGnomes(); drawTips(); }
     if (car && car.vip) {   // a gold star rides above a VIP
       const [x, y] = P(car.x, car.y, 3.2);
       ctx.font = '900 30px Overpass, sans-serif'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; ctx.lineJoin = 'round';
@@ -1016,6 +1020,37 @@
     ctx.restore();
   }
 
+  // ---------- hidden gnomes ----------
+  // Ten garden gnomes stand in out-of-the-way corners. Each is found once and stays found between visits.
+  const GNOMES = [[60, 15.5], [88, 74], [12, 64], [108, 64], [112, 8], [8, 8], [52, 73], [36, 73], [84, 18.5], [100, 84]];
+  const found = new Set();
+  let lastDrift = -99;
+  try { JSON.parse(localStorage.getItem('camp-gnomes') || '[]').forEach((i) => found.add(i)); } catch (e) { /* private window */ }
+  function stepGnomes() {
+    if (found.size === GNOMES.length) return;
+    const rects = rectsOf(car);
+    GNOMES.forEach(([x, y], i) => {
+      if (found.has(i) || Math.abs(x - car.x) > 12 || Math.abs(y - car.y) > 12 || !rects.some((r) => rectCircle(r, x, y, 2.8))) return;
+      found.add(i);
+      try { localStorage.setItem('camp-gnomes', JSON.stringify([...found])); } catch (e) { /* private window */ }
+      total += 100; sfx.best(); pop(x, y, '+100', '#e2553d', 30); toast(L.gnome(found.size, GNOMES.length), 2800);
+      if (found.size === GNOMES.length) { total += 1000; banner(L.bGnomes); award('gnomes'); }
+      hud();
+    });
+  }
+  function drawGnomes() {
+    const k = cam.s;
+    GNOMES.forEach(([x, y], i) => {
+      if (found.has(i)) return;
+      const [bx, by] = P(x, y), [fx, fy] = P(x, y, 0.6), [tx, ty] = P(x, y, 1.5);
+      if (bx < -20 || bx > vw + 20 || by < -20 || by > vh + 20) return;
+      ctx.strokeStyle = '#12211a'; ctx.lineWidth = 1.5; ctx.lineJoin = 'round';
+      ctx.fillStyle = '#3f6fb0'; ctx.beginPath(); ctx.arc(bx, by, 0.36 * k, 0, TAU); ctx.fill(); ctx.stroke();
+      ctx.fillStyle = '#f6f1df'; ctx.beginPath(); ctx.arc(fx, fy, 0.3 * k, 0, TAU); ctx.fill(); ctx.stroke();
+      ctx.fillStyle = '#e2553d'; ctx.beginPath(); ctx.moveTo(fx - 0.3 * k, fy - 0.1 * k); ctx.lineTo(tx, ty - 0.5 * k); ctx.lineTo(fx + 0.3 * k, fy - 0.1 * k); ctx.closePath(); ctx.fill(); ctx.stroke();
+    });
+  }
+
   // ---------- simulation ----------
   function step(dt) {
     clock += dt;
@@ -1045,7 +1080,7 @@
 
     hornCool -= dt;
     if (keys.horn && hornCool <= 0) honk();
-    stepTips(); stepJobs(); stepThief(dt);
+    stepTips(); stepJobs(); stepThief(dt); stepGnomes();
     boost.speed -= dt; boost.freeze -= dt; driftCool -= dt; boostChips();
     if (car.auto) { stepAuto(dt); return; }
     if (boost.auto && autoPark()) return;
@@ -1095,6 +1130,7 @@
         break;
       }
     }
+    if (hb && Math.abs(wrap(car.th - car.vh)) > 0.4) lastDrift = clock;
     if (hb && driftCool <= 0 && Math.abs(wrap(car.th - car.vh)) > 0.55) { driftCool = 2.5; total += 10; pop(car.x, car.y, `${L.drift} +10`, '#f6f1df', 22); hud(); }
     const wp = wheelPoints(car);   // braking hard from speed leaves rubber behind
     if (car._w && car.braking && Math.abs(v0) > 3.5) for (let i = 0; i < wp.length; i++) skids.push({ a: car._w[i], b: wp[i], t: clock });
@@ -1160,6 +1196,7 @@
     if (boost.double) boost.double--;
     const quick = speed >= 85 ? L.quick : speed <= 12 ? L.close2 : '';   // very fast, or at the last second: a little extra
     if (quick) { total += 30; pop(r.cx, r.cy, `${quick} +30`, '#f6f1df', 22, dark ? 100 : 74); }
+    if (clean && clock - lastDrift < 4) { total += 50; pop(r.cx, r.cy, `${L.driftPark} +50`, '#f6f1df', 22, quick ? 126 : 100); award('driftpark'); }
     total += pts; stats.streak = Math.max(stats.streak, streak); if (perfect) stats.perfect++;
     pop(r.cx, r.cy, `+${pts}`, '#f4c531', 40);
     if (perfect) { pop(r.cx, r.cy, L.perfect, '#f6f1df', 26, 40); confetti(r.cx, r.cy); remark(L.nice, r.cx, r.cy); }
@@ -1940,7 +1977,7 @@
     set('st-score', now); set('st-best', top);
     set('st-parked', n); set('st-onsite', guests.filter((g) => !g.packing && !g.leaving).length);
     set('st-acc', n ? `${Math.round(stats.acc / n)} / 100` : '–'); set('st-spd', n ? `${Math.round(stats.spd / n)} / 100` : '–');
-    set('st-top', n ? stats.top : '–'); set('st-streak', stats.streak); set('st-perfect', stats.perfect); set('st-tips', stats.tips); set('st-fines', stats.fines); set('st-errands', stats.errands);
+    set('st-top', n ? stats.top : '–'); set('st-streak', stats.streak); set('st-perfect', stats.perfect); set('st-tips', stats.tips); set('st-fines', stats.fines); set('st-errands', stats.errands); set('st-gnomes', `${found.size}/${GNOMES.length}`);
     set('st-rank', rankLine(now, startBest));
     boardFor(over);
     const ids = Object.keys(L.badges), list = $('bd-list');
@@ -2050,5 +2087,5 @@
   requestAnimationFrame(tick);
 
   // For automated checks only: /?debug exposes the state.
-  if (location.search.includes('debug')) window.camp = { get car() { return car; }, get target() { return target; }, get parked() { return parkedCount; }, get score() { return score(); }, get night() { return night; }, people, skids, packUp, guests, pitches, stats, rectsOf, rectRect, keys, blocked, livingRect, corners, setClock: (t) => { clock = t; }, setPatience: (t) => { patience = t; }, get lives() { return lives; }, get thief() { return thief; }, get rain() { return rain; }, setNext: (o) => { if (o.rain !== undefined) nextRain = o.rain; if (o.thief !== undefined) nextThief = o.thief; }, get job() { return job; }, setNextJob: (t) => { nextJob = t; }, tuneRadio, get station() { return station; }, get heat() { return heat; }, get warden() { return warden; }, trouble, boost, chats, takeBoost, say, addTip, earned, award, tips, honk, rankLine, get streak() { return streak; }, get mode() { return mode; }, get patienceMax() { return patienceMax; }, pops, bits, give: (kind) => { car = makeVehicle(kind, 61.8, 80.5, -Math.PI / 2); car.born = -9; }, next: () => { car = null; nextGuest(); } };
+  if (location.search.includes('debug')) window.camp = { get car() { return car; }, get target() { return target; }, get parked() { return parkedCount; }, get score() { return score(); }, get night() { return night; }, people, skids, packUp, guests, pitches, stats, rectsOf, rectRect, keys, blocked, livingRect, corners, setClock: (t) => { clock = t; }, setPatience: (t) => { patience = t; }, get lives() { return lives; }, found, GNOMES, get thief() { return thief; }, get rain() { return rain; }, setNext: (o) => { if (o.rain !== undefined) nextRain = o.rain; if (o.thief !== undefined) nextThief = o.thief; }, get job() { return job; }, setNextJob: (t) => { nextJob = t; }, tuneRadio, get station() { return station; }, get heat() { return heat; }, get warden() { return warden; }, trouble, boost, chats, takeBoost, say, addTip, earned, award, tips, honk, rankLine, get streak() { return streak; }, get mode() { return mode; }, get patienceMax() { return patienceMax; }, pops, bits, give: (kind) => { car = makeVehicle(kind, 61.8, 80.5, -Math.PI / 2); car.born = -9; }, next: () => { car = null; nextGuest(); } };
 })();
