@@ -548,6 +548,7 @@
   }
   function drawFx() {
     ctx.save();
+    drawAmbient();
     if (mode === 'play') { drawWash(); drawRamps(); }
     drawProps();
     if (mode === 'play') { drawGnomes(); drawTips(); }
@@ -1257,7 +1258,7 @@
     { kind: 'biker', x: NODES.F[0], y: NODES.F[1], th: Math.PI, at: 'F', to: 'E', sp: 3, hl: 0.95, hw: 0.45, paint: '#3f7fa6' },
     { kind: 'cyclist', x: NODES.B[0], y: NODES.B[1], th: Math.PI, at: 'B', to: 'A', sp: 2.1, hl: 0.8, hw: 0.3, paint: '#d5503c', jersey: '#f0b83a' },
     { kind: 'cyclist', x: NODES.D[0], y: NODES.D[1], th: 0, at: 'D', to: 'E', sp: 1.8, hl: 0.8, hw: 0.3, paint: '#5f9070', jersey: '#8b6fae' },
-    { kind: 'hikers', x: NODES.E[0], y: NODES.E[1], th: -Math.PI / 2, at: 'E', to: 'B', sp: 1.0, hl: 0.5, hw: 0.7 },
+    { kind: 'hikers', x: NODES.E[0], y: NODES.E[1], th: -Math.PI / 2, at: 'E', to: 'B', sp: 1.0, hl: 0.8, hw: 1.0 },
   ];
   const roamRect = (t) => ({ cx: t.x, cy: t.y, hl: t.hl, hw: t.hw, a: t.th });
   function stepRoamers(dt) {
@@ -1457,16 +1458,16 @@
     ctx.beginPath(); ctx.moveTo(...RP(r, -0.5, 0, 0.6)); ctx.lineTo(...RP(r, 0.5, 0, 0.6)); ctx.stroke();                                          // frame
     ctx.strokeStyle = '#22262a'; ctx.beginPath(); ctx.moveTo(...RP(r, 0.45, -0.25, 1.0)); ctx.lineTo(...RP(r, 0.45, 0.25, 1.0)); ctx.stroke();    // handlebars
     ctx.lineWidth = 1; ctx.lineCap = 'butt';
-    disc(r, -0.12, sway, 1.2, 0.24, t.jersey);
-    disc(r, 0.16, sway, 1.5, 0.15, '#f4c531');                                                         // helmet
+    disc(r, -0.12, sway, 1.2, 0.34, t.jersey);
+    disc(r, 0.2, sway, 1.5, 0.21, '#f4c531');                                                         // helmet
   }
   function drawHikers(r, t) {   // two backpackers side by side
-    [[-0.36, '#c8553d', '#3f7fa6'], [0.36, '#5f9070', '#d9a13b']].forEach(([w, pack, shirt], i) => {
-      const bob = Math.sin(clock * 7 + i * 2) * 0.05;
-      disc(r, -0.26, w, 0.95, 0.27, pack);                                                             // the rucksack on the back
-      disc(r, -0.42, w, 1.15, 0.13, shade(pack, 0.8));                                                 // bedroll
-      disc(r, 0.02 + bob, w, 1.0, 0.22, shirt);
-      disc(r, 0.1 + bob, w, 1.5, 0.14, i ? '#e2b48c' : '#b9805a');
+    [[-0.55, '#c8553d', '#3f7fa6'], [0.55, '#5f9070', '#d9a13b']].forEach(([w, pack, shirt], i) => {
+      const bob = Math.sin(clock * 7 + i * 2) * 0.08;
+      disc(r, -0.42, w, 0.95, 0.44, pack);                                                             // the rucksack on the back
+      disc(r, -0.7, w, 1.15, 0.2, shade(pack, 0.8));                                                 // bedroll
+      disc(r, 0.04 + bob, w, 1.0, 0.36, shirt);
+      disc(r, 0.16 + bob, w, 1.5, 0.23, i ? '#e2b48c' : '#b9805a');
     });
   }
   const ICE_SKIN = { paint: '#f2a7c0', extra: 2, side: 1, steer: 0 };
@@ -1586,6 +1587,53 @@
     TRICKS.forEach((k) => { const li = document.createElement('li'); li.textContent = tricks.has(k) ? L.tricks[k] : '???'; if (tricks.has(k)) li.className = 'got'; ul.append(li); });
   }
   $('play-fly').addEventListener('click', startFlight);
+
+  // ---------- small life ----------
+  // Nothing here does anything: ducks on the pond, butterflies by day, smoke from the fire in the evening and a
+  // skein of birds that crosses the camp now and then. It is only there to be looked at.
+  const ducks = [0, 2.1, 4.2].map((a, i) => ({ a, r: 0.35 + i * 0.16, s: (i % 2 ? -1 : 1) * (0.05 + i * 0.015) }));
+  const flutter = Array.from({ length: 16 }, (_, i) => ({ x: 6 + Math.random() * (W - 12), y: 6 + Math.random() * (H - 12), p: Math.random() * TAU, c: ['#f6f1df', '#f4c531', '#e8855f', '#9fd3ee'][i % 4] }));
+  const smoke = [];
+  let flock = null, nextFlock = 20, smokeT = 0;
+  function stepAmbient(dt) {
+    for (const d of ducks) d.a += d.s * dt;
+    if (!flock && clock > nextFlock) { const fromLeft = Math.random() < 0.5; flock = { x: fromLeft ? -12 : W + 12, y: 10 + Math.random() * (H - 30), vx: (fromLeft ? 1 : -1) * 7, vy: 1.2 - Math.random() * 2.4 }; }
+    if (flock) { flock.x += flock.vx * dt; flock.y += flock.vy * dt; if (flock.x < -20 || flock.x > W + 20) { flock = null; nextFlock = clock + 45 + Math.random() * 50; } }
+    if (night > 0.2 && !reduceMotion && (smokeT -= dt) <= 0) { smokeT = 0.35; smoke.push({ x: fire.x + (Math.random() - 0.5) * 0.4, y: fire.y, z: 0.6, life: 4.5, d: Math.random() - 0.5 }); }
+    for (let i = smoke.length - 1; i >= 0; i--) { const s = smoke[i]; s.z += 1.1 * dt; s.x += (0.35 + s.d * 0.3) * dt; if ((s.life -= dt) <= 0) smoke.splice(i, 1); }
+  }
+  function drawAmbient() {
+    const k = cam.s;
+    ctx.lineJoin = 'round';
+    for (const d of ducks) {   // ducks keep to the middle of the pond
+      const x0 = pond.x + Math.cos(d.a) * pond.rx * d.r, y0 = pond.y + Math.sin(d.a) * pond.ry * d.r, [x, y] = P(x0, y0), h = d.a + (d.s > 0 ? Math.PI / 2 : -Math.PI / 2);
+      if (x < -20 || x > vw + 20 || y < -20 || y > vh + 20) continue;
+      ctx.strokeStyle = 'rgba(246,241,223,0.35)'; ctx.lineWidth = 1.5; ctx.beginPath(); ctx.ellipse(x, y, 0.75 * k, 0.5 * k, 0, 0, TAU); ctx.stroke();   // its ripple
+      ctx.save(); ctx.translate(x, y); ctx.rotate(Math.atan2(Math.sin(h) * pond.ry, Math.cos(h) * pond.rx));
+      ctx.fillStyle = '#f6f1df'; ctx.strokeStyle = 'rgba(18,33,26,0.5)'; ctx.lineWidth = 1; ctx.beginPath(); ctx.ellipse(0, 0, 0.36 * k, 0.24 * k, 0, 0, TAU); ctx.fill(); ctx.stroke();
+      ctx.fillStyle = '#5a7d4a'; ctx.beginPath(); ctx.arc(0.32 * k, 0, 0.15 * k, 0, TAU); ctx.fill();
+      ctx.fillStyle = '#f0b83a'; ctx.beginPath(); ctx.moveTo(0.44 * k, -0.06 * k); ctx.lineTo(0.6 * k, 0); ctx.lineTo(0.44 * k, 0.06 * k); ctx.closePath(); ctx.fill();
+      ctx.restore();
+    }
+    if (night < 0.35 && !reduceMotion) for (const f of flutter) {   // butterflies, by day
+      const x0 = f.x + Math.sin(clock * 0.5 + f.p) * 4 + Math.sin(clock * 1.7 + f.p * 3) * 0.8, y0 = f.y + Math.cos(clock * 0.37 + f.p * 2) * 4, [x, y] = P(x0, y0, 0.8);
+      if (x < 0 || x > vw || y < 0 || y > vh) continue;
+      const flap = 0.25 + 0.75 * Math.abs(Math.sin(clock * 9 + f.p)), r = 0.2 * k;
+      ctx.globalAlpha = 1 - night / 0.35; ctx.fillStyle = f.c;
+      ctx.beginPath(); ctx.ellipse(x - r * flap * 0.6, y, r * flap, r * 0.8, 0, 0, TAU); ctx.ellipse(x + r * flap * 0.6, y, r * flap, r * 0.8, 0, 0, TAU); ctx.fill();
+      ctx.globalAlpha = 1;
+    }
+    for (const s of smoke) {   // woodsmoke drifting up from the fire
+      const [x, y] = P(s.x, s.y, s.z), a = clamp(s.life / 4.5, 0, 1);
+      ctx.fillStyle = `rgba(226,224,214,${0.28 * a * Math.min(1, night * 2)})`; ctx.beginPath(); ctx.arc(x, y, k * (0.35 + (1 - a) * 0.9), 0, TAU); ctx.fill();
+    }
+    if (flock) for (let i = 0; i < 5; i++) {   // five birds in a V, and their shadows on the ground
+      const row = Math.ceil(i / 2), side = i % 2 ? 1 : -1, dir = Math.sign(flock.vx), bx = flock.x - dir * row * 1.6, by = flock.y + side * row * 1.2;
+      const [sx, sy] = P(bx + 3, by + 4), [x, y] = P(bx, by, 9), w = (0.55 + 0.2 * Math.sin(clock * 7 + i)) * k;
+      ctx.strokeStyle = 'rgba(18,33,26,0.18)'; ctx.lineWidth = 2; ctx.beginPath(); ctx.moveTo(sx - w, sy - w * 0.3); ctx.lineTo(sx, sy); ctx.lineTo(sx + w, sy - w * 0.3); ctx.stroke();
+      ctx.strokeStyle = '#2b2f33'; ctx.lineWidth = 2.2; ctx.beginPath(); ctx.moveTo(x - w, y - w * 0.3 * dir); ctx.lineTo(x, y); ctx.lineTo(x + w, y - w * 0.3 * dir); ctx.stroke();
+    }
+  }
 
   // ---------- gamepad ----------
   // Left stick or d-pad steers, right trigger drives, left trigger reverses, A is the handbrake, X the horn.
@@ -1753,7 +1801,7 @@
       }
     }
     for (let i = ghosts.length - 1; i >= 0; i--) { ghosts[i].alpha -= dt / 1.2; if (ghosts[i].alpha <= 0) ghosts.splice(i, 1); }
-    stepPeople(dt); stepChats(dt); stepProps(dt);
+    stepPeople(dt); stepChats(dt); stepProps(dt); stepAmbient(dt);
     if (mode === 'play') { stepWarden(dt); stepWeather(dt); stepIce(dt); stepRoamers(dt); }
     if (mode === 'play') stats.time += dt;
     if (mode === 'play' && flying && plane) { stepPlane(dt); return; }
