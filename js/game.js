@@ -133,6 +133,7 @@
       flyHint: 'Steer left and right. It cannot stop. The children are watching', trickNew: (n) => `You found one: ${n}`, secretsTitle: 'Pilot\'s secrets',
       tricks: { circle: 'A full circle', eight: 'A figure of eight', pond: 'A low pass over the pond', flypast: 'A flypast down the main road', lap: 'A lap round the whole camp', night: 'A night flight' },
       sayPlane: ['Wow!', 'Again! Again!', 'Look, a plane!', 'Do another one!'], sayKid: ['A plane!', 'Hello up there!', 'Look! Look!'],
+      sayArrive: ['What a lovely spot!', 'Finally, holidays.', 'Kettle on!', 'Thank you, that was easy.', 'I can see the mountain from here.', 'Who has the tent pegs?'],
       honk: 'Beep beep!', vip: 'A VIP guest: double points, less patience',
       ranks: ['Trainee', 'Gate keeper', 'Camp host', 'Site warden', 'Camp manager', 'Legend of Vitosha'],
       rankNext: (n, r) => `${n} more for ${r}`, short: (n) => `only ${n} short of your best`,
@@ -252,6 +253,7 @@
       flyHint: 'Завивайте наляво и надясно. Самолетът не може да спре. Децата гледат', trickNew: (n) => `Открихте: ${n}`, secretsTitle: 'Тайните на пилота',
       tricks: { circle: 'Пълен кръг', eight: 'Осморка', pond: 'Нисък полет над езерцето', flypast: 'Прелитане над главната алея', lap: 'Обиколка на целия къмпинг', night: 'Нощен полет' },
       sayPlane: ['Уау!', 'Пак! Пак!', 'Вижте, самолет!', 'Още веднъж!'], sayKid: ['Самолет!', 'Ехо, там горе!', 'Виж! Виж!'],
+      sayArrive: ['Какво хубаво място!', 'Най-после почивка.', 'Слагам кафето!', 'Благодаря, лесно беше.', 'Оттук се вижда планината.', 'У кого са колчетата?'],
       honk: 'Бийп-бийп!', vip: 'VIP гост: двойни точки, по-малко търпение',
       ranks: ['Стажант', 'Пазач на портала', 'Домакин на къмпинга', 'Управител на терена', 'Директор на къмпинга', 'Легенда на Витоша'],
       rankNext: (n, r) => `още ${n} до „${r}“`, short: (n) => `само ${n} до рекорда ви`,
@@ -2075,6 +2077,7 @@
     target.guest = stay; guests.push(stay);
     parkedCount++; stats.acc += accuracy; stats.spd += speed; stats.top = Math.max(stats.top, stay.points);
     parkBadges({ clean, perfect, towing, vip, night: dark });
+    if (!demo && Math.random() < 0.6) { const ax = r.cx, ay = r.cy; setTimeout(() => { if (mode === 'play' && !people.some((o) => o.sayT > clock && Math.hypot(o.x - ax, o.y - ay) < 12)) remark(L.sayArrive, ax, ay, 7); }, 3200); }
     toast(back ? L.lifeBack : L.parked(pts, accuracy, speed, mult), back ? 2600 : 2000);
     car = null;
     setTimeout(() => { if (mode === 'play' && !car) nextGuest(); }, 1300);
