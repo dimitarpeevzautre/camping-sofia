@@ -138,7 +138,7 @@
       rankNext: (n, r) => `${n} more for ${r}`, short: (n) => `only ${n} short of your best`,
       perfect: 'Perfect!', newBest: 'New best score!', lifeBack: 'Five clean in a row: ♥ back',
       overTitle: 'Shift over', again: 'Play again', cardTitle: 'Your camp so far', close: 'Back to parking',
-      careful: (who) => `Careful, that was a ${who}! −60`,
+      careful: (who) => `Careful, that was a ${who}! −20`,
       who: { kid: 'child', cat: 'cat', dog: 'dog', adult: 'guest' },
       share: (n) => `I scored ${n} parking campers at Camping Sofia. Can you beat it?`,
       copy: 'Copy text', copied: 'Copied', copyFailed: 'Could not copy',
@@ -257,7 +257,7 @@
       rankNext: (n, r) => `още ${n} до „${r}“`, short: (n) => `само ${n} до рекорда ви`,
       perfect: 'Перфектно!', newBest: 'Нов рекорд!', lifeBack: 'Пет чисти поред: +♥',
       overTitle: 'Смяната свърши', again: 'Играйте пак', cardTitle: 'Вашият къмпинг дотук', close: 'Обратно към паркирането',
-      careful: (who) => `Внимавайте, това беше ${who}! −60`,
+      careful: (who) => `Внимавайте, това беше ${who}! −20`,
       who: { kid: 'дете', cat: 'котка', dog: 'куче', adult: 'гост' },
       share: (n) => `Събрах ${n} точки с паркиране на кемпери в Camping Sofia. Можеш ли повече?`,
       copy: 'Копирайте текста', copied: 'Копирано', copyFailed: 'Копирането не успя',
@@ -1927,8 +1927,8 @@
       if (blocked(car)) {
         car.x = px; car.y = py; car.th = pth; car.ph = pph; car.vh = pvh;
         if (Math.abs(v0) > 1.2 && bumpCool <= 0) {
-          const cost = Math.round(10 + Math.abs(v0) * 4);
-          bumpCool = 0.5; shake = reduceMotion ? 0 : Math.min(1, Math.abs(v0) / 6);
+          const cost = Math.round(5 + Math.abs(v0) * 2);
+          bumpCool = 0.5; shake = reduceMotion ? 0 : Math.min(0.4, Math.abs(v0) / 12);
           if (boost.shield) { boost.shield--; sfx.bump(Math.abs(v0)); pop(car.x, car.y, L.shielded, '#b98ce0', 26); }
           else { trouble(0.7); bumps++; damage += cost; stats.bumps++; streak = 0; sfx.bump(Math.abs(v0)); pop(car.x, car.y, `−${cost}`, '#e2553d', 26); toast(L.bump(cost), 1100); hud(); }
         }
@@ -2114,9 +2114,9 @@
   // The car ran into someone, or nearly: it stops dead, they jump clear, and it costs points.
   function startle(o) {
     const safe = boost.shield > 0;
-    if (safe) { boost.shield--; pop(o.x, o.y, L.shielded, '#b98ce0', 26); } else { regard(car.kind, -1); trouble(1.2); damage += 60; stats.scares++; streak = 0; pop(o.x, o.y, '−60', '#e2553d', 26); }
+    if (safe) { boost.shield--; pop(o.x, o.y, L.shielded, '#b98ce0', 26); } else { regard(car.kind, -1); trouble(1.2); damage += 20; stats.scares++; streak = 0; pop(o.x, o.y, '−20', '#e2553d', 26); }
     sfx.startle(); say(o, pick(L.ouch)); o.cool = 2.5; o.flee = 1.2; o.wait = 0;
-    car.v = 0; shake = reduceMotion ? 0 : 0.6;
+    car.v = 0; shake = reduceMotion ? 0 : 0.2;
     const a = Math.atan2(o.y - car.y, o.x - car.x);
     o.path.unshift([o.x + Math.cos(a) * 2.5, o.y + Math.sin(a) * 2.5]);
     if (!safe && Math.random() < 0.5) boss('scare');
