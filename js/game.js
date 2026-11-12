@@ -1162,8 +1162,9 @@
   // ---------- the little map ----------
   // Top left, once the name plate has stepped aside: roads, the pitch to reach and everything worth chasing.
   let playT = 0;
+  const SHOT = location.search.includes('shot');   // ?debug&shot: no map, goals or pointer, for taking the preview picture
   function drawMap() {
-    if (mode !== 'play' || clock - playT < 5.6) return;
+    if (SHOT || mode !== 'play' || clock - playT < 5.6) return;
     const k = Math.min(1.15, (vw * 0.34) / W), x0 = 12, y0 = 12, mw = W * k, mh = H * k;
     const dot = (x, y, r, c) => { ctx.fillStyle = c; ctx.beginPath(); ctx.arc(x0 + x * k, y0 + y * k, r, 0, TAU); ctx.fill(); };
     ctx.save();
@@ -2930,7 +2931,7 @@
     drawFx();
 
     // if the pitch is off screen, point at it
-    if (mode === 'play' && target && car) {
+    if (!SHOT && mode === 'play' && target && car) {
       const [tx, ty] = P(target.x + target.w / 2, target.y + target.d / 2), m = 46;
       if (tx < m || tx > vw - m || ty < m + 60 || ty > vh - m) {
         const ax = clamp(tx, m, vw - m), ay = clamp(ty, m + 70, vh - m - 90), a = Math.atan2(ty - ay, tx - ax);
