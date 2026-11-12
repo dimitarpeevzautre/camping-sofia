@@ -147,6 +147,11 @@ button.plate:active { transform: translateY(3px); box-shadow: none; }
 .totals .plate .v { font-size: 2rem; }
 .rank { margin: 12px 0 0; font-weight: 800; text-align: center; }
 .rank:empty { display: none; }
+.runs { margin: 0; padding: 0 0 0 1.6em; font-size: 0.85rem; font-variant-numeric: tabular-nums; }
+.runs:empty { display: none; }
+.runs li b { float: right; }
+.runs li.me { background: var(--plate); font-weight: 800; }
+#runs-title[hidden] { display: none; }
 .bossline { margin: 8px 0 0; text-align: center; font-style: italic; font-weight: 600; }
 .bossline:empty { display: none; }
 .lb[hidden], #lb-form[hidden] { display: none; }
