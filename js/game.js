@@ -198,12 +198,12 @@
         h2: 'Истинският къмпинг още се строи.',
         intro: 'Дотогава гостите идват в този. Закарайте всеки до мястото, което свети. Паркирайте право и бързо за точки; чистите паркирания поред ги умножават. Ударите струват скъпо, а трима гости, които се откажат да чакат, слагат край на смяната.',
         play: 'Започнете да паркирате',
-        keys: 'Стрелки или WASD за шофиране. Интервал е ръчната спирачка: на скорост завърта задницата. H е клаксон, M спира звука, R сменя радиото.',
+        keys: 'Стрелки или WASD за шофиране. Интервал е ръчната спирачка: на скорост завърта задницата. H е клаксон, M спира звука, R сменя радиото. Работи и с геймпад.',
         by: `Camping Sofia е проект на ${BY}`,
         note: `Този къмпинг е измислен. Истинският идва в София, от ${BY}.`,
         cardTitle: 'Вашият къмпинг дотук',
         stParked: 'Паркирани гости', stOnsite: 'В къмпинга сега', stAcc: 'Средна точност', stSpd: 'Средна бързина',
-        stTop: 'Най-добро паркиране', stStreak: 'Най-дълга чиста серия', stPerfect: 'Перфектни паркирания', stGnomes: 'Намерени скрити джуджета', lgGnome: 'Из къмпинга са скрити десет градински джуджета. Струва си да ги намерите.', legendTitle: 'Какво има по пътищата',
+        stTop: 'Най-добро паркиране', stStreak: 'Най-дълга чиста серия', stPerfect: 'Перфектни паркирания', lgIce: 'Колата за сладолед кара бавно и не бърза за никъде. Заобиколете я.', stGnomes: 'Намерени скрити джуджета', lgGnome: 'Из къмпинга са скрити десет градински джуджета. Струва си да ги намерите.', legendTitle: 'Какво има по пътищата',
         lgTip: 'Жълта монета: 25 точки. Синя: 8 секунди повече.', lgBoost: 'Лилав жетон: бонус. Ускорение, спряно време, двойни точки, автопаркиране, щит или дъжд от бакшиши.',
         lgJob: 'Зелен знак: поръчка. Вземете и закарайте до мястото за 120 точки.', lgDog: 'Кучето с наденичките: настигнете го за 200 точки.',
         lgWarden: 'Червени звезди: управителят ви гони. Глобата боли, чистото паркиране го успокоява.', lgRain: 'В дъжд и по тъмно паркирането носи повече, но пътят се хлъзга.', stErrands: 'Изпълнени поръчки', stFines: 'Глоби от управителя', lbTitle: 'Най-добрите къмпингари', lbWeek: 'Тази седмица', lbAll: 'За всички времена', lbPost: 'Запиши резултата ми', stTips: 'Събрани бакшиши', stBumps: 'Удари', stScares: 'Стреснати хора', stGaveUp: 'Гости, които се отказаха да чакат',
@@ -374,6 +374,7 @@
         if (Math.hypot(o.x - r.cx, o.y - r.cy) > 16) continue;
         for (const q of rectsOf(o)) if (rectRect(r, q)) return true;
       }
+      if (ice && v === car && Math.hypot(ice.x - r.cx, ice.y - r.cy) < 12 && rectRect(r, iceRect())) return true;
     }
     return false;
   }
@@ -484,7 +485,7 @@
       ctx.lineWidth = 6; ctx.strokeStyle = '#12211a'; ctx.strokeText(p.text, x, y - 34 - p.o - up);
       ctx.fillStyle = p.c; ctx.fillText(p.text, x, y - 34 - p.o - up);
     }
-    ctx.globalAlpha = 1; drawJob(); drawThief(); drawWarden(); drawRain(); drawBubbles(); drawMap();
+    ctx.globalAlpha = 1; drawJob(); drawThief(); if (mode === 'play') drawIce(); drawWarden(); drawRain(); drawBubbles(); drawMap();
     ctx.restore();
   }
 
@@ -1035,6 +1036,7 @@
     if (target) { ctx.fillStyle = Math.sin(clock * 6) > 0 ? '#f4c531' : '#f6f1df'; ctx.fillRect(x0 + target.x * k - 1, y0 + target.y * k - 1, target.w * k + 2, target.d * k + 2); }
     if (job) dot(job.carry ? job.dx : job.x, job.carry ? job.dy : job.y, 3.5, '#8fd18a');
     if (thief) dot(thief.x, thief.y, 3.5, '#c98a55');
+    if (ice) dot(ice.x, ice.y, 3, '#f2a7c0');
     if (warden) dot(warden.x, warden.y, 3.5, heat > 0 && Math.sin(clock * 14) > 0 ? '#e2553d' : '#7fa6ff');
     if (car) {
       const cx = x0 + car.x * k, cy = y0 + car.y * k, c = Math.cos(car.th), s = Math.sin(car.th);
@@ -1075,6 +1077,52 @@
     });
   }
 
+  // ---------- the ice-cream van ----------
+  // Slow traffic: it trundles round the lanes playing its tune, and it is very much in the way.
+  let ice = null, jingleT = 0;
+  const iceRect = () => ({ cx: ice.x, cy: ice.y, hl: 2.4, hw: 1.05, a: ice.th });
+  function stepIce(dt) {
+    if (!ice) { ice = { x: NODES.C[0], y: NODES.C[1], th: Math.PI, at: 'C', to: 'B' }; return; }
+    const t = ice;
+    if (nodeGap(t.to, t.x, t.y) < 0.3) {
+      const from = t.at, ways = [...LINKS[t.to]].filter((k) => k !== 'G' && k !== from);
+      t.at = t.to; t.to = ways.length ? pick(ways) : from;
+    }
+    const gx = NODES[t.to][0] - t.x, gy = NODES[t.to][1] - t.y, gd = Math.hypot(gx, gy);
+    t.th = wrap(t.th + clamp(wrap(Math.atan2(gy, gx) - t.th), -1.6 * dt, 1.6 * dt));
+    // it waits for anything in front of it: the driver, guests driving out, people
+    const fx = Math.cos(t.th), fy = Math.sin(t.th), ahead = (x, y, far) => { const dx = x - t.x, dy = y - t.y, a = dx * fx + dy * fy; return a > 0 && a < far && Math.abs(dx * fy - dy * fx) < 2.6; };
+    const held = (car && (ahead(car.x, car.y, 10) || Math.hypot(car.x - t.x, car.y - t.y) < 5)) || guests.some((g) => g.leave && ahead(g.x, g.y, 10)) || people.some((o) => !o.hidden && ahead(o.x, o.y, 5));
+    if (!held && Math.abs(wrap(Math.atan2(gy, gx) - t.th)) < 0.5) { const sp = Math.min(3.2 * dt, gd); t.x += fx * sp; t.y += fy * sp; }
+    if (car && (jingleT -= dt) <= 0 && Math.hypot(car.x - t.x, car.y - t.y) < 28) {
+      jingleT = 5;
+      [12, 16, 19, 16, 12, 19, 24].forEach((n, i) => note(hz(n), i * 0.16, 0.14, 'sine', 0.05));
+    }
+  }
+  function drawIce() {
+    if (!ice) return;
+    const r = iceRect();
+    drawBox(r, 2.3, '#f6f1df', '#f2a7c0');
+    const [x, y] = P(ice.x, ice.y, 3.1), k = cam.s;   // the cone on the roof
+    ctx.strokeStyle = '#12211a'; ctx.lineWidth = 2; ctx.lineJoin = 'round';
+    ctx.fillStyle = '#d9a13b'; ctx.beginPath(); ctx.moveTo(x - 0.4 * k, y); ctx.lineTo(x + 0.4 * k, y); ctx.lineTo(x, y + 0.9 * k); ctx.closePath(); ctx.fill(); ctx.stroke();
+    ctx.fillStyle = '#f6f1df'; ctx.beginPath(); ctx.arc(x, y - 0.1 * k, 0.45 * k, 0, TAU); ctx.fill(); ctx.stroke();
+  }
+
+  // ---------- gamepad ----------
+  // Left stick or d-pad steers, right trigger drives, left trigger reverses, A is the handbrake, X the horn.
+  const padState = {};
+  function pollPad() {
+    const p = navigator.getGamepads ? [...navigator.getGamepads()].find(Boolean) : null;
+    if (!p) return;
+    const b = (i) => !!(p.buttons[i] && p.buttons[i].pressed), v = (i) => (p.buttons[i] ? p.buttons[i].value : 0), ax = p.axes[0] || 0;
+    const st = { left: ax < -0.3 || b(14), right: ax > 0.3 || b(15), up: v(7) > 0.2 || b(12), down: v(6) > 0.2 || b(13), brake: b(0), horn: b(2) };
+    for (const k in st) if (st[k] !== padState[k]) { padState[k] = st[k]; if (!paused) keys[k] = st[k]; }
+    const go = b(9) || b(0);
+    if (go && !padState.go) { if (mode === 'attract') start(); else if (mode === 'over' && card.open) card.close(); }
+    padState.go = go;
+  }
+
   // ---------- simulation ----------
   function step(dt) {
     clock += dt;
@@ -1098,7 +1146,7 @@
     }
     for (let i = ghosts.length - 1; i >= 0; i--) { ghosts[i].alpha -= dt / 1.2; if (ghosts[i].alpha <= 0) ghosts.splice(i, 1); }
     stepPeople(dt); stepChats(dt);
-    if (mode === 'play') { stepWarden(dt); stepWeather(dt); }
+    if (mode === 'play') { stepWarden(dt); stepWeather(dt); stepIce(dt); }
     if (mode === 'play') stats.time += dt;
     if (mode !== 'play' || !car) return;
 
@@ -2103,6 +2151,7 @@
   let last = performance.now();
   function tick(now) {
     const dt = Math.min(0.05, (now - last) / 1000); last = now;
+    pollPad();
     if (!paused) { step(dt); stepFx(dt); stepToasts(); }
     engineSound(dt); stepRadio(dt); rainSound();
     updateCamera(dt);
@@ -2113,5 +2162,5 @@
   requestAnimationFrame(tick);
 
   // For automated checks only: /?debug exposes the state.
-  if (location.search.includes('debug')) window.camp = { get car() { return car; }, get target() { return target; }, get parked() { return parkedCount; }, get score() { return score(); }, get night() { return night; }, people, skids, packUp, guests, pitches, stats, rectsOf, rectRect, keys, blocked, livingRect, corners, setClock: (t) => { clock = t; }, setPatience: (t) => { patience = t; }, get lives() { return lives; }, found, GNOMES, get thief() { return thief; }, get rain() { return rain; }, setNext: (o) => { if (o.rain !== undefined) nextRain = o.rain; if (o.thief !== undefined) nextThief = o.thief; }, get job() { return job; }, setNextJob: (t) => { nextJob = t; }, tuneRadio, get station() { return station; }, get heat() { return heat; }, get warden() { return warden; }, trouble, boost, chats, takeBoost, say, addTip, earned, award, tips, honk, rankLine, get streak() { return streak; }, get mode() { return mode; }, get patienceMax() { return patienceMax; }, pops, bits, give: (kind) => { car = makeVehicle(kind, 61.8, 80.5, -Math.PI / 2); car.born = -9; }, next: () => { car = null; nextGuest(); } };
+  if (location.search.includes('debug')) window.camp = { get car() { return car; }, get target() { return target; }, get parked() { return parkedCount; }, get score() { return score(); }, get night() { return night; }, people, skids, packUp, guests, pitches, stats, rectsOf, rectRect, keys, blocked, livingRect, corners, setClock: (t) => { clock = t; }, setPatience: (t) => { patience = t; }, get lives() { return lives; }, get ice() { return ice; }, found, GNOMES, get thief() { return thief; }, get rain() { return rain; }, setNext: (o) => { if (o.rain !== undefined) nextRain = o.rain; if (o.thief !== undefined) nextThief = o.thief; }, get job() { return job; }, setNextJob: (t) => { nextJob = t; }, tuneRadio, get station() { return station; }, get heat() { return heat; }, get warden() { return warden; }, trouble, boost, chats, takeBoost, say, addTip, earned, award, tips, honk, rankLine, get streak() { return streak; }, get mode() { return mode; }, get patienceMax() { return patienceMax; }, pops, bits, give: (kind) => { car = makeVehicle(kind, 61.8, 80.5, -Math.PI / 2); car.born = -9; }, next: () => { car = null; nextGuest(); } };
 })();
