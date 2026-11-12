@@ -117,6 +117,9 @@
       sayCone: ['Oi! Those were in a line!', 'Nice shot.', 'Somebody tell the warden.'],
       sayFine: ['Told you so.', 'Saw that coming.', 'He never misses.'],
       sayIce: ['Ice cream!', 'Two scoops, please!', 'Wait for me!'],
+      clubs: { van: 'Van lifers', motorhome: 'Motorhome society', combo: 'Caravan club' },
+      clubUp: (c) => `${c}: they like you. A quarter more for parking them`, clubDown: (c) => `${c}: word has got round. They will not wait so long`,
+      clubBonus: 'Club bonus +25%', trap: 'Flash! Ten an hour past reception. The warden has the photo',
       honk: 'Beep beep!', vip: 'A VIP guest: double points, less patience',
       ranks: ['Trainee', 'Gate keeper', 'Camp host', 'Site warden', 'Camp manager', 'Legend of Vitosha'],
       rankNext: (n, r) => `${n} more for ${r}`, short: (n) => `only ${n} short of your best`,
@@ -221,6 +224,9 @@
       sayCone: ['Ей! Те бяха подредени!', 'Добър удар.', 'Някой да каже на управителя.'],
       sayFine: ['Казах ти.', 'Очакваше се.', 'Той не пропуска.'],
       sayIce: ['Сладолед!', 'Две топки, моля!', 'Чакайте ме!'],
+      clubs: { van: 'Ван лайфъри', motorhome: 'Дружество на кемперите', combo: 'Клуб на караванистите' },
+      clubUp: (c) => `${c}: харесват ви. Една четвърт повече за паркирането им`, clubDown: (c) => `${c}: разчу се. Няма да чакат толкова`,
+      clubBonus: 'Клубен бонус +25%', trap: 'Светкавица! Десет в час покрай рецепцията. Управителят има снимката',
       honk: 'Бийп-бийп!', vip: 'VIP гост: двойни точки, по-малко търпение',
       ranks: ['Стажант', 'Пазач на портала', 'Домакин на къмпинга', 'Управител на терена', 'Директор на къмпинга', 'Легенда на Витоша'],
       rankNext: (n, r) => `още ${n} до „${r}“`, short: (n) => `само ${n} до рекорда ви`,
@@ -243,7 +249,7 @@
         note: `Този къмпинг е измислен. Истинският идва в София, от ${BY}.`,
         cardTitle: 'Вашият къмпинг дотук',
         stParked: 'Паркирани гости', stOnsite: 'В къмпинга сега', stAcc: 'Средна точност', stSpd: 'Средна бързина',
-        stTop: 'Най-добро паркиране', stStreak: 'Най-дълга чиста серия', stPerfect: 'Перфектни паркирания', shopTitle: 'Магазинът на къмпинга', shopNote: 'Всяка точка става монета в края на смяната.', stBank: 'Монети за магазина', chill: 'Почивен ден: без часовник', restart: 'Обратно към портала', lgCone: 'Конусите летят, ако ги ударите: по 5 точки, но управителят забелязва.', lgIce: 'Колата за сладолед кара бавно и не бърза за никъде. Заобиколете я.', stGnomes: 'Намерени скрити джуджета', lgGnome: 'Из къмпинга са скрити десет градински джуджета. Струва си да ги намерите.', legendTitle: 'Какво има по пътищата',
+        stTop: 'Най-добро паркиране', stStreak: 'Най-дълга чиста серия', stPerfect: 'Перфектни паркирания', clubsTitle: 'Какво мислят клубовете', lgClub: 'Трите клуба ви помнят: паркирайте членовете им чисто и плащат повече.', shopTitle: 'Магазинът на къмпинга', shopNote: 'Всяка точка става монета в края на смяната.', stBank: 'Монети за магазина', chill: 'Почивен ден: без часовник', restart: 'Обратно към портала', lgCone: 'Конусите летят, ако ги ударите: по 5 точки, но управителят забелязва.', lgIce: 'Колата за сладолед кара бавно и не бърза за никъде. Заобиколете я.', stGnomes: 'Намерени скрити джуджета', lgGnome: 'Из къмпинга са скрити десет градински джуджета. Струва си да ги намерите.', legendTitle: 'Какво има по пътищата',
         lgTip: 'Жълта монета: 25 точки. Синя: 8 секунди повече.', lgBoost: 'Лилав жетон: бонус. Ускорение, спряно време, двойни точки, автопаркиране, щит или дъжд от бакшиши.',
         lgJob: 'Зелен знак: поръчка. Вземете и закарайте до мястото за 120 точки.', lgDog: 'Кучето с наденичките: настигнете го за 200 точки.',
         lgWarden: 'Червени звезди: управителят ви гони. Глобата боли, чистото паркиране го успокоява.', lgRain: 'В дъжд и по тъмно паркирането носи повече, но пътят се хлъзга.', stErrands: 'Изпълнени поръчки', stFines: 'Глоби от управителя', lbTitle: 'Най-добрите къмпингари', lbWeek: 'Тази седмица', lbAll: 'За всички времена', lbPost: 'Запиши резултата ми', stTips: 'Събрани бакшиши', stBumps: 'Удари', stScares: 'Стреснати хора', stGaveUp: 'Гости, които се отказаха да чакат',
@@ -526,7 +532,7 @@
       ctx.lineWidth = 6; ctx.strokeStyle = '#12211a'; ctx.strokeText(p.text, x, y - 34 - p.o - up);
       ctx.fillStyle = p.c; ctx.fillText(p.text, x, y - 34 - p.o - up);
     }
-    ctx.globalAlpha = 1; drawJob(); drawThief(); if (mode === 'play') drawIce(); drawWarden(); drawRain(); drawBubbles(); drawMap();
+    ctx.globalAlpha = 1; drawJob(); drawThief(); if (mode === 'play') drawIce(); drawWarden(); drawRain(); drawFlies(); drawBubbles(); drawMap();
     ctx.restore();
   }
 
@@ -643,6 +649,7 @@
     patienceMax = Math.max(18, 50 - parkedCount * 1.6) + dist * 0.35 + (kind === 'combo' ? 22 : kind === 'motorhome' ? 6 : 0);
     if (car.vip) patienceMax *= 0.85;
     if (owned.has('calm')) patienceMax *= 1.15;
+    if (respect[kind] <= -3) patienceMax *= 0.85;
     patience = patienceMax;
     hud();
     if (kind === 'combo' && !metCaravan) { metCaravan = true; toast(L.firstCombo(target.n), 3800); }
@@ -662,7 +669,7 @@
     $('start').hidden = true; $('hud').hidden = false;
     if (matchMedia('(pointer: coarse)').matches) $('pad').hidden = false;
     parkedCount = 0; damage = 0; Object.keys(stats).forEach((k) => { stats[k] = 0; });
-    drawGoals(); playT = clock; posted = false; thief = null; nextThief = clock + 50; raining = false; nextRain = clock + 70; job = null; nextJob = clock + 25; heat = 0; warden = null; heatStars(); tips.length = 0; Object.keys(boost).forEach((k) => { boost[k] = 0; }); nextBoost = clock + 8; boostChips(); total = 0; lives = maxLives(); streak = 0; startBest = best; newBestSaid = false; car = null;
+    Object.keys(respect).forEach((k) => { respect[k] = 0; }); drawGoals(); playT = clock; posted = false; thief = null; nextThief = clock + 50; raining = false; nextRain = clock + 70; job = null; nextJob = clock + 25; heat = 0; warden = null; heatStars(); tips.length = 0; Object.keys(boost).forEach((k) => { boost[k] = 0; }); nextBoost = clock + 8; boostChips(); total = 0; lives = maxLives(); streak = 0; startBest = best; newBestSaid = false; car = null;
     audioOn();
     nextGuest(true);
     setTimeout(() => document.body.classList.add('sign-away'), 5000);   // the name plate steps aside once the driving starts
@@ -1275,6 +1282,48 @@
     }
   }
 
+  // ---------- the clubs ----------
+  // Van lifers, the motorhome society and the caravan club each keep an opinion of the gate keeper, from -5 to +5.
+  // Park their members cleanly and it rises; from +3 they tip a quarter more. Let it sink to -3 and they stop waiting so long.
+  const respect = { van: 0, motorhome: 0, combo: 0 };
+  function regard(kind, d) {
+    if (!(kind in respect)) return;
+    const was = respect[kind];
+    respect[kind] = clamp(was + d, -5, 5);
+    if (respect[kind] !== was && car) pop(car.x, car.y, `${L.clubs[kind]} ${d > 0 ? '+1' : '−1'}`, d > 0 ? '#8fd18a' : '#e2553d', 18, 130);
+    if (was < 3 && respect[kind] >= 3) toast(L.clubUp(L.clubs[kind]), 2600);
+    if (was > -3 && respect[kind] <= -3) toast(L.clubDown(L.clubs[kind]), 2600);
+  }
+  function clubRows() {
+    const dl = $('st-clubs');
+    dl.textContent = '';
+    Object.keys(respect).forEach((k) => {
+      const row = document.createElement('div'), dt = document.createElement('dt'), dd = document.createElement('dd'), n = respect[k];
+      dt.textContent = L.clubs[k]; dd.textContent = (n > 0 ? '+' : n < 0 ? '−' : '') + Math.abs(n) + ' ' + (n >= 3 ? '★' : n <= -3 ? '☹' : '');
+      row.append(dt, dd); dl.append(row);
+    });
+  }
+
+  // ---------- the speed trap and the fireflies ----------
+  let trapCool = 0;
+  function stepTrap(dt) {   // ten an hour past reception, please
+    trapCool -= dt;
+    if (trapCool > 0 || Math.abs(car.v) < 9 || car.y < 58 || car.y > 70 || car.x < 56 || car.x > 64) return;
+    trapCool = 8; trouble(0.6); toast(L.trap, 2200); note(1800, 0, 0.05, 'square', 0.08);
+    if (!reduceMotion) $('flash').classList.remove('on'), void $('flash').offsetWidth, $('flash').classList.add('on');
+  }
+  const flies = Array.from({ length: 46 }, () => ({ x: 4 + Math.random() * (W - 8), y: 4 + Math.random() * (H - 8), p: Math.random() * TAU, s: 0.5 + Math.random() }));
+  function drawFlies() {
+    if (night < 0.5 || reduceMotion) return;
+    for (const f of flies) {
+      const x0 = f.x + Math.sin(clock * 0.4 * f.s + f.p) * 3, y0 = f.y + Math.cos(clock * 0.3 * f.s + f.p * 2) * 3, [x, y] = P(x0, y0, 1.2);
+      if (x < 0 || x > vw || y < 0 || y > vh) continue;
+      const a = (night - 0.5) * 2 * (0.5 + 0.5 * Math.sin(clock * 2.2 * f.s + f.p));
+      ctx.fillStyle = `rgba(214,255,150,${0.22 * a})`; ctx.beginPath(); ctx.arc(x, y, 7, 0, TAU); ctx.fill();
+      ctx.fillStyle = `rgba(236,255,190,${a})`; ctx.beginPath(); ctx.arc(x, y, 1.8, 0, TAU); ctx.fill();
+    }
+  }
+
   // ---------- simulation ----------
   function step(dt) {
     clock += dt;
@@ -1304,7 +1353,7 @@
 
     hornCool -= dt;
     if (keys.horn && hornCool <= 0) honk();
-    stepTips(); stepJobs(); stepThief(dt); stepGnomes();
+    stepTips(); stepJobs(); stepThief(dt); stepGnomes(); stepTrap(dt);
     boost.speed -= dt; boost.freeze -= dt; driftCool -= dt; boostChips();
     if (car.auto) { stepAuto(dt); return; }
     if (boost.auto && autoPark()) return;
@@ -1417,7 +1466,9 @@
     // Clean parkings in a row multiply the points: x1, x1.25 ... up to x3. A bump or a crooked parking starts again.
     const clean = bumps === 0 && accuracy >= 60, perfect = clean && accuracy >= 90;
     streak = clean ? streak + 1 : 0;
-    const mult = 1 + Math.min(Math.max(streak - 1, 0), 8) * 0.25, dark = night > 0.6, pts = Math.round((accuracy + speed) * mult * (car.vip ? 2 : 1) * (dark ? 1.25 : 1) * (boost.double ? 2 : 1) * (rain > 0.3 ? 1.2 : 1)) + (perfect ? 50 : 0);
+    const mult = 1 + Math.min(Math.max(streak - 1, 0), 8) * 0.25, dark = night > 0.6, pts = Math.round((accuracy + speed) * mult * (car.vip ? 2 : 1) * (dark ? 1.25 : 1) * (boost.double ? 2 : 1) * (rain > 0.3 ? 1.2 : 1) * (respect[car.kind] >= 3 ? 1.25 : 1)) + (perfect ? 50 : 0);
+    if (respect[car.kind] >= 3) pop(r.cx, r.cy, L.clubBonus, '#8fd18a', 20, 152);
+    regard(car.kind, clean ? 1 : -1);
     if (boost.double) boost.double--;
     const quick = chill ? '' : speed >= 85 ? L.quick : speed <= 12 ? L.close2 : '';   // very fast, or at the last second: a little extra
     if (quick) { total += 30; pop(r.cx, r.cy, `${quick} +30`, '#f6f1df', 22, dark ? 100 : 74); }
@@ -1533,7 +1584,7 @@
   // The car ran into someone, or nearly: it stops dead, they jump clear, and it costs points.
   function startle(o) {
     const safe = boost.shield > 0;
-    if (safe) { boost.shield--; pop(o.x, o.y, L.shielded, '#b98ce0', 26); } else { trouble(1.2); damage += 60; stats.scares++; streak = 0; pop(o.x, o.y, '−60', '#e2553d', 26); }
+    if (safe) { boost.shield--; pop(o.x, o.y, L.shielded, '#b98ce0', 26); } else { regard(car.kind, -1); trouble(1.2); damage += 60; stats.scares++; streak = 0; pop(o.x, o.y, '−60', '#e2553d', 26); }
     sfx.startle(); say(o, pick(L.ouch)); o.cool = 2.5; o.flee = 1.2; o.wait = 0;
     car.v = 0; shake = reduceMotion ? 0 : 0.6;
     const a = Math.atan2(o.y - car.y, o.x - car.x);
@@ -2207,7 +2258,7 @@
     set('st-top', n ? stats.top : '–'); set('st-streak', stats.streak); set('st-perfect', stats.perfect); set('st-tips', stats.tips); set('st-fines', stats.fines); set('st-errands', stats.errands); set('st-bank', bank); set('st-gnomes', `${found.size}/${GNOMES.length}`);
     set('st-rank', rankLine(now, startBest));
     { let i = 0; while (i < RANKS.length - 1 && now >= RANKS[i + 1]) i++; set('st-boss', over === true ? L.boss.over[i] : ''); }
-    boardFor(over);
+    boardFor(over); clubRows();
     const ids = Object.keys(L.badges), list = $('bd-list');
     set('bd-title', `${L.badgesTitle} ${ids.filter((id) => earned.has(id)).length}/${ids.length}`);
     list.textContent = '';
@@ -2318,5 +2369,5 @@
   requestAnimationFrame(tick);
 
   // For automated checks only: /?debug exposes the state.
-  if (location.search.includes('debug')) window.camp = { get car() { return car; }, get target() { return target; }, get parked() { return parkedCount; }, get score() { return score(); }, get night() { return night; }, people, skids, packUp, guests, pitches, stats, rectsOf, rectRect, keys, blocked, livingRect, corners, setClock: (t) => { clock = t; }, setPatience: (t) => { patience = t; }, get lives() { return lives; }, owned, get bank() { return bank; }, setBank: (n) => { bank = n; saveShop(); shop(); }, props, get goals() { return goals; }, get ice() { return ice; }, found, GNOMES, get thief() { return thief; }, get rain() { return rain; }, setNext: (o) => { if (o.rain !== undefined) nextRain = o.rain; if (o.thief !== undefined) nextThief = o.thief; }, get job() { return job; }, setNextJob: (t) => { nextJob = t; }, tuneRadio, get station() { return station; }, get heat() { return heat; }, get warden() { return warden; }, trouble, boost, chats, takeBoost, say, addTip, earned, award, tips, honk, rankLine, get streak() { return streak; }, get mode() { return mode; }, get patienceMax() { return patienceMax; }, pops, bits, give: (kind) => { car = makeVehicle(kind, 61.8, 80.5, -Math.PI / 2); car.born = -9; }, next: () => { car = null; nextGuest(); } };
+  if (location.search.includes('debug')) window.camp = { get car() { return car; }, get target() { return target; }, get parked() { return parkedCount; }, get score() { return score(); }, get night() { return night; }, people, skids, packUp, guests, pitches, stats, rectsOf, rectRect, keys, blocked, livingRect, corners, setClock: (t) => { clock = t; }, setPatience: (t) => { patience = t; }, get lives() { return lives; }, respect, owned, get bank() { return bank; }, setBank: (n) => { bank = n; saveShop(); shop(); }, props, get goals() { return goals; }, get ice() { return ice; }, found, GNOMES, get thief() { return thief; }, get rain() { return rain; }, setNext: (o) => { if (o.rain !== undefined) nextRain = o.rain; if (o.thief !== undefined) nextThief = o.thief; }, get job() { return job; }, setNextJob: (t) => { nextJob = t; }, tuneRadio, get station() { return station; }, get heat() { return heat; }, get warden() { return warden; }, trouble, boost, chats, takeBoost, say, addTip, earned, award, tips, honk, rankLine, get streak() { return streak; }, get mode() { return mode; }, get patienceMax() { return patienceMax; }, pops, bits, give: (kind) => { car = makeVehicle(kind, 61.8, 80.5, -Math.PI / 2); car.born = -9; }, next: () => { car = null; nextGuest(); } };
 })();
