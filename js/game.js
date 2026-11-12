@@ -2729,6 +2729,13 @@
       if (v === car && car.air) {   // in the air: nearer the camera, so larger, and lifted off its shadow
         const h = Math.sin(Math.PI * clamp(car.air.t / car.air.T, 0, 1)), [sx, sy] = P(car.x, car.y);
         ctx.save(); ctx.translate(sx, sy - h * cam.s * 1.4); ctx.scale(1 + 0.32 * h, 1 + 0.32 * h); ctx.translate(-sx, -sy); drawVehicle(v); ctx.restore();
+      } else if (v === car && !car.auto) {   // the driven vehicle looks the same while it holds its line, so it is reused too
+        const b = bodyRect(car);
+        const tag = `${Math.round(car.th * 90)}|${Math.round(car.steer * 16)}|${Math.round((car.ph || 0) * 90)}|${car.braking ? 1 : 0}${car.reversing ? 1 : 0}${car.kind}${car.rare || ''}`;
+        if (tag === car._tag) viaSprite(car, b.cx, b.cy, tag, () => drawVehicle(car), car.t.trailer ? 9 : 5);   // only once it has settled: while it turns it is drawn directly
+        else drawVehicle(car);
+        car._tag = tag;
+        car._lights = [RP(b, b.hl, -b.hw * 0.6, 0.7), RP(b, b.hl, b.hw * 0.6, 0.7)];
       } else if (!drawParked(v)) drawVehicle(v);
     }
     drawPeople();
