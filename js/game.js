@@ -74,6 +74,8 @@
         ['Seven Rila Lakes tomorrow?', 'Only if you drive.', 'Only if you park.'],
         ['Lovely evening.', 'Smells like someone is grilling.', 'That is us. Come over.'],
       ],
+      lbEmpty: 'Nobody yet. Be the first', lbFail: 'The scoreboard cannot be reached right now', lbNote: 'Only your nickname and score are stored.',
+      lbPlace: (n, w, a) => `${n}: #${w} this week, #${a} of all time`, lead: (n, s) => `This week\'s best: ${n} with ${s}`,
       honk: 'Beep beep!', vip: 'A VIP guest: double points, less patience',
       ranks: ['Trainee', 'Gate keeper', 'Camp host', 'Site warden', 'Camp manager', 'Legend of Vitosha'],
       rankNext: (n, r) => `${n} more for ${r}`, short: (n) => `only ${n} short of your best`,
@@ -135,6 +137,8 @@
         ['Утре на Седемте рилски езера?', 'Само ако ти караш.', 'Само ако ти паркираш.'],
         ['Хубава вечер.', 'Мирише на скара.', 'Ние сме. Елате.'],
       ],
+      lbEmpty: 'Още няма никого. Бъдете първи', lbFail: 'Класацията е недостъпна в момента', lbNote: 'Пазим само прякора и резултата ви.',
+      lbPlace: (n, w, a) => `${n}: №${w} тази седмица, №${a} за всички времена`, lead: (n, s) => `Най-добър тази седмица: ${n} с ${s}`,
       honk: 'Бийп-бийп!', vip: 'VIP гост: двойни точки, по-малко търпение',
       ranks: ['Стажант', 'Пазач на портала', 'Домакин на къмпинга', 'Управител на терена', 'Директор на къмпинга', 'Легенда на Витоша'],
       rankNext: (n, r) => `още ${n} до „${r}“`, short: (n) => `само ${n} до рекорда ви`,
@@ -157,13 +161,13 @@
         note: `Този къмпинг е измислен. Истинският идва в София, от ${BY}.`,
         cardTitle: 'Вашият къмпинг дотук',
         stParked: 'Паркирани гости', stOnsite: 'В къмпинга сега', stAcc: 'Средна точност', stSpd: 'Средна бързина',
-        stTop: 'Най-добро паркиране', stStreak: 'Най-дълга чиста серия', stPerfect: 'Перфектни паркирания', stTips: 'Събрани бакшиши', stBumps: 'Удари', stScares: 'Стреснати хора', stGaveUp: 'Гости, които се отказаха да чакат',
+        stTop: 'Най-добро паркиране', stStreak: 'Най-дълга чиста серия', stPerfect: 'Перфектни паркирания', lbTitle: 'Най-добрите къмпингари', lbWeek: 'Тази седмица', lbAll: 'За всички времена', lbPost: 'Запиши резултата ми', stTips: 'Събрани бакшиши', stBumps: 'Удари', stScares: 'Стреснати хора', stGaveUp: 'Гости, които се отказаха да чакат',
         stTime: 'Време зад волана', shareTitle: 'Споделете резултата', shareNative: 'Сподели', savePic: 'Запази картинката', close: 'Обратно към паркирането',
       },
       aria: {
         camp: 'Къмпинг, гледан отгоре. Закарайте всеки пристигащ гост до мястото му.',
         patience: 'Колко още ще чака този гост', lives: 'Колко гости още може да разочаровате', mute: 'Звук (M)', scoreBtn: 'Вашата статистика и споделяне',
-        horn: 'Клаксон', brake: 'Ръчна спирачка', left: 'Завий наляво', right: 'Завий надясно', down: 'Назад', up: 'Напред',
+        horn: 'Клаксон', lbName: 'Вашият прякор', brake: 'Ръчна спирачка', left: 'Завий наляво', right: 'Завий надясно', down: 'Назад', up: 'Напред',
       },
     },
   };
@@ -543,7 +547,7 @@
     $('start').hidden = true; $('hud').hidden = false;
     if (matchMedia('(pointer: coarse)').matches) $('pad').hidden = false;
     parkedCount = 0; damage = 0; Object.keys(stats).forEach((k) => { stats[k] = 0; });
-    tips.length = 0; Object.keys(boost).forEach((k) => { boost[k] = 0; }); nextBoost = clock + 8; boostChips(); total = 0; lives = 3; streak = 0; startBest = best; newBestSaid = false; car = null;
+    posted = false; tips.length = 0; Object.keys(boost).forEach((k) => { boost[k] = 0; }); nextBoost = clock + 8; boostChips(); total = 0; lives = 3; streak = 0; startBest = best; newBestSaid = false; car = null;
     audioOn();
     nextGuest(true);
     setTimeout(() => document.body.classList.add('sign-away'), 5000);   // the name plate steps aside once the driving starts
@@ -1671,6 +1675,7 @@
     set('st-acc', n ? `${Math.round(stats.acc / n)} / 100` : '–'); set('st-spd', n ? `${Math.round(stats.spd / n)} / 100` : '–');
     set('st-top', n ? stats.top : '–'); set('st-streak', stats.streak); set('st-perfect', stats.perfect); set('st-tips', stats.tips);
     set('st-rank', rankLine(now, startBest));
+    boardFor(over);
     const ids = Object.keys(L.badges), list = $('bd-list');
     set('bd-title', `${L.badgesTitle} ${ids.filter((id) => earned.has(id)).length}/${ids.length}`);
     list.textContent = '';
@@ -1713,6 +1718,56 @@
   $('card-again').addEventListener('click', () => card.close());
   card.addEventListener('click', (e) => { if (e.target === card) card.close(); });   // a click on the backdrop
   card.addEventListener('close', () => { paused = false; last = performance.now(); cv.focus(); if (mode === 'over') start(); });
+
+  // ---------- leaderboard ----------
+  // A small service on Google Cloud keeps the best scores (see the `backend` branch). It stores a nickname and the
+  // figures of a shift, nothing else. With no address set here the leaderboard simply does not show.
+  const API = (location.search.includes('debug') && new URLSearchParams(location.search).get('api')) || '';
+  let myName = '', posted = false, lastPost = null;
+  try { myName = localStorage.getItem('camp-name') || ''; } catch (e) { /* private window */ }
+  function showTop(data) {
+    [['lb-week', data.week], ['lb-all', data.all]].forEach(([id, rows]) => {
+      const ol = $(id);
+      ol.textContent = '';
+      if (!rows.length) { const li = document.createElement('li'); li.className = 'none'; li.textContent = L.lbEmpty; ol.append(li); }
+      rows.slice(0, 10).forEach((r) => {
+        const li = document.createElement('li'), b = document.createElement('b');
+        li.textContent = r.name; b.textContent = r.score; li.append(b);
+        if (lastPost && r.name === lastPost.name && r.score === lastPost.score) li.className = 'me';
+        ol.append(li);
+      });
+    });
+    if (data.week[0]) $('lead').textContent = L.lead(data.week[0].name, data.week[0].score);
+  }
+  function loadTop() {
+    if (!API) return;
+    fetch(`${API}/top`).then((r) => r.json()).then(showTop).catch(() => { /* the game works without it */ });
+  }
+  function postScore(name) {
+    const n = score();
+    if (!API || posted || n <= 0 || !name) return;
+    posted = true; $('lb-form').hidden = true; $('lb-status').textContent = '…';
+    fetch(`${API}/score`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ name, score: n, parked: parkedCount, time: Math.round(stats.time) }) })
+      .then((r) => (r.ok ? r.json() : Promise.reject(r.status)))
+      .then((d) => {
+        myName = name; try { localStorage.setItem('camp-name', name); } catch (e) { /* private window */ }
+        lastPost = { name: d.week.concat(d.all).map((r) => r.name).find((x) => x === name) || name, score: n };
+        $('lb-status').textContent = L.lbPlace(name, d.placeWeek, d.placeAll);
+        showTop(d);
+      })
+      .catch(() => { posted = false; $('lb-form').hidden = false; $('lb-status').textContent = L.lbFail; });
+  }
+  function boardFor(over) {   // called when the score card opens
+    if (!API) return;
+    $('lb').hidden = false;
+    const can = over === true && !posted && score() > 0;
+    $('lb-form').hidden = !can; $('lb-name').value = myName;
+    if (!posted) $('lb-status').textContent = can ? L.lbNote : '';
+    if (can && myName) postScore(myName); else loadTop();
+  }
+  $('lb-form').addEventListener('submit', (e) => { e.preventDefault(); postScore($('lb-name').value.trim().slice(0, 16)); });
+  $('lb-name').addEventListener('keydown', (e) => e.stopPropagation());   // typing a name is not driving
+  loadTop();
 
   // ---------- loop ----------
   let last = performance.now();
