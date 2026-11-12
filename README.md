@@ -58,3 +58,13 @@ meet stop for a short scripted chat; the scripts are in the language tables at t
 Bumps and scares raise a heat level; the warden's cart then chases the driver along the roads and a catch costs a
 fine. Campers ask for errands (pick up at the green marker, drop at their pitch) for 120 points. R tunes a
 synthesised radio: three stations, one of them in 7/8.
+
+Also in the game: three goals per shift listed under a corner map; ten hidden garden gnomes; cones, bins and
+footballs to knock about; an ice-cream van as slow traffic; a speed trap by reception; three clubs that remember
+how their members were parked; a camp shop where the points of finished shifts buy permanent perks; a "day off"
+mode with no clock; remarks from the owner, Baba Ginka; a spoken announcer for the banners (Web Speech, when the
+browser has a voice for the language); and gamepad support. Everything a player keeps (best score, badges,
+gnomes, coins, perks, nickname, sound choices) lives in `localStorage`.
+
+The leaderboard needs the service on the `backend` branch (Cloud Run and Firestore). Until its address is set in
+`API` in `js/game.js`, the leaderboard stays hidden.
