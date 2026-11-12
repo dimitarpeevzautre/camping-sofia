@@ -2145,6 +2145,7 @@
     if (kind === 'pond') return { x: rand(88, 101), y: 19.7, ly: 21, lane: 0 };
     if (kind === 'fire') { const a = rand(0, TAU); return { x: fire.x + Math.cos(a) * 2.5, y: fire.y + Math.sin(a) * 2.5, ly: 70.6, lane: 2 }; }
     if (kind === 'reception') return { x: 65.6, y: rand(73, 78), ly: 70.6, lane: 2 };
+    if (kind === 'play') return { x: rand(82.5, 90), y: rand(77, 82.5), ly: 70.6, lane: 2, play: true };   // the playground
     let x; do { x = rand(10, 110); } while (x > 55 && x < 81);   // somewhere on the meadow, clear of the road and reception
     return { x, y: rand(71.5, 84), ly: 70.6, lane: 2 };
   }
@@ -2194,11 +2195,11 @@
     const dusk = night > 0.15;
     if (kid) {
       const roll = Math.random();
-      if (roll < 0.3) {
+      if (roll < 0.1) {
         const band = LANE_BAND[o.home.lane], y = rand(band[0], band[1]);
         return routeTo(o, { x: clamp(o.home.x + rand(-10, 10), 9.5, 110.5), y, ly: y, lane: o.home.lane });
       }
-      if (roll < 0.45) return routeTo(o, atHome ? placeTo(pick(['pond', 'fire', 'meadow', 'meadow', 'wc'])) : o.home);
+      if (roll < 0.45) return routeTo(o, atHome ? placeTo(pick(['play', 'play', 'play', 'pond', 'meadow', 'wc'])) : o.home);
       o.wait = rand(2, 9); return;
     }
     if (atHome) {
@@ -2252,7 +2253,7 @@
         if (sp > 0) {
           if (d < sp * dt + 0.05) {
             o.x = tx; o.y = ty; o.path.shift();
-            if (!o.path.length) { if (o.dest) o.at = o.dest; o.wait = o.kind === 'kid' ? rand(1, 6) : o.at === o.home ? rand(12, 40) : rand(5, 18); }
+            if (!o.path.length) { if (o.dest) o.at = o.dest; o.wait = o.dest && o.dest.play ? rand(12, 30) : o.kind === 'kid' ? rand(1, 6) : o.at === o.home ? rand(12, 40) : rand(5, 18); }
           } else { o.x += (dx / d) * sp * dt; o.y += (dy / d) * sp * dt; o.dir = Math.atan2(dy, dx); o.phase += dt * sp * 4; }
         }
       }
