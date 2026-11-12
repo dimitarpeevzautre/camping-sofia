@@ -48,6 +48,14 @@ body.sign-away .sign { opacity: 0; transform: translateY(-150%); pointer-events:
 }
 .patience i { display: block; height: 100%; width: 100%; background: var(--plate); transform-origin: left; }
 .patience i.low { background: #e2553d; }
+.meta { grid-column: 1 / -1; display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+.lives { color: #e2553d; font-size: 1.4rem; line-height: 1; letter-spacing: 2px; text-shadow: -2px 0 var(--ink), 2px 0 var(--ink), 0 -2px var(--ink), 0 3px var(--ink); }
+.combo { font-weight: 900; font-size: 1.1rem; line-height: 1.3; background: var(--plate); border: 3px solid var(--ink); border-radius: 8px; padding: 0 8px; box-shadow: 0 3px 0 var(--ink); }
+.combo:empty { visibility: hidden; }
+.combo.hit { animation: hit .4s ease; }
+@keyframes hit { 40% { transform: scale(1.4) rotate(-5deg); } }
+.mute { font: inherit; font-weight: 900; width: 34px; height: 30px; padding: 0; color: var(--ink); background: var(--paper); border: 3px solid var(--ink); border-radius: 8px; box-shadow: 0 3px 0 var(--ink); cursor: pointer; }
+.mute.off { text-decoration: line-through; opacity: 0.6; }
 
 .start {
   position: fixed; left: max(14px, env(safe-area-inset-left)); bottom: max(54px, calc(env(safe-area-inset-bottom) + 54px));
