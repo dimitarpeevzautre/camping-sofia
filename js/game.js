@@ -652,7 +652,7 @@
     if (free.length < 8 && !guests.some((g) => g.packing)) checkout();
     const roll = rnd();
     // The second guest always tows a caravan, so everyone meets one early.
-    const kind = demo || parkedCount === 0 ? 'van' : parkedCount === 1 && !metCaravan ? 'combo' : roll < 0.4 ? 'van' : roll < 0.65 ? 'motorhome' : 'combo';
+    const kind = demo ? (Math.random() < 0.4 ? 'combo' : 'van') : parkedCount === 0 ? 'van' : parkedCount === 1 && !metCaravan ? 'combo' : roll < 0.4 ? 'van' : roll < 0.65 ? 'motorhome' : 'combo';
     car = makeVehicle(kind, 61.8, 80.5, -Math.PI / 2);   // on the right, clear of guests driving out
     const room = rectsOf(car).map((r) => ({ ...r, hl: r.hl + 1.5, hw: r.hw + 0.8 }));
     if (!now && (guests.some((o) => o.leave && rectsOf(o).some((q) => room.some((r) => rectRect(r, q)))) ||
@@ -674,7 +674,7 @@
     if (car.rush) patienceMax *= 0.75;
     patience = patienceMax;
     hud();
-    if (kind === 'combo' && !metCaravan) { metCaravan = true; toast(L.firstCombo(target.n), 5000); }
+    if (kind === 'combo' && !metCaravan && !demo) { metCaravan = true; toast(L.firstCombo(target.n), 5000); }
     else if (car.vip) { toast(L.vip, 2600); sfx.best(); }
     else if (parkedCount > 0 && parkedCount % 5 === 0) { toast(L.wave(parkedCount), 2600); sfx.best(); }
     else if (parkedCount > 0) { toast(L.next(L.names[kind], target.n), 1500); sfx.next(); }
@@ -1331,9 +1331,31 @@
     car = null; nextGuest(true);
   }
   function endDemo() { demo = false; for (const k in keys) keys[k] = false; car = null; target = null; }
+  // The demo with a caravan on: along the far side of the lane, turn in late, then straight down the middle of the
+  // pitch so the caravan follows the car in.
+  function demoCombo(dt, p) {
+    const cx = p.x + p.w / 2, laneY = p.laneBelow ? p.y + p.d + 5 : p.y - 4.5, into = p.laneBelow ? -1 : 1, side = cx < 60 ? -1 : 1;
+    const far = laneY - into * 2.4, endY = into > 0 ? p.y + p.d - 0.8 : p.y + 0.8;
+    const fx = car.x + Math.cos(car.th) * car.t.wb, fy = car.y + Math.sin(car.th) * car.t.wb;
+    if ((demoT += dt) > 70) { car = null; demoI = 0; demoT = 0; nextGuest(true); return; }
+    let tx = 60, ty = far + (far < 70 ? 1 : 0), want = 7;
+    if (demoI === 0 && Math.hypot(tx - fx, ty - fy) < 4.5) demoI = 1;
+    if (demoI === 1) {
+      tx = cx + side * 20; ty = far; want = Math.abs(wrap(Math.atan2(ty - fy, tx - fx) - car.th)) > 0.4 ? 2.5 : 5;
+      if (side * (car.x - (cx - side * 4.3)) > 0) demoI = 2;
+    }
+    if (demoI === 2) { tx = cx; ty = fy + into * 6; want = 2; }
+    const err = wrap(Math.atan2(ty - fy, tx - fx) - car.th), noseY = car.y + Math.sin(car.th) * 3.6, done = demoI === 2 && (into > 0 ? noseY > endY : noseY < endY);
+    if (done) want = 0;
+    keys.left = err < -0.04; keys.right = err > 0.04; keys.up = car.v < want - 0.2; keys.down = car.v > want + 0.8 || (done && car.v > 0.2); keys.brake = false; keys.horn = false;
+    if (demoBack > 0) { demoBack -= dt; keys.up = false; keys.down = true; keys.left = false; keys.right = false; demoRef = null; return; }
+    if (!demoRef || Math.hypot(car.x - demoRef.x, car.y - demoRef.y) > 1 || done) demoRef = { x: car.x, y: car.y, t: demoT };
+    else if (demoT - demoRef.t > 2.5) demoBack = 1.2;
+  }
   function stepDemo(dt) {
-    if (!car) { demoPts = []; return; }
+    if (!car) { demoPts = []; demoI = 0; demoT = 0; return; }
     const p = target;
+    if (car.t.trailer) { demoCombo(dt, p); return; }
     if (!demoPts.length) {
       const cx = p.x + p.w / 2, laneY = p.laneBelow ? p.y + p.d + 5 : p.y - 4.5, into = p.laneBelow ? -1 : 1, side = cx < 60 ? -1 : 1;
       demoPts = [[60, laneY + 1.5], [cx - side * 6.5, laneY - into * 1.2], [cx, laneY + into * 4.5], [cx, p.y + p.d / 2 + into * 3]];
