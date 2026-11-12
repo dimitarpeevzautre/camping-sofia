@@ -29,7 +29,7 @@
       touchKeys: 'Steer with the left buttons. D drives, R reverses. The small buttons are the handbrake and the horn.',
       names: { van: 'a campervan', motorhome: 'a motorhome', combo: 'a car and caravan' },
       labels: {},
-      firstCombo: (n) => `A car and caravan for pitch ${n}. Get the caravan onto the pitch`,
+      firstCombo: (n) => `A car and caravan for pitch ${n}. Swing wide, then drive straight in: the caravan follows`,
       next: (name, n) => `Next: ${name} for pitch ${n}`,
       packed: (n, p) => `Pitch ${n} packed up and left: −${p}`,
       first: (n) => `First guest: pitch ${n}`,
@@ -143,7 +143,7 @@
       touchKeys: 'Завивайте с левите бутони. D е напред, R е назад. Малките бутони са ръчната спирачка и клаксонът.',
       names: { van: 'ван', motorhome: 'кемпер', combo: 'кола с каравана' },
       labels: { Reception: 'Рецепция' },
-      firstCombo: (n) => `Кола с каравана за място ${n}. Вкарайте караваната на мястото`,
+      firstCombo: (n) => `Кола с каравана за място ${n}. Вземете широк завой и влезте направо: караваната ще ви последва`,
       next: (name, n) => `Следва: ${name} за място ${n}`,
       packed: (n, p) => `Място ${n} си събра багажа и замина: −${p}`,
       first: (n) => `Първи гост: място ${n}`,
@@ -674,7 +674,7 @@
     if (car.rush) patienceMax *= 0.75;
     patience = patienceMax;
     hud();
-    if (kind === 'combo' && !metCaravan) { metCaravan = true; toast(L.firstCombo(target.n), 3800); }
+    if (kind === 'combo' && !metCaravan) { metCaravan = true; toast(L.firstCombo(target.n), 5000); }
     else if (car.vip) { toast(L.vip, 2600); sfx.best(); }
     else if (parkedCount > 0 && parkedCount % 5 === 0) { toast(L.wave(parkedCount), 2600); sfx.best(); }
     else if (parkedCount > 0) { toast(L.next(L.names[kind], target.n), 1500); sfx.next(); }
