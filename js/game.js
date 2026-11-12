@@ -1842,7 +1842,23 @@
     ctx.fillStyle = '#d5503c'; ctx.beginPath(); ctx.moveTo(0.74 * k, -0.05 * k); ctx.lineTo(1.25 * k, 0); ctx.lineTo(0.74 * k, 0.05 * k); ctx.closePath(); ctx.fill();   // the long red bill
     ctx.restore();
   }
+  // Mist lies over the pond and the meadow for the few moments around dusk and dawn.
+  const MIST = [[94, 14, 13, 7], [84, 22, 9, 5], [30, 78, 14, 7], [47, 83, 11, 6], [92, 80, 12, 6]];
+  function drawMist() {
+    const m = clamp(1 - Math.abs(night - 0.24) / 0.2, 0, 1);
+    if (m <= 0) return;
+    for (const [x0, y0, rx, ry] of MIST) {
+      const x = x0 + (reduceMotion ? 0 : Math.sin(clock * 0.07 + x0) * 3), [sx, sy] = P(x, y0, 0.8);
+      if (sx < -rx * cam.s || sx > vw + rx * cam.s || sy < -ry * cam.s || sy > vh + ry * cam.s) continue;
+      ctx.save(); ctx.translate(sx, sy); ctx.scale(rx * cam.s, ry * cam.s);
+      const g = ctx.createRadialGradient(0, 0, 0.1, 0, 0, 1);
+      g.addColorStop(0, `rgba(240,244,240,${0.34 * m})`); g.addColorStop(1, 'rgba(240,244,240,0)');
+      ctx.fillStyle = g; ctx.beginPath(); ctx.arc(0, 0, 1, 0, TAU); ctx.fill();
+      ctx.restore();
+    }
+  }
   function drawAmbient(ground) {   // ground: the ducks, drawn with the world; otherwise what is in the air
+    if (!ground) drawMist();
     if (!ground) { drawStork(); drawBalloon(); }
     if (!ground) drawCloudShadows();
     if (ground) drawPondLife();
