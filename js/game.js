@@ -1735,7 +1735,22 @@
       ['#d5503c', '#f4c531', '#f6f1df', '#e8855f', '#d5503c'].forEach((c, i) => { const a = i * 1.26; ctx.fillStyle = c; ctx.beginPath(); ctx.arc(x + Math.cos(a) * 0.26 * k, y + Math.sin(a) * 0.26 * k, 0.17 * k, 0, TAU); ctx.fill(); });
     }
   }
+  const clouds = [[10, 20, 26, 15], [70, 60, 32, 18], [120, 30, 24, 14]];
+  function drawCloudShadows() {
+    if (night > 0.5 || reduceMotion) return;
+    const dark = 0.1 * (1 - night * 2);
+    for (const [x0, y0, rx, ry] of clouds) {
+      const x = ((x0 + clock * 0.9) % (W + 120)) - 60, y = y0 + Math.sin(clock * 0.02 + x0) * 8, [sx, sy] = P(x, y);
+      if (sx < -rx * cam.s || sx > vw + rx * cam.s || sy < -ry * cam.s || sy > vh + ry * cam.s) continue;
+      ctx.save(); ctx.translate(sx, sy); ctx.rotate(0.2); ctx.scale(rx * cam.s, ry * cam.s);   // a soft-edged oval
+      const g = ctx.createRadialGradient(0, 0, 0.15, 0, 0, 1);
+      g.addColorStop(0, `rgba(20,40,60,${dark})`); g.addColorStop(1, 'rgba(20,40,60,0)');
+      ctx.fillStyle = g; ctx.beginPath(); ctx.arc(0, 0, 1, 0, TAU); ctx.fill();
+      ctx.restore();
+    }
+  }
   function drawAmbient(ground) {   // ground: the ducks, drawn with the world; otherwise what is in the air
+    if (!ground) drawCloudShadows();
     if (ground) drawPondLife();
     const k = cam.s;
     ctx.lineJoin = 'round';
@@ -2786,9 +2801,13 @@
     ctx.beginPath(); ctx.moveTo(bx, by); ctx.lineTo(tx, ty); ctx.stroke();
     ctx.globalAlpha = fade;
     const tones = t.hue < 0.33 ? ['#2f6b3a', '#3c8046', '#57994f'] : t.hue < 0.66 ? ['#2a5f3f', '#35774a', '#4c9058'] : ['#3d6a2c', '#527f33', '#6f9a3f'];
-    [[0.62, 1], [0.82, 0.78], [1, 0.5]].forEach(([zf, rf], i) => {
-      const [x, y] = P(t.x, t.y, t.z * zf);
-      ctx.fillStyle = tones[i]; ctx.beginPath(); ctx.arc(x, y, t.r * rf * cam.s * (1 + t.z * zf * LEAN), 0, TAU); ctx.fill();
+    const pine = t.hue > 0.74 && t.hue < 0.9;
+    (pine ? [[0.5, 1], [0.8, 0.68], [1.1, 0.36]] : [[0.62, 1], [0.82, 0.78], [1, 0.5]]).forEach(([zf, rf], i) => {
+      const [x, y] = P(t.x, t.y, t.z * zf), rad = t.r * rf * cam.s * (1 + t.z * zf * LEAN);
+      ctx.fillStyle = pine ? ['#1f4a33', '#2a5d40', '#37724d'][i] : tones[i]; ctx.beginPath();
+      if (pine) { for (let k = 0; k < 22; k++) { const a = (k / 22) * TAU + t.x + i * 0.3, q = rad * (k % 2 ? 0.74 : 1); if (k) ctx.lineTo(x + Math.cos(a) * q, y + Math.sin(a) * q); else ctx.moveTo(x + Math.cos(a) * q, y + Math.sin(a) * q); } ctx.closePath(); }
+      else ctx.arc(x, y, rad, 0, TAU);
+      ctx.fill();
     });
     ctx.globalAlpha = 1;
   }
