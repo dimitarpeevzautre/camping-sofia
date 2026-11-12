@@ -144,6 +144,8 @@ button.plate:active { transform: translateY(3px); box-shadow: none; }
 .totals .plate .v { font-size: 2rem; }
 .rank { margin: 12px 0 0; font-weight: 800; text-align: center; }
 .rank:empty { display: none; }
+.bossline { margin: 8px 0 0; text-align: center; font-style: italic; font-weight: 600; }
+.bossline:empty { display: none; }
 .lb[hidden], #lb-form[hidden] { display: none; }
 #lb-form { display: flex; gap: 8px; }
 #lb-form input { flex: 1; min-width: 0; font: inherit; font-weight: 800; padding: 6px 10px; background: #fff; color: var(--ink); border: 3px solid var(--ink); border-radius: 8px; }
