@@ -1,0 +1,15 @@
+{
+  "name": "camping-sofia-leaderboard",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Leaderboard for the camping-sofia.com parking game: Cloud Run in front of Firestore",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "MEMORY=1 PORT=8787 node server.js"
+  },
+  "engines": { "node": ">=20" },
+  "dependencies": {
+    "@google-cloud/firestore": "^7.10.0"
+  }
+}
