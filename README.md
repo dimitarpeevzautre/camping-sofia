@@ -45,3 +45,8 @@ can be forced with `?lang=bg` or `?lang=en`; the Bulgarian strings live at the t
 
 The score card also draws a 1200 x 630 picture of the score over the camp as it looks at that moment. It can be
 saved, and the device share sheet attaches it where the browser allows files.
+
+A shift ends when three guests have given up waiting. Clean parkings in a row multiply the points (up to x3),
+a perfect one adds 50, a VIP is worth double and parking after dark adds a quarter. Tips on the roads give 25 points
+(yellow) or 8 seconds (blue); H honks people out of the way. Best score, badges and the mute choice are kept in
+`localStorage`. Sound is synthesised with Web Audio, so there are no audio files.
