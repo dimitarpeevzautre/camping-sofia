@@ -165,6 +165,9 @@ button.plate:active { transform: translateY(3px); box-shadow: none; }
 .badges li.got::before { content: '★'; }
 .mine { margin: 12px 0 0 !important; font-size: 0.9rem !important; font-weight: 800; }
 .mine:empty { display: none; }
+.legend { margin: 12px 0 0; font-size: 0.85rem; }
+.legend summary { font-weight: 800; cursor: pointer; }
+.legend ul { margin: 6px 0 0; padding-left: 1.2em; display: grid; gap: 3px; }
 .totals .plate:first-child { background: var(--plate); }
 .stats { margin: 14px 0 0; }
 .stats div { display: flex; justify-content: space-between; gap: 16px; padding: 6px 0; border-bottom: 2px dotted rgba(18, 33, 26, 0.3); }
