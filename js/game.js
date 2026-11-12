@@ -105,7 +105,7 @@
         roll: ['Baba Ginka: Five clean ones! I knew I hired you for a reason.', 'Baba Ginka: Keep this up and you get the good chair.'],
         gaveUp: ['Baba Ginka: That guest went to a hotel. A HOTEL.', 'Baba Ginka: They left a review. I am not reading it to you.'],
         dog: ['Baba Ginka: You saved the sausages. Dinner is on me.'],
-        scare: ['Baba Ginka: We park campers here, not guests.', 'Baba Ginka: The children are not cones.'],
+        scare: ['Baba Ginka: Mind the little ones. They were here first.', 'Baba Ginka: Slowly past the people, please.'],
         over: ['Baba Ginka: Tomorrow you start with the wheelbarrow.', 'Baba Ginka: Not bad. Not good. Not bad.', 'Baba Ginka: The guests asked for you by name. Mostly politely.',
           'Baba Ginka: I am putting your photo up at reception.', 'Baba Ginka: Take the big office. I never liked it.', 'Baba Ginka: They will name a pitch after you.'],
       },
@@ -224,7 +224,7 @@
         roll: ['Баба Гинка: Пет чисти! Знаех си защо те взех.', 'Баба Гинка: Карай така и столът с облегалката е твой.'],
         gaveUp: ['Баба Гинка: Този гост отиде на хотел. НА ХОТЕЛ.', 'Баба Гинка: Оставиха отзив. Няма да ти го чета.'],
         dog: ['Баба Гинка: Ти спаси наденичките. Вечерята е от мен.'],
-        scare: ['Баба Гинка: Тук паркираме кемпери, не гости.', 'Баба Гинка: Децата не са конуси.'],
+        scare: ['Баба Гинка: Внимавай с малките. Те бяха тук първи.', 'Баба Гинка: По-бавно покрай хората, моля.'],
         over: ['Баба Гинка: Утре започваш с ръчната количка.', 'Баба Гинка: Не е зле. Не е и добре. Не е зле.', 'Баба Гинка: Гостите питаха за теб по име. Повечето учтиво.',
           'Баба Гинка: Слагам снимката ти на рецепцията.', 'Баба Гинка: Вземи големия кабинет. И без това не го харесвах.', 'Баба Гинка: Ще кръстят място на твое име.'],
       },
@@ -705,7 +705,7 @@
 
   function start(off) {
     if (demo) endDemo();
-    flying = false; plane = null; document.body.classList.remove('flying');
+    flying = false; plane = null; document.body.classList.remove('flying'); padLabels('D', 'R');
     mode = 'play'; chill = off === true; document.body.classList.toggle('chill', chill);
     document.body.classList.add('playing');
     $('start').hidden = true; $('hud').hidden = false;
@@ -1509,10 +1509,11 @@
   const CORNERS = [[10, 10], [110, 10], [110, 84], [10, 84]];
   const tricks = new Set();
   try { JSON.parse(localStorage.getItem('camp-tricks') || '[]').forEach((k) => tricks.add(k)); } catch (e) { /* private window */ }
+  function padLabels(up, down) { document.querySelector('.pad [data-k="up"]').textContent = up; document.querySelector('.pad [data-k="down"]').textContent = down; }
   function startFlight() {
     if (demo) endDemo();
     mode = 'play'; flying = true; chill = true; car = null; target = null;
-    document.body.classList.add('playing', 'flying'); document.body.classList.remove('chill');
+    document.body.classList.add('playing', 'flying'); document.body.classList.remove('chill'); padLabels('+', '−');   // in the air the pedals are faster and slower
     $('start').hidden = true; $('hud').hidden = false;
     if (matchMedia('(pointer: coarse)').matches) $('pad').hidden = false;
     total = 0; damage = 0; parkedCount = 0; streak = 0; Object.keys(stats).forEach((k) => { stats[k] = 0; });
