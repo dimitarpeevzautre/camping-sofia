@@ -898,9 +898,22 @@
     while (prev[n] !== from) n = prev[n];
     return n;
   }
+  // The banners are read out too, in a deep announcer's voice, when the browser has a voice for the language.
+  function shout(text) {
+    const synth = window.speechSynthesis;
+    if (muted || !synth || !window.SpeechSynthesisUtterance) return;
+    try {
+      const voice = synth.getVoices().find((v) => v.lang && v.lang.toLowerCase().startsWith(LANG));
+      if (!voice) return;
+      const u = new SpeechSynthesisUtterance(text.replace('×', '').toLowerCase());
+      u.voice = voice; u.lang = voice.lang; u.pitch = 0.5; u.rate = 1.05; u.volume = 0.7;
+      synth.cancel(); synth.speak(u);
+    } catch (e) { /* no speech: the banner is enough */ }
+  }
   function banner(text) {
     const el = $('banner');
     el.textContent = text; el.classList.remove('on'); void el.offsetWidth; el.classList.add('on');
+    shout(text);
   }
   function heatStars() {
     const s = heat > 0 ? '★'.repeat(Math.ceil(heat)) : '';
