@@ -68,3 +68,6 @@ gnomes, coins, perks, nickname, sound choices) lives in `localStorage`.
 
 The leaderboard needs the service on the `backend` branch (Cloud Run and Firestore). Until its address is set in
 `API` in `js/game.js`, the leaderboard stays hidden.
+
+Content is kept to a PG-13 level: nobody is hurt (people are startled and step aside), a chase ends in a fine,
+and the strongest line in the scripts is a joke about home-made rakia.

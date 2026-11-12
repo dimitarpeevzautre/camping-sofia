@@ -45,6 +45,7 @@
         vip: 'Red carpet: a perfect parking for a VIP', tips: 'Pocket money: ten tips in one shift', gentle: 'Gentle driver: eight guests without a bump or a scare',
         ten: 'Full house: ten guests in one shift', twenty: 'Rush hour hero: twenty guests in one shift',
         gnomes: 'Gnome hunter: find all ten hidden gnomes', driftpark: 'Handbrake parking: slide straight into a clean parking',
+        wash: 'Squeaky clean: roll slowly through the wash bay',
         goals: 'To-do list: all three goals in one shift', strike: 'Strike: knock over four cones in one go',
         errand: 'Room service: five errands in one shift', dog: 'Sausage hero: catch the dog that took the sausages', host: 'Camp host: 1500 points in one shift', legend: 'Legend of Vitosha: 8000 points in one shift',
       },
@@ -55,7 +56,7 @@
         shield: 'Shield: your next bump or scare is forgiven', rush: 'Tip rush: grab all you can in twenty seconds',
       },
       autoOn: 'Self-parking', shielded: 'Shield!', drift: 'Drift!', stBoosts: 'Boosts picked up',
-      ouch: ['Hey! Watch it!', 'Are you blind?', 'Slow down!', 'That was close!'],
+      ouch: ['Hey! Watch it!', 'Use your eyes!', 'Slow down!', 'That was close!'],
       honked: ['Alright, alright!', 'Keep your hair on!', 'Coming through, is it?', 'Charming.'],
       nice: ['Nicely parked!', 'Now that is how it is done.', 'Smooth!', 'Dead centre. Respect.', 'Somebody has done this before.'],
       chats: [
@@ -123,6 +124,7 @@
       runGuests: (n) => `${n} guests`, bHour: 'RUSH HOUR!', rushOn: 'Rush hour: the next three guests are in a hurry and pay double',
       shareRank: (n, r) => `I scored ${n} parking campers at Camping Sofia and made ${r}. Can you beat it?`,
       dayOff: 'A day off: no clock. V swaps your vehicle', swapped: (v) => `Now driving ${v}`,
+      washed: 'Squeaky clean', washSlow: 'Slower through the wash bay',
       honk: 'Beep beep!', vip: 'A VIP guest: double points, less patience',
       ranks: ['Trainee', 'Gate keeper', 'Camp host', 'Site warden', 'Camp manager', 'Legend of Vitosha'],
       rankNext: (n, r) => `${n} more for ${r}`, short: (n) => `only ${n} short of your best`,
@@ -155,6 +157,7 @@
         vip: 'Червен килим: перфектно паркиране за VIP гост', tips: 'Джобни: десет бакшиша в една смяна', gentle: 'Внимателен шофьор: осем гости без удар и без стреснат човек',
         ten: 'Пълен къмпинг: десет гости в една смяна', twenty: 'Герой на пиковия час: двайсет гости в една смяна',
         gnomes: 'Ловец на джуджета: намерете десетте скрити джуджета', driftpark: 'Паркиране с ръчна: влезте с плъзгане в чисто паркиране',
+        wash: 'Блести от чистота: минете бавно през автомивката',
         goals: 'По списък: и трите цели в една смяна', strike: 'Страйк: съборете четири конуса наведнъж',
         errand: 'Рум сървис: пет поръчки в една смяна', dog: 'Герой на наденичките: хванете кучето крадец', host: 'Домакин на къмпинга: 1500 точки в една смяна', legend: 'Легенда на Витоша: 8000 точки в една смяна',
       },
@@ -165,7 +168,7 @@
         shield: 'Щит: следващият удар или стреснат човек се прощава', rush: 'Дъжд от бакшиши: съберете колкото можете за двайсет секунди',
       },
       autoOn: 'Автопаркиране', shielded: 'Щит!', drift: 'Дрифт!',
-      ouch: ['Ей! Внимавай!', 'Сляп ли си?', 'По-бавно!', 'На косъм!'],
+      ouch: ['Ей! Внимавай!', 'Гледай къде караш!', 'По-бавно!', 'На косъм!'],
       honked: ['Добре де, добре!', 'Спокойно!', 'Път ли искаш?', 'Много мило.'],
       nice: ['Браво, чисто паркиране!', 'Така се прави.', 'Като по конец!', 'Точно в средата. Респект.', 'Личи си опитът.'],
       chats: [
@@ -233,6 +236,7 @@
       runGuests: (n) => `${n} гости`, bHour: 'ПИКОВ ЧАС!', rushOn: 'Пиков час: следващите трима гости бързат и плащат двойно',
       shareRank: (n, r) => `Събрах ${n} точки с паркиране на кемпери в Camping Sofia и станах „${r}“. Ще ме биеш ли?`,
       dayOff: 'Почивен ден: без часовник. V сменя возилото', swapped: (v) => `Сега карате ${v}`,
+      washed: 'Блести от чистота', washSlow: 'По-бавно през автомивката',
       honk: 'Бийп-бийп!', vip: 'VIP гост: двойни точки, по-малко търпение',
       ranks: ['Стажант', 'Пазач на портала', 'Домакин на къмпинга', 'Управител на терена', 'Директор на къмпинга', 'Легенда на Витоша'],
       rankNext: (n, r) => `още ${n} до „${r}“`, short: (n) => `само ${n} до рекорда ви`,
@@ -255,7 +259,7 @@
         note: `Този къмпинг е измислен. Истинският идва в София, от ${BY}.`,
         cardTitle: 'Вашият къмпинг дотук',
         stParked: 'Паркирани гости', stOnsite: 'В къмпинга сега', stAcc: 'Средна точност', stSpd: 'Средна бързина',
-        stTop: 'Най-добро паркиране', stStreak: 'Най-дълга чиста серия', stPerfect: 'Перфектни паркирания', runsTitle: 'Най-добрите ви смени', clubsTitle: 'Какво мислят клубовете', lgClub: 'Трите клуба ви помнят: паркирайте членовете им чисто и плащат повече.', shopTitle: 'Магазинът на къмпинга', shopNote: 'Всяка точка става монета в края на смяната.', stBank: 'Монети за магазина', chill: 'Почивен ден: без часовник', restart: 'Обратно към портала', lgCone: 'Конусите летят, ако ги ударите: по 5 точки, но управителят забелязва.', lgIce: 'Колата за сладолед и тракторът карат бавно, а пощальонът с мотопеда вечно закъснява. Заобикаляйте ги.', stGnomes: 'Намерени скрити джуджета', lgGnome: 'Из къмпинга са скрити десет градински джуджета. Струва си да ги намерите.', legendTitle: 'Какво има по пътищата',
+        stTop: 'Най-добро паркиране', stStreak: 'Най-дълга чиста серия', stPerfect: 'Перфектни паркирания', lgWash: 'Синьото райе на западната алея е автомивка: минете бавно за 30 точки и по-спокоен управител.', runsTitle: 'Най-добрите ви смени', clubsTitle: 'Какво мислят клубовете', lgClub: 'Трите клуба ви помнят: паркирайте членовете им чисто и плащат повече.', shopTitle: 'Магазинът на къмпинга', shopNote: 'Всяка точка става монета в края на смяната.', stBank: 'Монети за магазина', chill: 'Почивен ден: без часовник', restart: 'Обратно към портала', lgCone: 'Конусите летят, ако ги ударите: по 5 точки, но управителят забелязва.', lgIce: 'Колата за сладолед и тракторът карат бавно, а пощальонът с мотопеда вечно закъснява. Заобикаляйте ги.', stGnomes: 'Намерени скрити джуджета', lgGnome: 'Из къмпинга са скрити десет градински джуджета. Струва си да ги намерите.', legendTitle: 'Какво има по пътищата',
         lgTip: 'Жълта монета: 25 точки. Синя: 8 секунди повече.', lgBoost: 'Лилав жетон: бонус. Ускорение, спряно време, двойни точки, автопаркиране, щит или дъжд от бакшиши.',
         lgJob: 'Зелен знак: поръчка. Вземете и закарайте до мястото за 120 точки.', lgDog: 'Кучето с наденичките: настигнете го за 200 точки.',
         lgWarden: 'Червени звезди: управителят ви гони. Глобата боли, чистото паркиране го успокоява.', lgRain: 'В дъжд и по тъмно паркирането носи повече, но пътят се хлъзга.', stErrands: 'Изпълнени поръчки', stFines: 'Глоби от управителя', lbTitle: 'Най-добрите къмпингари', lbWeek: 'Тази седмица', lbAll: 'За всички времена', lbPost: 'Запиши резултата ми', stTips: 'Събрани бакшиши', stBumps: 'Удари', stScares: 'Стреснати хора', stGaveUp: 'Гости, които се отказаха да чакат',
@@ -524,6 +528,7 @@
   }
   function drawFx() {
     ctx.save();
+    if (mode === 'play') drawWash();
     drawProps();
     if (mode === 'play') { drawGnomes(); drawTips(); }
     if (car && car.vip) {   // a gold star rides above a VIP
@@ -1250,6 +1255,29 @@
     }
   }
 
+  // ---------- the wash bay ----------
+  // A striped bay on the west link. Roll through it slowly for a clean van: a few points, and the warden likes it.
+  const WASH = { x: 9, y: 36, w: 5, h: 7 };
+  let washCool = 0;
+  function stepWash(dt) {
+    washCool -= dt;
+    if (washCool > 0 || car.x < WASH.x || car.x > WASH.x + WASH.w || car.y < WASH.y || car.y > WASH.y + WASH.h) return;
+    if (Math.abs(car.v) > 4) { if (washCool < -1) { washCool = 1.5; toast(L.washSlow, 1600); } return; }
+    washCool = 45; total += 30; heat = Math.max(0, heat - 0.5); heatStars(); stats.washes++; sfx.life();
+    pop(car.x, car.y, `${L.washed} +30`, '#6fb6d9', 24); award('wash'); hud();
+    if (!reduceMotion) for (let i = 0; i < 40; i++) { const a = Math.random() * TAU, sp = 1 + Math.random() * 4; bits.push({ x: car.x, y: car.y, z: 1.5, vx: Math.cos(a) * sp, vy: Math.sin(a) * sp, vz: 2 + Math.random() * 4, c: i % 2 ? '#ffffff' : '#9fd3ee', life: 1.4, s: 5 }); }
+  }
+  function drawWash() {
+    const [x0, y0] = P(WASH.x, WASH.y), [x1, y1] = P(WASH.x + WASH.w, WASH.y + WASH.h), ready = washCool <= 0;
+    ctx.save(); ctx.globalAlpha = ready ? 0.8 : 0.3;
+    ctx.beginPath(); ctx.rect(x0, y0, x1 - x0, y1 - y0); ctx.clip();
+    ctx.fillStyle = '#6fb6d9'; ctx.fillRect(x0, y0, x1 - x0, y1 - y0);
+    ctx.strokeStyle = '#f6f1df'; ctx.lineWidth = 0.5 * cam.s;
+    for (let i = -8; i < 12; i++) { ctx.beginPath(); ctx.moveTo(x0 + i * cam.s, y1); ctx.lineTo(x0 + (i + 7) * cam.s, y0); ctx.stroke(); }
+    ctx.restore();
+    ctx.strokeStyle = '#12211a'; ctx.lineWidth = 2; ctx.strokeRect(x0, y0, x1 - x0, y1 - y0);
+  }
+
   // ---------- gamepad ----------
   // Left stick or d-pad steers, right trigger drives, left trigger reverses, A is the handbrake, X the horn.
   const padState = {};
@@ -1426,7 +1454,7 @@
 
     hornCool -= dt;
     if (keys.horn && hornCool <= 0) honk();
-    stepTips(); stepJobs(); stepThief(dt); stepGnomes(); stepTrap(dt);
+    stepTips(); stepJobs(); stepThief(dt); stepGnomes(); stepTrap(dt); stepWash(dt);
     boost.speed -= dt; boost.freeze -= dt; driftCool -= dt; boostChips();
     if (car.auto) { stepAuto(dt); return; }
     if (boost.auto && autoPark()) return;
@@ -2277,7 +2305,7 @@
 
   // ---------- score card ----------
   // Pressing the Score plate pauses the game and opens a card with the figures behind the score and ways to share it.
-  const stats = { acc: 0, spd: 0, top: 0, bumps: 0, scares: 0, gaveUp: 0, time: 0, streak: 0, perfect: 0, tips: 0, honks: 0, boosts: 0, fines: 0, errands: 0, dogs: 0, cones: 0 };
+  const stats = { acc: 0, spd: 0, top: 0, bumps: 0, scares: 0, gaveUp: 0, time: 0, streak: 0, perfect: 0, tips: 0, honks: 0, boosts: 0, fines: 0, errands: 0, dogs: 0, cones: 0, washes: 0 };
   const card = $('card'), SITE = 'https://camping-sofia.com/';
   let paused = false, pic = null, picUrl = '';
   // A 1200 x 630 picture of the score for sharing: the camp as it looks right now, behind a plate with the figures.
@@ -2303,7 +2331,9 @@
     g.font = font(900, 56); g.fillText('Camping Sofia', 412, 86);
     g.textAlign = 'center';
     g.font = font(900, 190); g.fillText(String(top), 600, n ? 262 : 300);
-    g.font = font(600, 32); g.fillText(L.imgPoints, 600, n ? 372 : 420);
+    let ri = 0;
+    while (ri < RANKS.length - 1 && top >= RANKS[ri + 1]) ri++;
+    g.font = font(600, 27); g.fillText(ri > 0 ? `${L.imgPoints} · ${L.ranks[ri]}` : L.imgPoints, 600, n ? 372 : 420);
     if (n) {
       const cols = [[n, L.imgParked], [Math.round(stats.acc / n), L.imgAcc], [Math.round(stats.spd / n), L.imgSpd]];
       cols.forEach(([v, label], i) => {
