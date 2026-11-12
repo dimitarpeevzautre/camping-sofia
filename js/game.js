@@ -1637,7 +1637,37 @@
       ctx.fillText(n.s, x, y); ctx.globalAlpha = 1;
     }
   }
+  // Lily pads and a fringe of reeds for the pond, and tubs of flowers by the reception door. Their places are
+  // worked out once.
+  const lilies = Array.from({ length: 9 }, (_, i) => { const a = i * 2.4 + 0.5, r = 0.45 + ((i * 37) % 40) / 100; return { x: pond.x + Math.cos(a) * pond.rx * r, y: pond.y + Math.sin(a) * pond.ry * r, s: 0.38 + (i % 3) * 0.1, a: i * 1.3, bloom: i % 3 === 0 }; });
+  const reeds = Array.from({ length: 22 }, (_, i) => { const a = Math.PI * 0.95 + (i / 21) * Math.PI * 0.9; return { x: pond.x + Math.cos(a) * pond.rx * 0.97, y: pond.y + Math.sin(a) * pond.ry * 0.97, h: 0.9 + (i % 4) * 0.25, p: i * 0.7 }; });
+  const tubs = [[65.6, 73.2], [65.6, 77.8]];
+  function drawPondLife() {
+    const k = cam.s, [px, py] = P(pond.x, pond.y);
+    if (px > -pond.rx * k - 60 && px < vw + pond.rx * k + 60 && py > -pond.ry * k - 60 && py < vh + pond.ry * k + 60) {
+      for (const l of lilies) {
+        const [x, y] = P(l.x, l.y);
+        ctx.fillStyle = '#4f8a4a'; ctx.strokeStyle = 'rgba(18,33,26,0.3)'; ctx.lineWidth = 1;
+        ctx.beginPath(); ctx.moveTo(x, y); ctx.arc(x, y, l.s * k, l.a + 0.35, l.a + TAU - 0.35); ctx.closePath(); ctx.fill(); ctx.stroke();   // a pad with its notch
+        if (l.bloom) { ctx.fillStyle = '#f6c9d6'; ctx.beginPath(); ctx.arc(x, y, l.s * k * 0.42, 0, TAU); ctx.fill(); ctx.fillStyle = '#f4c531'; ctx.beginPath(); ctx.arc(x, y, l.s * k * 0.16, 0, TAU); ctx.fill(); }
+      }
+      ctx.lineCap = 'round';
+      for (const r of reeds) {
+        const sway = reduceMotion ? 0 : Math.sin(clock * 1.3 + r.p) * 0.12, [x0, y0] = P(r.x, r.y), [x1, y1] = P(r.x + sway, r.y, r.h * 2.2);
+        ctx.strokeStyle = '#5f8f45'; ctx.lineWidth = Math.max(1.5, k * 0.07); ctx.beginPath(); ctx.moveTo(x0, y0); ctx.lineTo(x1, y1); ctx.stroke();
+        ctx.strokeStyle = '#6b4a2f'; ctx.lineWidth = Math.max(2, k * 0.13); ctx.beginPath(); ctx.moveTo(x1, y1); ctx.lineTo(...P(r.x + sway * 0.8, r.y, r.h * 1.7)); ctx.stroke();   // the brown head
+      }
+      ctx.lineCap = 'butt'; ctx.lineWidth = 1;
+    }
+    for (const [tx, ty] of tubs) {
+      const [x, y] = P(tx, ty, 0.5);
+      if (x < -30 || x > vw + 30 || y < -30 || y > vh + 30) continue;
+      ctx.fillStyle = '#8a5a3c'; ctx.strokeStyle = 'rgba(18,33,26,0.4)'; ctx.lineWidth = 1; ctx.beginPath(); ctx.arc(x, y, 0.55 * k, 0, TAU); ctx.fill(); ctx.stroke();
+      ['#d5503c', '#f4c531', '#f6f1df', '#e8855f', '#d5503c'].forEach((c, i) => { const a = i * 1.26; ctx.fillStyle = c; ctx.beginPath(); ctx.arc(x + Math.cos(a) * 0.26 * k, y + Math.sin(a) * 0.26 * k, 0.17 * k, 0, TAU); ctx.fill(); });
+    }
+  }
   function drawAmbient(ground) {   // ground: the ducks, drawn with the world; otherwise what is in the air
+    if (ground) drawPondLife();
     const k = cam.s;
     ctx.lineJoin = 'round';
     for (const d of ground ? ducks : []) {   // ducks keep to the middle of the pond
