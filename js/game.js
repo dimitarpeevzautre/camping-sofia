@@ -1764,6 +1764,20 @@
         ctx.lineCap = 'butt'; ctx.lineWidth = 1;
       }
     }
+    // picnic tables on the meadow and two benches facing the pond
+    for (const [x, y, a] of [[25, 79, 0.3], [38.5, 83, -0.5], [45, 71.5, 1.2], [94, 81, 0.1]]) {
+      const [sx, sy] = P(x, y);
+      if (sx < -60 || sx > vw + 60 || sy < -60 || sy > vh + 60) continue;
+      const r = { cx: x, cy: y, hl: 1.1, hw: 0.9, a }, top = box(-1.1, 1.1, -0.4, 0.4);
+      for (const w of [-0.75, 0.75]) { const seat = box(-1.1, 1.1, w - 0.16, w + 0.16); solid(r, seat, 0.3, seat, 0.42, '#8a6a45', '#a98458'); }
+      solid(r, top, 0.55, top, 0.72, '#8a6a45', '#b98a55');
+    }
+    for (const [x, y] of [[89.5, 20.3], [98.5, 20.3]]) {
+      const [sx, sy] = P(x, y);
+      if (sx < -60 || sx > vw + 60 || sy < -60 || sy > vh + 60) continue;
+      const r = { cx: x, cy: y, hl: 0.9, hw: 0.3, a: 0 }, seat = box(-0.9, 0.9, -0.25, 0.25), back = box(-0.9, 0.9, 0.2, 0.3);
+      solid(r, seat, 0.3, seat, 0.45, '#8a6a45', '#a98458'); solid(r, back, 0.45, back, 0.95, '#7a5c3c', '#8a6a45');
+    }
     for (const [tx, ty] of tubs) {
       const [x, y] = P(tx, ty, 0.5);
       if (x < -30 || x > vw + 30 || y < -30 || y > vh + 30) continue;
