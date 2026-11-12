@@ -58,7 +58,7 @@ body.sign-away .sign { opacity: 0; transform: translateY(-150%); pointer-events:
 @keyframes heat { 50% { background: #2b4fa3; } }
 .banner {
   position: fixed; left: 50%; top: 40%; transform: translate(-50%, -50%) rotate(-5deg) scale(0.4); opacity: 0; pointer-events: none;
-  font-size: clamp(2.4rem, 10vw, 6rem); font-weight: 900; letter-spacing: -0.02em; line-height: 1; white-space: nowrap; color: var(--plate);
+  font-size: clamp(2.4rem, 10vw, 6rem); font-weight: 900; letter-spacing: -0.02em; line-height: 1; width: max-content; max-width: 94vw; text-align: center; color: var(--plate);
   text-shadow: -4px 0 var(--ink), 4px 0 var(--ink), 0 -4px var(--ink), 0 4px var(--ink), -3px -3px var(--ink), 3px -3px var(--ink), -3px 3px var(--ink), 3px 3px var(--ink), 0 10px 0 var(--ink);
 }
 .banner.on { animation: banner 1.5s ease-out; }
