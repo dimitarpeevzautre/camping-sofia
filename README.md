@@ -12,14 +12,20 @@ lights up. Nothing hurries you. When the camp fills, the longest-staying guests 
 - **A shift.** It lasts until you choose "Finish the shift" on the score card (the Score plate, or P). Finishing
   banks the points as coins for the camp shop and records the shift among your five best.
 - **Guests.** Campervans, motorhomes, cars with caravans and cars with rooftop tents. Now and then a rare
-  vehicle arrives (six kinds); each is worth 100 the first time and is kept in an album on the score card.
-- **On the lanes.** An ice-cream van, a tractor, a touring biker, cyclists and backpackers, all slow. Tips to
+  vehicle arrives (nine kinds); each is worth 100 the first time and is kept in an album on the score card.
+- **On the lanes.** An ice-cream van, a tractor, a touring biker, cyclists and backpackers, all slow, each
+  keeping to the right-hand side of its road so the middle is always free. Tips to
   pick up, an occasional purple boost (double points, self-parking, a shield), a wash bay, ten hidden gnomes, an
   errand for a camper every so often and, rarely, a dog that has run off with the sausages.
 - **People.** Each guest brings a small family. Campers from different pitches who meet stop for a short scripted
   chat, and they remark on what happens around them. The owner, Baba Ginka, has a few words too.
 - **The biplane.** "Fly the biplane" on the start card. It cannot land or stop. Four things you can do with it
-  are worth points and are not announced; the score card counts the ones found.
+  are worth points and are not announced (seven of them); the score card counts the ones found. It leaves a
+  trail in the sky.
+- **To look at.** Ducks, lily pads and reeds on the pond; butterflies, cloud shadows, a hot-air balloon and a
+  skein of birds by day; a golden hour at dusk; fairy lights, fireflies, woodsmoke and a ring of campers round
+  the fire at night; a playground the children walk to; backpackers' tents going up in the field. Very quiet
+  birdsong by day and crickets after dark.
 - **Before you start.** A campervan or a car and caravan drives itself to a pitch behind the start card.
 
 Controls: arrow keys or WASD, Space for the handbrake, H for the horn, M to mute, R for the radio, P to pause.
@@ -58,6 +64,13 @@ The score card can show weekly and all-time top lists from a small service (Clou
 the `backend` branch of this repository. It stores a nickname and the figures of a shift, nothing else. Until
 the service's address is set in `API` in the leaderboard section of `js/game.js`, the lists stay hidden.
 
+## How it is drawn
+
+Everything is drawn on one canvas each frame. Anything that does not change from frame to frame (a parked
+camper, traffic going straight, the driven vehicle while it holds its line) is drawn once onto a small canvas of
+its own and reused until the camera has moved a metre and a half; see `viaSprite` in `js/game.js`. Without that a
+full camp ran at a few frames a second on a phone.
+
 ## Run it locally
 
 ```
@@ -65,7 +78,7 @@ python -m http.server 8123
 ```
 
 Then open http://127.0.0.1:8123/. Add `?debug` to the address to expose the game state as `window.camp` in the
-browser console.
+browser console, and `?debug&shot` to hide the map, goals and pointer when taking a picture such as `og.jpg`.
 
 ## Deploy
 
