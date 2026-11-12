@@ -46,6 +46,7 @@
         ten: 'Full house: ten guests in one shift', twenty: 'Rush hour hero: twenty guests in one shift',
         host: 'Camp host: 1500 points in one shift', legend: 'Legend of Vitosha: 8000 points in one shift',
       },
+      quick: 'Lightning!', close2: 'Just in time!', wave: (n) => `${n} guests parked. The next ones are in more of a hurry`,
       honk: 'Beep beep!', vip: 'A VIP guest: double points, less patience',
       ranks: ['Trainee', 'Gate keeper', 'Camp host', 'Site warden', 'Camp manager', 'Legend of Vitosha'],
       rankNext: (n, r) => `${n} more for ${r}`, short: (n) => `only ${n} short of your best`,
@@ -79,6 +80,7 @@
         ten: 'Пълен къмпинг: десет гости в една смяна', twenty: 'Герой на пиковия час: двайсет гости в една смяна',
         host: 'Домакин на къмпинга: 1500 точки в една смяна', legend: 'Легенда на Витоша: 8000 точки в една смяна',
       },
+      quick: 'Светкавично!', close2: 'В последната секунда!', wave: (n) => `${n} паркирани гости. Следващите бързат повече`,
       honk: 'Бийп-бийп!', vip: 'VIP гост: двойни точки, по-малко търпение',
       ranks: ['Стажант', 'Пазач на портала', 'Домакин на къмпинга', 'Управител на терена', 'Директор на къмпинга', 'Легенда на Витоша'],
       rankNext: (n, r) => `още ${n} до „${r}“`, short: (n) => `само ${n} до рекорда ви`,
@@ -371,7 +373,7 @@
       ctx.font = '900 30px Overpass, sans-serif'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; ctx.lineJoin = 'round';
       ctx.lineWidth = 5; ctx.strokeStyle = '#12211a'; ctx.strokeText('★', x, y); ctx.fillStyle = '#f4c531'; ctx.fillText('★', x, y);
     }
-    for (const b of bits) { const [x, y] = P(b.x, b.y, b.z); ctx.fillStyle = b.c; ctx.fillRect(x - 3, y - 3, 6, 6); }
+    for (const b of bits) { const [x, y] = P(b.x, b.y, b.z); const h = (b.s || 6) / 2; ctx.fillStyle = b.c; ctx.fillRect(x - h, y - h, h * 2, h * 2); }
     ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; ctx.lineJoin = 'round';
     for (const p of pops) {
       const [x, y] = P(p.x, p.y), up = (p.max - p.life) * 34, grow = 1 + 0.5 * clamp(1 - (p.max - p.life) / 0.15, 0, 1);
@@ -471,6 +473,7 @@
     hud();
     if (kind === 'combo' && !metCaravan) { metCaravan = true; toast(L.firstCombo(target.n), 3800); }
     else if (car.vip) { toast(L.vip, 2600); sfx.best(); }
+    else if (parkedCount > 0 && parkedCount % 5 === 0) { toast(L.wave(parkedCount), 2600); sfx.best(); }
     else if (parkedCount > 0) { toast(L.next(L.names[kind], target.n), 1500); sfx.next(); }
   }
   function packUp(g, delay = 0) {   // roll in the awning, call the family back, then drive off
@@ -663,6 +666,10 @@
     if (car._w && car.braking && Math.abs(v0) > 3.5) for (let i = 0; i < wp.length; i++) skids.push({ a: car._w[i], b: wp[i], t: clock });
     if (skids.length > 1500) skids.splice(0, skids.length - 1500);
     car._w = wp;
+    if (!reduceMotion && Math.abs(car.v) > 3 && Math.random() < 0.6) {   // gravel dust off the rear wheels
+      const w = wp[(Math.random() * 2) | 0], k = -Math.sign(car.v);
+      bits.push({ x: w[0], y: w[1], z: 0.2, vx: Math.cos(car.th) * k * 1.5 + (Math.random() - 0.5) * 2, vy: Math.sin(car.th) * k * 1.5 + (Math.random() - 0.5) * 2, vz: 1.2, c: 'rgba(214,198,160,0.55)', life: 0.45, s: 5 });
+    }
     bumpCool -= dt; shake = Math.max(0, shake - dt * 3);
 
     // Parked when the living part sits inside the pitch and has stopped for a moment.
@@ -716,6 +723,8 @@
     const clean = bumps === 0 && accuracy >= 60, perfect = clean && accuracy >= 90;
     streak = clean ? streak + 1 : 0;
     const mult = 1 + Math.min(Math.max(streak - 1, 0), 8) * 0.25, dark = night > 0.6, pts = Math.round((accuracy + speed) * mult * (car.vip ? 2 : 1) * (dark ? 1.25 : 1)) + (perfect ? 50 : 0);
+    const quick = speed >= 85 ? L.quick : speed <= 12 ? L.close2 : '';   // very fast, or at the last second: a little extra
+    if (quick) { total += 30; pop(r.cx, r.cy, `${quick} +30`, '#f6f1df', 22, dark ? 100 : 74); }
     total += pts; stats.streak = Math.max(stats.streak, streak); if (perfect) stats.perfect++;
     pop(r.cx, r.cy, `+${pts}`, '#f4c531', 40);
     if (perfect) { pop(r.cx, r.cy, L.perfect, '#f6f1df', 26, 40); confetti(r.cx, r.cy); }
