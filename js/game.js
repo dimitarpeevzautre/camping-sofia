@@ -608,9 +608,10 @@
 
   let toastTimer = 0, toastUntil = 0;
   const toastQ = [];   // remarks from the owner wait here until the screen is clear
-  function boss(key) { if (toastQ.length < 2) toastQ.push(pick(L.boss[key])); }
+  function boss(key) { if (!demo && toastQ.length < 2) toastQ.push(pick(L.boss[key])); }
   function stepToasts() { if (toastQ.length && mode === 'play' && performance.now() > toastUntil + 500) toast(toastQ.shift(), 3400); }
   function toast(text, ms = 1800) {
+    if (demo) return;
     toastUntil = performance.now() + ms;
     const el = $('toast');
     el.textContent = text; el.classList.add('on');
@@ -651,7 +652,7 @@
     if (free.length < 8 && !guests.some((g) => g.packing)) checkout();
     const roll = rnd();
     // The second guest always tows a caravan, so everyone meets one early.
-    const kind = parkedCount === 0 ? 'van' : parkedCount === 1 && !metCaravan ? 'combo' : roll < 0.4 ? 'van' : roll < 0.65 ? 'motorhome' : 'combo';
+    const kind = demo || parkedCount === 0 ? 'van' : parkedCount === 1 && !metCaravan ? 'combo' : roll < 0.4 ? 'van' : roll < 0.65 ? 'motorhome' : 'combo';
     car = makeVehicle(kind, 61.8, 80.5, -Math.PI / 2);   // on the right, clear of guests driving out
     const room = rectsOf(car).map((r) => ({ ...r, hl: r.hl + 1.5, hw: r.hw + 0.8 }));
     if (!now && (guests.some((o) => o.leave && rectsOf(o).some((q) => room.some((r) => rectRect(r, q)))) ||
@@ -659,7 +660,7 @@
       car = null; setTimeout(() => { if (mode === 'play' && !car) nextGuest(); }, 400); return;
     }
     car.born = clock; car.vip = parkedCount >= 3 && rnd() < 0.14;
-    if (!chill && parkedCount > 0 && parkedCount % 8 === 6 && !rushLeft) { rushLeft = 3; banner(L.bHour); toastQ.push(L.rushOn); }
+    if (!chill && !demo && parkedCount > 0 && parkedCount % 8 === 6 && !rushLeft) { rushLeft = 3; banner(L.bHour); toastQ.push(L.rushOn); }
     car.rush = rushLeft > 0; if (car.rush) rushLeft--;
     const options = freePitches();
     target = options[(rnd() * options.length) | 0];
@@ -685,6 +686,7 @@
   function checkout() { guests.filter((g) => !g.packing && !g.leaving).slice(0, 3).forEach((g, i) => packUp(g, i * 5)); }
 
   function start(off) {
+    if (demo) endDemo();
     mode = 'play'; chill = off === true; document.body.classList.toggle('chill', chill);
     document.body.classList.add('playing');
     $('start').hidden = true; $('hud').hidden = false;
@@ -772,6 +774,7 @@
   let badgeQ = 0;
   try { JSON.parse(localStorage.getItem('camp-badges') || '[]').forEach((id) => earned.add(id)); } catch (e) { /* private window */ }
   function award(id) {
+    if (demo) return;
     if (earned.has(id) || !L.badges[id]) return;
     earned.add(id);
     try { localStorage.setItem('camp-badges', JSON.stringify([...earned])); } catch (e) { /* private window */ }
@@ -932,6 +935,7 @@
     } catch (e) { /* no speech: the banner is enough */ }
   }
   function banner(text) {
+    if (demo) return;
     const el = $('banner');
     el.textContent = text; el.classList.remove('on'); void el.offsetWidth; el.classList.add('on');
     shout(text);
@@ -1165,7 +1169,7 @@
   let lastDrift = -99;
   try { JSON.parse(localStorage.getItem('camp-gnomes') || '[]').forEach((i) => found.add(i)); } catch (e) { /* private window */ }
   function stepGnomes() {
-    if (found.size === GNOMES.length) return;
+    if (demo || found.size === GNOMES.length) return;
     const rects = rectsOf(car);
     GNOMES.forEach(([x, y], i) => {
       if (found.has(i) || Math.abs(x - car.x) > 12 || Math.abs(y - car.y) > 12 || !rects.some((r) => rectCircle(r, x, y, 2.8))) return;
@@ -1316,6 +1320,39 @@
     }
   }
 
+  // ---------- the demo behind the start card ----------
+  // Until somebody presses Start, a campervan drives itself from the gate to its pitch, over and over, so the page
+  // is never still. Nothing it does is recorded, announced or heard.
+  let demo = false, demoPts = [], demoI = 0, demoT = 0, demoBack = 0, demoRef = null;
+  function beginDemo() {
+    if (mode !== 'attract' || reduceMotion) return;
+    mode = 'play'; chill = true; demo = true; parkedCount = 0; total = 0; damage = 0; streak = 0; heat = 0; warden = null; job = null; thief = null;
+    nextJob = nextThief = nextBoost = 1e9; nextRain = clock + 1e9; playT = 1e9; goals = [];
+    car = null; nextGuest(true);
+  }
+  function endDemo() { demo = false; for (const k in keys) keys[k] = false; car = null; target = null; }
+  function stepDemo(dt) {
+    if (!car) { demoPts = []; return; }
+    const p = target;
+    if (!demoPts.length) {
+      const cx = p.x + p.w / 2, laneY = p.laneBelow ? p.y + p.d + 5 : p.y - 4.5, into = p.laneBelow ? -1 : 1, side = cx < 60 ? -1 : 1;
+      demoPts = [[60, laneY + 1.5], [cx - side * 6.5, laneY - into * 1.2], [cx, laneY + into * 4.5], [cx, p.y + p.d / 2 + into * 3]];
+      demoI = 0; demoT = 0; demoBack = 0; demoRef = null;
+    }
+    if ((demoT += dt) > 70) { car = null; demoPts = []; nextGuest(true); return; }   // it lost its way: send the next one
+    const fx = car.x + Math.cos(car.th) * car.t.wb, fy = car.y + Math.sin(car.th) * car.t.wb;
+    let [tx, ty] = demoPts[demoI];
+    if (demoI < demoPts.length - 1 && Math.hypot(tx - fx, ty - fy) < (demoI === 0 ? 5 : 2.5)) { demoI++; [tx, ty] = demoPts[demoI]; }
+    const err = wrap(Math.atan2(ty - fy, tx - fx) - car.th), d = Math.hypot(tx - fx, ty - fy), r = livingRect(car);
+    const inside = demoI === demoPts.length - 1 && Math.abs(r.cy - (p.y + p.d / 2)) < 1 && Math.abs(r.cx - (p.x + p.w / 2)) < 1.2;
+    const want = inside ? 0 : demoI >= 2 ? 2 : Math.abs(err) > 0.5 ? 2.5 : d < 9 ? 3.5 : 7;
+    keys.left = err < -0.04; keys.right = err > 0.04; keys.up = car.v < want - 0.2; keys.down = car.v > want + 0.8 || (inside && car.v > 0.2); keys.brake = false; keys.horn = false;
+    // wedged against something: if it has not moved a metre in two seconds, back off on the opposite lock for a moment
+    if (demoBack > 0) { demoBack -= dt; keys.up = false; keys.down = true; keys.left = !keys.left; keys.right = !keys.right; demoRef = null; return; }
+    if (!demoRef || Math.hypot(car.x - demoRef.x, car.y - demoRef.y) > 1 || inside) demoRef = { x: car.x, y: car.y, t: demoT };
+    else if (demoT - demoRef.t > 2) demoBack = 1.3;
+  }
+
   // ---------- gamepad ----------
   // Left stick or d-pad steers, right trigger drives, left trigger reverses, A is the handbrake, X the horn.
   const padState = {};
@@ -1326,7 +1363,7 @@
     const st = { left: ax < -0.3 || b(14), right: ax > 0.3 || b(15), up: v(7) > 0.2 || b(12), down: v(6) > 0.2 || b(13), brake: b(0), horn: b(2) };
     for (const k in st) if (st[k] !== padState[k]) { padState[k] = st[k]; if (!paused) keys[k] = st[k]; }
     const go = b(9) || b(0);
-    if (go && !padState.go) { if (mode === 'attract') start(); else if (mode === 'over' && card.open) card.close(); }
+    if (go && !padState.go) { if (mode === 'attract' || demo) start(); else if (mode === 'over' && card.open) card.close(); }
     padState.go = go;
   }
 
@@ -1347,6 +1384,7 @@
     }
   }
   function drawGoalList(x, y) {
+    if (demo) return;
     ctx.font = '800 12px Overpass, "Segoe UI", sans-serif'; ctx.textAlign = 'left'; ctx.textBaseline = 'top'; ctx.lineJoin = 'round'; ctx.lineWidth = 3.5; ctx.strokeStyle = '#12211a';
     goals.forEach((g, i) => {
       const text = `${g.done ? '✓' : '○'} ${L.goalNames[g.key]} ${goalNow(g)}/${g.n}`;
@@ -2450,7 +2488,7 @@
   $('card-close').addEventListener('click', () => card.close());
   $('card-again').addEventListener('click', () => card.close());
   $('card-restart').addEventListener('click', () => location.reload());
-  addEventListener('keydown', (e) => { if ((e.code === 'KeyP' || e.code === 'Escape') && mode === 'play' && !paused) { e.preventDefault(); openCard(); } });
+  addEventListener('keydown', (e) => { if ((e.code === 'KeyP' || e.code === 'Escape') && mode === 'play' && !paused && !demo) { e.preventDefault(); openCard(); } });
   card.addEventListener('click', (e) => { if (e.target === card) card.close(); });   // a click on the backdrop
   card.addEventListener('close', () => { paused = false; last = performance.now(); cv.focus(); if (mode === 'over') start(chill); });
 
@@ -2531,6 +2569,7 @@
   function tick(now) {
     const dt = Math.min(0.05, (now - last) / 1000); last = now;
     pollPad();
+    if (demo && !paused) stepDemo(dt);
     if (!paused) { step(dt); stepFx(dt); stepToasts(); }
     engineSound(dt); stepRadio(dt); rainSound();
     updateCamera(dt);
@@ -2539,7 +2578,8 @@
   }
   hud();
   requestAnimationFrame(tick);
+  setTimeout(beginDemo, 2500);
 
   // For automated checks only: /?debug exposes the state.
-  if (location.search.includes('debug')) window.camp = { get car() { return car; }, get target() { return target; }, get parked() { return parkedCount; }, get score() { return score(); }, get night() { return night; }, people, skids, packUp, guests, pitches, stats, rectsOf, rectRect, keys, blocked, livingRect, corners, setClock: (t) => { clock = t; }, setPatience: (t) => { patience = t; }, get lives() { return lives; }, roamers, respect, owned, get bank() { return bank; }, setBank: (n) => { bank = n; saveShop(); shop(); }, props, get goals() { return goals; }, get ice() { return ice; }, found, GNOMES, get thief() { return thief; }, get rain() { return rain; }, setNext: (o) => { if (o.rain !== undefined) nextRain = o.rain; if (o.thief !== undefined) nextThief = o.thief; }, get job() { return job; }, setNextJob: (t) => { nextJob = t; }, tuneRadio, get station() { return station; }, get heat() { return heat; }, get warden() { return warden; }, trouble, boost, chats, takeBoost, say, addTip, earned, award, tips, honk, rankLine, get streak() { return streak; }, get mode() { return mode; }, get patienceMax() { return patienceMax; }, pops, bits, give: (kind) => { car = makeVehicle(kind, 61.8, 80.5, -Math.PI / 2); car.born = -9; }, next: () => { car = null; nextGuest(); } };
+  if (location.search.includes('debug')) window.camp = { get car() { return car; }, get target() { return target; }, get parked() { return parkedCount; }, get score() { return score(); }, get night() { return night; }, people, skids, packUp, guests, pitches, stats, rectsOf, rectRect, keys, blocked, livingRect, corners, setClock: (t) => { clock = t; }, setPatience: (t) => { patience = t; }, get lives() { return lives; }, get demo() { return demo; }, roamers, respect, owned, get bank() { return bank; }, setBank: (n) => { bank = n; saveShop(); shop(); }, props, get goals() { return goals; }, get ice() { return ice; }, found, GNOMES, get thief() { return thief; }, get rain() { return rain; }, setNext: (o) => { if (o.rain !== undefined) nextRain = o.rain; if (o.thief !== undefined) nextThief = o.thief; }, get job() { return job; }, setNextJob: (t) => { nextJob = t; }, tuneRadio, get station() { return station; }, get heat() { return heat; }, get warden() { return warden; }, trouble, boost, chats, takeBoost, say, addTip, earned, award, tips, honk, rankLine, get streak() { return streak; }, get mode() { return mode; }, get patienceMax() { return patienceMax; }, pops, bits, give: (kind) => { car = makeVehicle(kind, 61.8, 80.5, -Math.PI / 2); car.born = -9; }, next: () => { car = null; nextGuest(); } };
 })();
