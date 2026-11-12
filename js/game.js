@@ -2705,6 +2705,14 @@
       for (const l of lamps) { const [x, y] = P(l.x, l.y, 1); glow(x, y, cam.s * 11, 'rgba(255,214,130,A)', 0.5); }
       { const [x, y] = P(fire.x, fire.y); glow(x, y, cam.s * (8 + Math.sin(clock * 11) * 0.6), 'rgba(255,150,60,A)', 0.7); }
       for (const g of guests) { const r = livingRect(g), [x, y] = P(r.cx, r.cy, 1); glow(x, y, cam.s * 4.5, 'rgba(255,200,120,A)', 0.4 * g.alpha); }
+      // fairy lights along the edge of every awning, and a row of bulbs on the beam over the gate
+      const BULBS = ['rgba(255,236,170,A)', 'rgba(255,150,110,A)', 'rgba(150,210,255,A)'];
+      for (const g of guests) {
+        if (!g.parked || g.packing || g.leaving || g.kind === 'roofcar' || clock - g.parked.t < 1.5) continue;
+        const r = livingRect(g), z = (g.t.trailer ? g.t.trailer.z : g.t.z) - 0.55, w = g.side * (r.hw + 2.1);
+        for (let i = 0; i < 7; i++) { const [x, y] = RP(r, -1.6 + i * 0.55, w, z); glow(x, y, cam.s * 0.36, BULBS[i % 3], 0.6 + 0.15 * Math.sin(clock * 2.5 + i * 2 + r.cx)); }
+      }
+      for (let i = 0; i < 11; i++) { const [x, y] = P(55.2 + i * 0.96, 85.8, 3.6); glow(x, y, cam.s * 0.36, BULBS[0], 0.7); }
       if (car && car._lights) {
         for (const [x, y] of car._lights) {
           const a = car.th, len = cam.s * 17;
