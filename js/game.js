@@ -1,6 +1,7 @@
 /* Camping Sofia: the coming-soon page is a small driving game.
    An invented campsite seen from above. Guests arrive at the gate one after another; the player drives each to
-   the pitch that lights up. It never ends: when the camp fills, the longest-staying guests check out.
+   the pitch that lights up. A shift lasts until three guests have given up waiting; when the camp fills, the
+   longest-staying guests check out.
 
    Units are metres. The view is a close overhead camera that follows the vehicle and pulls back with speed;
    anything with height (trees, buildings, roofs) is drawn pushed away from the screen centre in proportion to its
@@ -34,8 +35,10 @@
       first: (n) => `First guest: pitch ${n}`,
       jackknife: 'Jackknifed. Pull forward to straighten up',
       bump: (c) => `Bump: −${c}`,
-      gaveUp: 'That guest got tired of waiting and left: −20',
-      parked: (p, a, s) => `+${p}: accuracy ${a}, speed ${s}`,
+      gaveUp: 'That guest got tired of waiting and left. One ♥ gone',
+      parked: (p, a, s, m) => `+${p}: accuracy ${a}, speed ${s}${m > 1 ? `, ×${m}` : ''}`,
+      perfect: 'Perfect!', newBest: 'New best score!', lifeBack: 'Five clean in a row: ♥ back',
+      overTitle: 'Shift over', again: 'Play again', cardTitle: 'Your camp so far', close: 'Back to parking',
       careful: (who) => `Careful, that was a ${who}! −60`,
       who: { kid: 'child', cat: 'cat', dog: 'dog', adult: 'guest' },
       share: (n) => `I scored ${n} parking campers at Camping Sofia. Can you beat it?`,
@@ -53,8 +56,10 @@
       first: (n) => `Първи гост: място ${n}`,
       jackknife: 'Караваната се сгъна. Дръпнете напред, за да се изправи',
       bump: (c) => `Удар: −${c}`,
-      gaveUp: 'Гостът се отказа да чака и си тръгна: −20',
-      parked: (p, a, s) => `+${p}: точност ${a}, бързина ${s}`,
+      gaveUp: 'Гостът се отказа да чака и си тръгна. Минус едно ♥',
+      parked: (p, a, s, m) => `+${p}: точност ${a}, бързина ${s}${m > 1 ? `, ×${m}` : ''}`,
+      perfect: 'Перфектно!', newBest: 'Нов рекорд!', lifeBack: 'Пет чисти поред: +♥',
+      overTitle: 'Смяната свърши', again: 'Играй пак', cardTitle: 'Вашият къмпинг дотук', close: 'Обратно към паркирането',
       careful: (who) => `Внимавайте, това беше ${who}! −60`,
       who: { kid: 'дете', cat: 'котка', dog: 'куче', adult: 'гост' },
       share: (n) => `Събрах ${n} точки с паркиране на кемпери в Camping Sofia. Ще ме биеш ли?`,
@@ -65,19 +70,19 @@
         tagline: 'Очаквайте скоро. Вашата база за София.',
         pitch: 'Място', score: 'Точки', best: 'Рекорд',
         h2: 'Истинският къмпинг още се строи.',
-        intro: 'Дотогава гостите идват в този. Закарайте всеки до мястото, което свети. Паркирайте право и бързо за точки; ударите струват скъпо, и внимавайте с децата.',
+        intro: 'Дотогава гостите идват в този. Закарайте всеки до мястото, което свети. Паркирайте право и бързо за точки; чистите паркирания поред ги умножават. Ударите струват скъпо, а трима гости, които се откажат да чакат, слагат край на смяната.',
         play: 'Започнете да паркирате',
         keys: 'Стрелки или WASD за шофиране. Интервал за спирачка.',
         by: `Camping Sofia е проект на ${BY}`,
         note: `Този къмпинг е измислен. Истинският идва в София, от ${BY}.`,
         cardTitle: 'Вашият къмпинг дотук',
         stParked: 'Паркирани гости', stOnsite: 'В къмпинга сега', stAcc: 'Средна точност', stSpd: 'Средна бързина',
-        stTop: 'Най-добро паркиране', stBumps: 'Удари', stScares: 'Стреснати хора', stGaveUp: 'Гости, които се отказаха да чакат',
+        stTop: 'Най-добро паркиране', stStreak: 'Най-дълга чиста серия', stPerfect: 'Перфектни паркирания', stBumps: 'Удари', stScares: 'Стреснати хора', stGaveUp: 'Гости, които се отказаха да чакат',
         stTime: 'Време зад волана', shareTitle: 'Споделете резултата', shareNative: 'Сподели', savePic: 'Запази картинката', close: 'Обратно към паркирането',
       },
       aria: {
         camp: 'Къмпинг, гледан отгоре. Закарайте всеки пристигащ гост до мястото му.',
-        patience: 'Колко още ще чака този гост', scoreBtn: 'Вашата статистика и споделяне',
+        patience: 'Колко още ще чака този гост', lives: 'Колко гости още може да разочаровате', mute: 'Звук (M)', scoreBtn: 'Вашата статистика и споделяне',
         left: 'Завий наляво', right: 'Завий надясно', down: 'Назад', up: 'Напред',
       },
     },
@@ -244,6 +249,109 @@
     return false;
   }
 
+  // ---------- sound ----------
+  // Everything is synthesised with Web Audio, so there are no files to load. The context is made on the first click.
+  let muted = false, AC = null, master = null, eng = null, beepT = 0, tickT = 0;
+  try { muted = localStorage.getItem('camp-mute') === '1'; } catch (e) { /* private window */ }
+  function audioOn() {
+    if (AC) { if (AC.state === 'suspended') AC.resume(); return; }
+    const C = window.AudioContext || window.webkitAudioContext;
+    if (!C) return;
+    try {
+      AC = new C(); master = AC.createGain(); master.gain.value = muted ? 0 : 0.5; master.connect(AC.destination);
+      const o = AC.createOscillator(), f = AC.createBiquadFilter(), g = AC.createGain();
+      o.type = 'sawtooth'; o.frequency.value = 50; f.type = 'lowpass'; f.frequency.value = 300; g.gain.value = 0;
+      o.connect(f); f.connect(g); g.connect(master); o.start(); eng = { o, f, g };
+    } catch (e) { AC = null; eng = null; }
+  }
+  function note(freq, at = 0, dur = 0.15, type = 'triangle', vol = 0.25, to = 0) {
+    if (!AC) return;
+    const t = AC.currentTime + at, o = AC.createOscillator(), g = AC.createGain();
+    o.type = type; o.frequency.setValueAtTime(freq, t);
+    if (to) o.frequency.exponentialRampToValueAtTime(to, t + dur);
+    g.gain.setValueAtTime(0.0001, t); g.gain.exponentialRampToValueAtTime(vol, t + 0.012); g.gain.exponentialRampToValueAtTime(0.0001, t + dur);
+    o.connect(g); g.connect(master); o.start(t); o.stop(t + dur + 0.02);
+  }
+  function thud(vol = 0.5) {
+    if (!AC) return;
+    const n = (AC.sampleRate * 0.25) | 0, buf = AC.createBuffer(1, n, AC.sampleRate), d = buf.getChannelData(0);
+    for (let i = 0; i < n; i++) d[i] = (Math.random() * 2 - 1) * Math.pow(1 - i / n, 2.5);
+    const s = AC.createBufferSource(), f = AC.createBiquadFilter(), g = AC.createGain();
+    s.buffer = buf; f.type = 'lowpass'; f.frequency.value = 500; g.gain.value = vol;
+    s.connect(f); f.connect(g); g.connect(master); s.start();
+    note(90, 0, 0.22, 'sine', vol, 40);
+  }
+  const SCALE = [0, 2, 4, 7, 9, 12, 14, 16, 19];
+  const hz = (semi) => 261.63 * Math.pow(2, semi / 12);
+  const sfx = {
+    park(run, perfect) {   // the chime climbs with the streak
+      const b = SCALE[Math.min(run, 8)];
+      [0, 4, 7, 12].forEach((s, i) => note(hz(b + s), i * 0.08, 0.22, 'triangle', 0.22));
+      if (perfect) [16, 19, 24].forEach((s, i) => note(hz(b + s), 0.34 + i * 0.07, 0.3, 'sine', 0.2));
+    },
+    bump(v) { thud(Math.min(0.7, 0.25 + v * 0.07)); },
+    startle() { note(880, 0, 0.12, 'square', 0.12); note(660, 0.13, 0.2, 'square', 0.12); },
+    lost() { [7, 3, 0].forEach((s, i) => note(hz(s - 12), i * 0.16, 0.3, 'sawtooth', 0.12)); },
+    life() { note(hz(12), 0, 0.12, 'sine', 0.25); note(hz(19), 0.1, 0.25, 'sine', 0.25); },
+    best() { [0, 4, 7, 12, 16].forEach((s, i) => note(hz(s + 5), i * 0.09, 0.3, 'square', 0.1)); },
+    over() { [12, 7, 4, 0, -5].forEach((s, i) => note(hz(s - 12), i * 0.2, 0.4, 'triangle', 0.25)); },
+    tick(low) { note(low ? 1400 : 1000, 0, 0.05, 'square', 0.07); },
+    beep() { note(1150, 0, 0.14, 'square', 0.05); },
+    next() { note(hz(7), 0, 0.08, 'sine', 0.15); note(hz(12), 0.08, 0.12, 'sine', 0.15); },
+    coin() { note(hz(19), 0, 0.07, 'square', 0.1); note(hz(24), 0.07, 0.16, 'square', 0.1); },
+    horn() { note(415, 0, 0.32, 'sawtooth', 0.16); note(523, 0, 0.32, 'sawtooth', 0.16); },
+  };
+  function engineSound(dt) {
+    if (!eng) return;
+    const on = mode === 'play' && car && !paused, v = on ? Math.abs(car.v) : 0, t = AC.currentTime, gas = on && (keys.up || keys.down);
+    eng.g.gain.setTargetAtTime(on ? 0.05 + v * 0.006 + (gas ? 0.03 : 0) : 0, t, 0.08);
+    eng.o.frequency.setTargetAtTime(48 + v * 11 + (gas ? 8 : 0), t, 0.1);
+    eng.f.frequency.setTargetAtTime(260 + v * 70, t, 0.1);
+    if (!on) return;
+    if (car.reversing && (beepT -= dt) <= 0) { beepT = 0.75; sfx.beep(); }
+    if (patience < 10 && (tickT -= dt) <= 0) { tickT = patience < 5 ? 0.5 : 1; sfx.tick(patience < 5); }
+  }
+  function setMute(m) {
+    muted = m;
+    try { localStorage.setItem('camp-mute', m ? '1' : '0'); } catch (e) { /* private window */ }
+    if (master) master.gain.value = m ? 0 : 0.5;
+    $('mute').classList.toggle('off', m); $('mute').setAttribute('aria-pressed', String(m));
+  }
+  setMute(muted);
+  $('mute').addEventListener('click', () => { audioOn(); setMute(!muted); cv.focus(); });
+  addEventListener('keydown', (e) => { if (e.code === 'KeyM' && !e.repeat) setMute(!muted); });
+
+  // ---------- pop-ups and confetti ----------
+  const pops = [], bits = [];
+  const pop = (x, y, text, c = '#f4c531', size = 30, o = 0) => pops.push({ x, y, text, c, size, o, life: 1.5, max: 1.5 });
+  function confetti(x, y) {
+    if (reduceMotion) return;
+    for (let i = 0; i < 44; i++) {
+      const a = Math.random() * TAU, s = 2 + Math.random() * 6;
+      bits.push({ x, y, z: 1, vx: Math.cos(a) * s, vy: Math.sin(a) * s, vz: 3 + Math.random() * 5, c: ['#f4c531', '#f6f1df', '#e2553d', '#6fb6d9'][i % 4], life: 1.8 });
+    }
+  }
+  function stepFx(dt) {
+    for (let i = pops.length - 1; i >= 0; i--) if ((pops[i].life -= dt) <= 0) pops.splice(i, 1);
+    for (let i = bits.length - 1; i >= 0; i--) {
+      const b = bits[i];
+      b.x += b.vx * dt; b.y += b.vy * dt; b.z += b.vz * dt; b.vz -= 9 * dt;
+      if (b.z < 0 || (b.life -= dt) <= 0) bits.splice(i, 1);
+    }
+  }
+  function drawFx() {
+    ctx.save();
+    for (const b of bits) { const [x, y] = P(b.x, b.y, b.z); ctx.fillStyle = b.c; ctx.fillRect(x - 3, y - 3, 6, 6); }
+    ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; ctx.lineJoin = 'round';
+    for (const p of pops) {
+      const [x, y] = P(p.x, p.y), up = (p.max - p.life) * 34, grow = 1 + 0.5 * clamp(1 - (p.max - p.life) / 0.15, 0, 1);
+      ctx.globalAlpha = clamp(p.life / 0.4, 0, 1); ctx.font = `900 ${Math.round(p.size * grow)}px Overpass, "Segoe UI", sans-serif`;
+      ctx.lineWidth = 6; ctx.strokeStyle = '#12211a'; ctx.strokeText(p.text, x, y - 34 - p.o - up);
+      ctx.fillStyle = p.c; ctx.fillText(p.text, x, y - 34 - p.o - up);
+    }
+    ctx.restore();
+  }
+
   // ---------- game state ----------
   const guests = [];           // parked vehicles, oldest first
   const ghosts = [];           // tow cars fading out as they leave for town; nothing can hit them
@@ -252,6 +360,7 @@
   let mode = 'attract';
   let parkedCount = 0, best = 0, damage = 0, night = 0, bumps = 0, holdT = 0, patience = 1, patienceMax = 60, bumpCool = 0, shake = 0;
   let clock = 0, lastNote = 0, metCaravan = false;
+  let total = 0, lives = 3, streak = 0, startBest = 0, newBestSaid = false;
   try { best = +localStorage.getItem('camp-best-score') || 0; } catch (e) { /* private window */ }
 
   const keys = { up: false, down: false, left: false, right: false, brake: false };
@@ -282,14 +391,20 @@
   function hud() {
     $('hud-pitch').textContent = target ? target.n : '–';
     const now = score();
-    if (mode === 'play' && now > best) { best = now; try { localStorage.setItem('camp-best-score', String(best)); } catch (e) { /* private window */ } }
+    if (mode === 'play' && now > best) {
+      best = now; try { localStorage.setItem('camp-best-score', String(best)); } catch (e) { /* private window */ }
+      if (startBest > 0 && !newBestSaid) { newBestSaid = true; toast(L.newBest, 2600); sfx.best(); }
+    }
+    $('hud-lives').textContent = '♥'.repeat(Math.max(0, lives)) + '♡'.repeat(3 - Math.max(0, lives));
+    const m = 1 + Math.min(streak, 8) * 0.25, combo = $('hud-combo'), was = combo.textContent;   // what the next clean parking is worth
+    combo.textContent = streak ? `×${m}` : '';
+    if (combo.textContent !== was && streak) { combo.classList.remove('hit'); void combo.offsetWidth; combo.classList.add('hit'); }
     $('hud-score').textContent = now;
     $('hud-best').textContent = best;
   }
 
-  // The score is what the guests now on site were worth when they parked, less every bump so far. A guest who
-  // packs up takes their points along; the bumps stay.
-  function score() { return guests.reduce((sum, g) => sum + (g.packing || g.leaving ? 0 : g.points || 0), 0) - damage; }
+  // The score is everything earned by parking this shift, less every bump.
+  function score() { return total - damage; }
   function freePitches() { return pitches.filter((p) => !p.guest); }
   function settle(v, p) {   // put a vehicle on a pitch without driving it there (the campers already on site)
     const cx = p.x + p.w / 2, nose = p.laneBelow ? -1 : 1;   // nose-in, away from the lane
@@ -306,7 +421,7 @@
     if (free.length < 8 && !guests.some((g) => g.packing)) checkout();
     const roll = rnd();
     // The second guest always tows a caravan, so everyone meets one early.
-    const kind = parkedCount === 0 ? 'van' : parkedCount === 1 ? 'combo' : roll < 0.4 ? 'van' : roll < 0.65 ? 'motorhome' : 'combo';
+    const kind = parkedCount === 0 ? 'van' : parkedCount === 1 && !metCaravan ? 'combo' : roll < 0.4 ? 'van' : roll < 0.65 ? 'motorhome' : 'combo';
     car = makeVehicle(kind, 61.8, 80.5, -Math.PI / 2);   // on the right, clear of guests driving out
     const room = rectsOf(car).map((r) => ({ ...r, hl: r.hl + 1.5, hw: r.hw + 0.8 }));
     if (!now && (guests.some((o) => o.leave && rectsOf(o).some((q) => room.some((r) => rectRect(r, q)))) ||
@@ -317,15 +432,16 @@
     const options = freePitches();
     target = options[(rnd() * options.length) | 0];
     bumps = 0; holdT = 0;
-    patienceMax = Math.max(34, 75 - parkedCount * 2) + (kind === 'combo' ? 25 : kind === 'motorhome' ? 8 : 0);
+    // Less time with every guest, more for a long drive and for the awkward vehicles.
+    const dist = Math.hypot(target.x + target.w / 2 - car.x, target.y + target.d / 2 - car.y);
+    patienceMax = Math.max(18, 50 - parkedCount * 1.6) + dist * 0.35 + (kind === 'combo' ? 22 : kind === 'motorhome' ? 6 : 0);
     patience = patienceMax;
     hud();
     if (kind === 'combo' && !metCaravan) { metCaravan = true; toast(L.firstCombo(target.n), 3800); }
-    else if (parkedCount > 0) toast(L.next(L.names[kind], target.n), 1500);
+    else if (parkedCount > 0) { toast(L.next(L.names[kind], target.n), 1500); sfx.next(); }
   }
   function packUp(g, delay = 0) {   // roll in the awning, call the family back, then drive off
     g.packing = clock + delay;
-    if (mode === 'play' && g.points) toast(L.packed(g.parked.pitch.n, g.points), 2200);
     hud();
   }
   function checkout() { guests.filter((g) => !g.packing && !g.leaving).slice(0, 3).forEach((g, i) => packUp(g, i * 5)); }
@@ -336,6 +452,8 @@
     $('start').hidden = true; $('hud').hidden = false;
     if (matchMedia('(pointer: coarse)').matches) $('pad').hidden = false;
     parkedCount = 0; damage = 0; Object.keys(stats).forEach((k) => { stats[k] = 0; });
+    total = 0; lives = 3; streak = 0; startBest = best; newBestSaid = false; car = null;
+    audioOn();
     nextGuest(true);
     setTimeout(() => document.body.classList.add('sign-away'), 5000);   // the name plate steps aside once the driving starts
     toast(L.first(target.n), 2200);
@@ -406,7 +524,7 @@
         if (Math.abs(v0) > 1.2 && bumpCool <= 0) {
           const cost = Math.round(10 + Math.abs(v0) * 4);
           bumps++; bumpCool = 0.5; shake = reduceMotion ? 0 : Math.min(1, Math.abs(v0) / 6);
-          damage += cost; stats.bumps++; toast(L.bump(cost), 1100); hud();
+          damage += cost; stats.bumps++; streak = 0; sfx.bump(Math.abs(v0)); pop(car.x, car.y, `−${cost}`, '#e2553d', 26); toast(L.bump(cost), 1100); hud();
         }
         car.v = -car.v * 0.25;
         break;
@@ -433,7 +551,16 @@
     const bar = $('hud-patience');
     bar.style.transform = `scaleX(${clamp(patience / patienceMax, 0, 1)})`;
     bar.classList.toggle('low', patience < 10);
-    if (patience <= 0) { damage += 20; stats.gaveUp++; toast(L.gaveUp, 2200); car = null; nextGuest(); }
+    if (patience <= 0) {   // one guest let down; the third ends the shift
+      stats.gaveUp++; lives--; streak = 0; car = null; sfx.lost();
+      if (lives <= 0) gameOver(); else { toast(L.gaveUp, 2400); setTimeout(() => { if (mode === 'play' && !car) nextGuest(); }, 1600); }
+      hud();
+    }
+  }
+
+  function gameOver() {
+    mode = 'over'; target = null; sfx.over(); toast(L.overTitle, 2000);
+    setTimeout(() => openCard(true), 1100);
   }
 
   function arrived() {
@@ -456,10 +583,21 @@
       ghosts.push(tow);
     }
     stay.parked = { pitch: target, t: clock + (towing ? 1 : 0) };
-    stay.points = accuracy + speed; stay.stay = 150 + Math.random() * 170;
+    // Clean parkings in a row multiply the points: x1, x1.25 ... up to x3. A bump or a crooked parking starts again.
+    const clean = bumps === 0 && accuracy >= 60, perfect = clean && accuracy >= 90;
+    streak = clean ? streak + 1 : 0;
+    const mult = 1 + Math.min(Math.max(streak - 1, 0), 8) * 0.25, pts = Math.round((accuracy + speed) * mult) + (perfect ? 50 : 0);
+    total += pts; stats.streak = Math.max(stats.streak, streak); if (perfect) stats.perfect++;
+    pop(r.cx, r.cy, `+${pts}`, '#f4c531', 40);
+    if (perfect) { pop(r.cx, r.cy, L.perfect, '#f6f1df', 26, 40); confetti(r.cx, r.cy); }
+    else if (mult > 1) pop(r.cx, r.cy, `×${mult}`, '#f6f1df', 26, 40);
+    sfx.park(streak, perfect);
+    let back = false;
+    if (clean && streak % 5 === 0 && lives < 3) { lives++; back = true; setTimeout(() => sfx.life(), 600); }
+    stay.points = pts; stay.stay = 150 + Math.random() * 170;
     target.guest = stay; guests.push(stay);
     parkedCount++; stats.acc += accuracy; stats.spd += speed; stats.top = Math.max(stats.top, stay.points);
-    toast(L.parked(stay.points, accuracy, speed), 2000);
+    toast(back ? L.lifeBack : L.parked(pts, accuracy, speed, mult), back ? 2600 : 2000);
     car = null;
     setTimeout(() => { if (mode === 'play' && !car) nextGuest(); }, 1300);
     hud();
@@ -554,7 +692,7 @@
 
   // The car ran into someone, or nearly: it stops dead, they jump clear, and it costs points.
   function startle(o) {
-    damage += 60; stats.scares++; o.cool = 2.5; o.flee = 1.2; o.wait = 0;
+    damage += 60; stats.scares++; streak = 0; sfx.startle(); pop(o.x, o.y, '−60', '#e2553d', 26); o.cool = 2.5; o.flee = 1.2; o.wait = 0;
     car.v = 0; shake = reduceMotion ? 0 : 0.6;
     const a = Math.atan2(o.y - car.y, o.x - car.x);
     o.path.unshift([o.x + Math.cos(a) * 2.5, o.y + Math.sin(a) * 2.5]);
@@ -1155,6 +1293,8 @@
       ctx.strokeStyle = `rgba(244,197,49,${0.55 + 0.35 * Math.sin(clock * 5)})`; ctx.lineWidth = 4; ctx.strokeRect(x0, y0, x1 - x0, y1 - y0);
     }
 
+    drawFx();
+
     // if the pitch is off screen, point at it
     if (mode === 'play' && target && car) {
       const [tx, ty] = P(target.x + target.w / 2, target.y + target.d / 2), m = 46;
@@ -1170,7 +1310,7 @@
 
   // ---------- score card ----------
   // Pressing the Score plate pauses the game and opens a card with the figures behind the score and ways to share it.
-  const stats = { acc: 0, spd: 0, top: 0, bumps: 0, scares: 0, gaveUp: 0, time: 0 };
+  const stats = { acc: 0, spd: 0, top: 0, bumps: 0, scares: 0, gaveUp: 0, time: 0, streak: 0, perfect: 0 };
   const card = $('card'), SITE = 'https://camping-sofia.com/';
   let paused = false, pic = null, picUrl = '';
   // A 1200 x 630 picture of the score for sharing: the camp as it looks right now, behind a plate with the figures.
@@ -1209,15 +1349,17 @@
     return c;
   }
 
-  function openCard() {
+  function openCard(over) {
     if (!card.showModal || card.open) return;
+    $('card-title').textContent = over === true ? L.overTitle : L.cardTitle;
+    $('card-close').textContent = over === true ? L.again : L.close;
     const now = score(), top = Math.max(best, now), n = parkedCount, enc = encodeURIComponent;
     const text = L.share(top);
     const set = (id, v) => { $(id).textContent = v; };
     set('st-score', now); set('st-best', top);
     set('st-parked', n); set('st-onsite', guests.filter((g) => !g.packing && !g.leaving).length);
     set('st-acc', n ? `${Math.round(stats.acc / n)} / 100` : '–'); set('st-spd', n ? `${Math.round(stats.spd / n)} / 100` : '–');
-    set('st-top', n ? stats.top : '–');
+    set('st-top', n ? stats.top : '–'); set('st-streak', stats.streak); set('st-perfect', stats.perfect);
     set('st-bumps', stats.bumps); set('st-scares', stats.scares); set('st-gaveup', stats.gaveUp);
     set('st-time', `${Math.floor(stats.time / 60)}:${String(Math.floor(stats.time % 60)).padStart(2, '0')}`);
     $('sh-fb').href = `https://www.facebook.com/sharer/sharer.php?u=${enc(SITE)}`;
@@ -1250,16 +1392,17 @@
     paused = true; for (const k in keys) keys[k] = false;
     card.showModal();
   }
-  $('score-btn').addEventListener('click', openCard);
+  $('score-btn').addEventListener('click', () => openCard());
   $('card-close').addEventListener('click', () => card.close());
   card.addEventListener('click', (e) => { if (e.target === card) card.close(); });   // a click on the backdrop
-  card.addEventListener('close', () => { paused = false; last = performance.now(); cv.focus(); });
+  card.addEventListener('close', () => { paused = false; last = performance.now(); cv.focus(); if (mode === 'over') start(); });
 
   // ---------- loop ----------
   let last = performance.now();
   function tick(now) {
     const dt = Math.min(0.05, (now - last) / 1000); last = now;
-    if (!paused) step(dt);
+    if (!paused) { step(dt); stepFx(dt); }
+    engineSound(dt);
     updateCamera(dt);
     frame(night);
     requestAnimationFrame(tick);
@@ -1268,5 +1411,5 @@
   requestAnimationFrame(tick);
 
   // For automated checks only: /?debug exposes the state.
-  if (location.search.includes('debug')) window.camp = { get car() { return car; }, get target() { return target; }, get parked() { return parkedCount; }, get score() { return score(); }, get night() { return night; }, people, skids, packUp, guests, pitches, stats, rectsOf, rectRect, keys, blocked, livingRect, corners, setClock: (t) => { clock = t; }, give: (kind) => { car = makeVehicle(kind, 61.8, 80.5, -Math.PI / 2); car.born = -9; }, next: () => { car = null; nextGuest(); } };
+  if (location.search.includes('debug')) window.camp = { get car() { return car; }, get target() { return target; }, get parked() { return parkedCount; }, get score() { return score(); }, get night() { return night; }, people, skids, packUp, guests, pitches, stats, rectsOf, rectRect, keys, blocked, livingRect, corners, setClock: (t) => { clock = t; }, setPatience: (t) => { patience = t; }, get lives() { return lives; }, get streak() { return streak; }, get mode() { return mode; }, get patienceMax() { return patienceMax; }, pops, bits, give: (kind) => { car = makeVehicle(kind, 61.8, 80.5, -Math.PI / 2); car.born = -9; }, next: () => { car = null; nextGuest(); } };
 })();
