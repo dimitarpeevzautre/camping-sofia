@@ -131,7 +131,7 @@
       rares: { bus: 'a 1960s camper bus', beetle: 'a little old car with a roof tent', woodie: 'a wood-panelled estate', firetruck: 'a fire engine turned camper', airstream: 'a polished aluminium caravan', teardrop: 'a teardrop caravan', landy: 'an old green four-by-four', schoolbus: 'a school bus turned camper', bubble: 'a little round caravan from the sixties' },
       rareSpot: (name, n, of) => `A rare sight: ${name}! ${n} of ${of} spotted`, rareTitle: 'Rare vehicles spotted',
       flyHint: 'Steer left and right. It cannot stop. The children are watching', trickNew: (n) => `You found one: ${n}`, secretsTitle: 'Pilot\'s secrets',
-      tricks: { circle: 'A full circle', eight: 'A figure of eight', pond: 'A low pass over the pond', flypast: 'A flypast down the main road', lap: 'A lap round the whole camp', night: 'A night flight' },
+      tricks: { circle: 'A full circle', eight: 'A figure of eight', pond: 'A low pass over the pond', flypast: 'A flypast down the main road', lap: 'A lap round the whole camp', night: 'A night flight', balloon: 'A wave to the balloon' },
       sayPlane: ['Wow!', 'Again! Again!', 'Look, a plane!', 'Do another one!'], sayKid: ['A plane!', 'Hello up there!', 'Look! Look!'],
       sayArrive: ['What a lovely spot!', 'Finally, holidays.', 'Kettle on!', 'Thank you, that was easy.', 'I can see the mountain from here.', 'Who has the tent pegs?'],
       honk: 'Beep beep!', vip: 'A VIP guest: double points, less patience',
@@ -251,7 +251,7 @@
       rares: { bus: 'кемпер бус от шейсетте', beetle: 'малка стара кола с палатка на покрива', woodie: 'комби с дървени панели', firetruck: 'пожарна, превърната в кемпер', airstream: 'лъскава алуминиева каравана', teardrop: 'каравана капка', landy: 'стар зелен джип', schoolbus: 'училищен автобус, превърнат в кемпер', bubble: 'малка кръгла каравана от шейсетте' },
       rareSpot: (name, n, of) => `Рядка гледка: ${name}! Забелязани ${n} от ${of}`, rareTitle: 'Забелязани редки возила',
       flyHint: 'Завивайте наляво и надясно. Самолетът не може да спре. Децата гледат', trickNew: (n) => `Открихте: ${n}`, secretsTitle: 'Тайните на пилота',
-      tricks: { circle: 'Пълен кръг', eight: 'Осморка', pond: 'Нисък полет над езерцето', flypast: 'Прелитане над главната алея', lap: 'Обиколка на целия къмпинг', night: 'Нощен полет' },
+      tricks: { circle: 'Пълен кръг', eight: 'Осморка', pond: 'Нисък полет над езерцето', flypast: 'Прелитане над главната алея', lap: 'Обиколка на целия къмпинг', night: 'Нощен полет', balloon: 'Поздрав към балона' },
       sayPlane: ['Уау!', 'Пак! Пак!', 'Вижте, самолет!', 'Още веднъж!'], sayKid: ['Самолет!', 'Ехо, там горе!', 'Виж! Виж!'],
       sayArrive: ['Какво хубаво място!', 'Най-после почивка.', 'Слагам кафето!', 'Благодаря, лесно беше.', 'Оттук се вижда планината.', 'У кого са колчетата?'],
       honk: 'Бийп-бийп!', vip: 'VIP гост: двойни точки, по-малко търпение',
@@ -1556,7 +1556,7 @@
   // little faster or slower. Nothing says so, but some things you can do with it are worth points: the list on
   // the score card shows how many there are and names the ones already found.
   let plane = null, flying = false;
-  const TRICKS = ['circle', 'eight', 'pond', 'flypast', 'lap', 'night'];
+  const TRICKS = ['circle', 'eight', 'pond', 'flypast', 'lap', 'night', 'balloon'];
   const CORNERS = [[10, 10], [110, 10], [110, 84], [10, 84]];
   const tricks = new Set();
   try { JSON.parse(localStorage.getItem('camp-tricks') || '[]').forEach((k) => tricks.add(k)); } catch (e) { /* private window */ }
@@ -1621,6 +1621,8 @@
     }
     // a night flight: ten seconds aloft after dark, once a flight
     if (night > 0.8 && !p.nightDone && (p.nightT = (p.nightT || 0) + dt) > 10) { p.nightDone = true; trick('night', 100); }
+    // a wave to the hot-air balloon, once each time one drifts over
+    if (balloon && !balloon.waved && Math.hypot(p.x - balloon.x, p.y - balloon.y) < 11) { balloon.waved = true; trick('balloon', 100); }
     // children look up and wave
     for (const o of people) {
       if (o.hidden || o.kind !== 'kid' || o.waveT > clock || Math.hypot(o.x - p.x, o.y - p.y) > 12) continue;
@@ -1684,7 +1686,7 @@
     tents.push({ x, y, a, c, born: clock, small: true }); nextTent = clock + 90 + Math.random() * 60;
   }
   function stepAmbient(dt) {
-    stepTents();
+    stepTents(); stepBalloon(dt);
     for (const d of ducks) d.a += d.s * dt;
     if (!flock && clock > nextFlock) { const fromLeft = Math.random() < 0.5; flock = { x: fromLeft ? -12 : W + 12, y: 10 + Math.random() * (H - 30), vx: (fromLeft ? 1 : -1) * 7, vy: 1.2 - Math.random() * 2.4 }; }
     if (flock) { flock.x += flock.vx * dt; flock.y += flock.vy * dt; if (flock.x < -20 || flock.x > W + 20) { flock = null; nextFlock = clock + 45 + Math.random() * 50; } }
@@ -1799,7 +1801,32 @@
       ctx.restore();
     }
   }
+  let balloon = null, nextBalloon = 45;
+  function stepBalloon(dt) {
+    if (!balloon) {
+      if (clock < nextBalloon || night > 0.4 || reduceMotion) return;
+      const fromLeft = Math.random() < 0.5;
+      balloon = { x: fromLeft ? -14 : W + 14, y: 18 + Math.random() * (H - 40), vx: (fromLeft ? 1 : -1) * 1.7, vy: 0.25 - Math.random() * 0.5, hue: (Math.random() * 3) | 0 };
+      return;
+    }
+    balloon.x += balloon.vx * dt; balloon.y += balloon.vy * dt;
+    if (balloon.x < -20 || balloon.x > W + 20) { balloon = null; nextBalloon = clock + 150 + Math.random() * 120; }
+  }
+  function drawBalloon() {
+    if (!balloon) return;
+    const b = balloon, k = cam.s, [gx, gy] = P(b.x, b.y), R = 4.2 * k, x = gx, y = gy - 7 * k;
+    if (gx < -R * 3 || gx > vw + R * 3 || gy < -R * 3 || gy > vh + R * 4) return;
+    ctx.fillStyle = 'rgba(18,33,26,0.16)'; ctx.beginPath(); ctx.ellipse(gx + 3 * k, gy + 4 * k, R * 0.95, R * 0.8, 0, 0, TAU); ctx.fill();   // its shadow on the ground
+    const cols = [['#d5503c', '#f6f1df'], ['#f4c531', '#3f7fa6'], ['#5f9070', '#f6f1df']][b.hue];
+    for (let i = 0; i < 12; i++) {   // gores, seen from above
+      ctx.fillStyle = cols[i % 2]; ctx.beginPath(); ctx.moveTo(x, y); ctx.arc(x, y, R, (i / 12) * TAU, ((i + 1) / 12) * TAU); ctx.closePath(); ctx.fill();
+    }
+    ctx.strokeStyle = '#12211a'; ctx.lineWidth = 2.5; ctx.beginPath(); ctx.arc(x, y, R, 0, TAU); ctx.stroke();
+    ctx.fillStyle = 'rgba(18,33,26,0.12)'; ctx.beginPath(); ctx.arc(x + R * 0.25, y + R * 0.3, R * 0.72, 0, TAU); ctx.fill();                  // the shaded side
+    ctx.fillStyle = '#12211a'; ctx.beginPath(); ctx.arc(x, y, R * 0.13, 0, TAU); ctx.fill();                                                    // the vent at the crown
+  }
   function drawAmbient(ground) {   // ground: the ducks, drawn with the world; otherwise what is in the air
+    if (!ground) drawBalloon();
     if (!ground) drawCloudShadows();
     if (ground) drawPondLife();
     const k = cam.s;
@@ -3213,5 +3240,5 @@
   setTimeout(beginDemo, 2500);
 
   // For automated checks only: /?debug exposes the state.
-  if (location.search.includes('debug')) window.camp = { get car() { return car; }, get target() { return target; }, get parked() { return parkedCount; }, get score() { return score(); }, get night() { return night; }, people, skids, packUp, guests, pitches, stats, rectsOf, rectRect, keys, blocked, livingRect, corners, setClock: (t) => { clock = t; }, setPatience: (t) => { patience = t; }, get lives() { return lives; }, get plane() { return plane; }, tricks, get demo() { return demo; }, roamers, respect, owned, get bank() { return bank; }, setBank: (n) => { bank = n; saveShop(); shop(); }, props, get goals() { return goals; }, get ice() { return ice; }, found, GNOMES, get thief() { return thief; }, get rain() { return rain; }, setNext: (o) => { if (o.rain !== undefined) nextRain = o.rain; if (o.thief !== undefined) nextThief = o.thief; }, get job() { return job; }, setNextJob: (t) => { nextJob = t; }, tuneRadio, get station() { return station; }, get heat() { return heat; }, get warden() { return warden; }, trouble, boost, chats, takeBoost, say, addTip, earned, award, tips, honk, rankLine, get streak() { return streak; }, get mode() { return mode; }, get patienceMax() { return patienceMax; }, pops, bits, give: (kind) => { car = makeVehicle(kind, 61.8, 80.5, -Math.PI / 2); car.born = -9; }, next: () => { car = null; nextGuest(); } };
+  if (location.search.includes('debug')) window.camp = { get car() { return car; }, get target() { return target; }, get parked() { return parkedCount; }, get score() { return score(); }, get night() { return night; }, people, skids, packUp, guests, pitches, stats, rectsOf, rectRect, keys, blocked, livingRect, corners, setClock: (t) => { clock = t; }, setPatience: (t) => { patience = t; }, get lives() { return lives; }, get balloon() { return balloon; }, callBalloon: () => { nextBalloon = 0; }, get plane() { return plane; }, tricks, get demo() { return demo; }, roamers, respect, owned, get bank() { return bank; }, setBank: (n) => { bank = n; saveShop(); shop(); }, props, get goals() { return goals; }, get ice() { return ice; }, found, GNOMES, get thief() { return thief; }, get rain() { return rain; }, setNext: (o) => { if (o.rain !== undefined) nextRain = o.rain; if (o.thief !== undefined) nextThief = o.thief; }, get job() { return job; }, setNextJob: (t) => { nextJob = t; }, tuneRadio, get station() { return station; }, get heat() { return heat; }, get warden() { return warden; }, trouble, boost, chats, takeBoost, say, addTip, earned, award, tips, honk, rankLine, get streak() { return streak; }, get mode() { return mode; }, get patienceMax() { return patienceMax; }, pops, bits, give: (kind) => { car = makeVehicle(kind, 61.8, 80.5, -Math.PI / 2); car.born = -9; }, next: () => { car = null; nextGuest(); } };
 })();
