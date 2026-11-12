@@ -47,7 +47,7 @@
         gnomes: 'Gnome hunter: find all ten hidden gnomes', driftpark: 'Handbrake parking: slide straight into a clean parking',
         wash: 'Squeaky clean: roll slowly through the wash bay',
         collector: 'Spotter: see every rare vehicle',
-        pilot: 'Barnstormer: find all four of the pilot\'s secrets',
+        pilot: 'Barnstormer: find every one of the pilot\'s secrets',
         goals: 'To-do list: all three goals in one shift',
         errand: 'Room service: five errands in one shift', dog: 'Sausage hero: catch the dog that took the sausages', host: 'Camp host: 1500 points in one shift', legend: 'Legend of Vitosha: 8000 points in one shift',
       },
@@ -131,7 +131,7 @@
       rares: { bus: 'a 1960s camper bus', beetle: 'a little old car with a roof tent', woodie: 'a wood-panelled estate', firetruck: 'a fire engine turned camper', airstream: 'a polished aluminium caravan', teardrop: 'a teardrop caravan', landy: 'an old green four-by-four', schoolbus: 'a school bus turned camper', bubble: 'a little round caravan from the sixties' },
       rareSpot: (name, n, of) => `A rare sight: ${name}! ${n} of ${of} spotted`, rareTitle: 'Rare vehicles spotted',
       flyHint: 'Steer left and right. It cannot stop. The children are watching', trickNew: (n) => `You found one: ${n}`, secretsTitle: 'Pilot\'s secrets',
-      tricks: { circle: 'A full circle', eight: 'A figure of eight', pond: 'A low pass over the pond', flypast: 'A flypast down the main road' },
+      tricks: { circle: 'A full circle', eight: 'A figure of eight', pond: 'A low pass over the pond', flypast: 'A flypast down the main road', lap: 'A lap round the whole camp', night: 'A night flight' },
       sayPlane: ['Wow!', 'Again! Again!', 'Look, a plane!', 'Do another one!'], sayKid: ['A plane!', 'Hello up there!', 'Look! Look!'],
       honk: 'Beep beep!', vip: 'A VIP guest: double points, less patience',
       ranks: ['Trainee', 'Gate keeper', 'Camp host', 'Site warden', 'Camp manager', 'Legend of Vitosha'],
@@ -166,7 +166,7 @@
         ten: 'Пълен къмпинг: десет гости в една смяна', twenty: 'Герой на пиковия час: двайсет гости в една смяна',
         gnomes: 'Ловец на джуджета: намерете десетте скрити джуджета', driftpark: 'Паркиране с ръчна: влезте с плъзгане в чисто паркиране',
         wash: 'Блести от чистота: минете бавно през автомивката',
-        pilot: 'Въздушен ас: открийте и четирите тайни на пилота', collector: 'Наблюдател: вижте всички редки возила',
+        pilot: 'Въздушен ас: открийте всички тайни на пилота', collector: 'Наблюдател: вижте всички редки возила',
         goals: 'По списък: и трите цели в една смяна',
         errand: 'Рум сървис: пет поръчки в една смяна', dog: 'Герой на наденичките: хванете кучето крадец', host: 'Домакин на къмпинга: 1500 точки в една смяна', legend: 'Легенда на Витоша: 8000 точки в една смяна',
       },
@@ -250,7 +250,7 @@
       rares: { bus: 'кемпер бус от 60-те', beetle: 'малка стара кола с палатка на покрива', woodie: 'комби с дървени панели', firetruck: 'пожарна, превърната в кемпер', airstream: 'лъскава алуминиева каравана', teardrop: 'каравана капка', landy: 'стар зелен джип', schoolbus: 'училищен автобус, превърнат в кемпер', bubble: 'малка кръгла каравана от шейсетте' },
       rareSpot: (name, n, of) => `Рядка гледка: ${name}! Забелязани ${n} от ${of}`, rareTitle: 'Забелязани редки возила',
       flyHint: 'Завивайте наляво и надясно. Не може да спре. Децата гледат', trickNew: (n) => `Открихте: ${n}`, secretsTitle: 'Тайните на пилота',
-      tricks: { circle: 'Пълен кръг', eight: 'Осморка', pond: 'Нисък полет над езерцето', flypast: 'Прелитане над главната алея' },
+      tricks: { circle: 'Пълен кръг', eight: 'Осморка', pond: 'Нисък полет над езерцето', flypast: 'Прелитане над главната алея', lap: 'Обиколка на целия къмпинг', night: 'Нощен полет' },
       sayPlane: ['Уау!', 'Пак! Пак!', 'Вижте, самолет!', 'Още веднъж!'], sayKid: ['Самолет!', 'Здравей горе!', 'Виж! Виж!'],
       honk: 'Бийп-бийп!', vip: 'VIP гост: двойни точки, по-малко търпение',
       ranks: ['Стажант', 'Пазач на портала', 'Домакин на къмпинга', 'Управител на терена', 'Директор на къмпинга', 'Легенда на Витоша'],
@@ -1505,7 +1505,8 @@
   // little faster or slower. Nothing says so, but some things you can do with it are worth points: the list on
   // the score card shows how many there are and names the ones already found.
   let plane = null, flying = false;
-  const TRICKS = ['circle', 'eight', 'pond', 'flypast'];
+  const TRICKS = ['circle', 'eight', 'pond', 'flypast', 'lap', 'night'];
+  const CORNERS = [[10, 10], [110, 10], [110, 84], [10, 84]];
   const tricks = new Set();
   try { JSON.parse(localStorage.getItem('camp-tricks') || '[]').forEach((k) => tricks.add(k)); } catch (e) { /* private window */ }
   function startFlight() {
@@ -1555,6 +1556,19 @@
       if (!p.road) p.road = p.y;
       else if (Math.abs(p.y - p.road) > 52 && clock > p.roadCool) { p.roadCool = clock + 20; p.road = p.y; trick('flypast', 150); chorus(L.sayPlane, 4); }
     } else p.road = null;
+    // a lap: past all four corners of the camp in turn, either way round, and back to the first
+    const near = CORNERS.findIndex(([x, y]) => Math.hypot(p.x - x, p.y - y) < 17);
+    if (near >= 0) {
+      const l = p.lap;
+      if (!l || clock - l.t > 100) p.lap = { last: near, n: 1, dir: 0, t: clock };
+      else if (near !== l.last) {
+        const step = (near - l.last + 4) % 4, dir = step === 1 ? 1 : step === 3 ? -1 : 0;
+        if (dir && (!l.dir || l.dir === dir)) { l.dir = dir; l.last = near; if (++l.n === 5) { p.lap = null; trick('lap', 250); chorus(L.sayPlane, 4); } }
+        else p.lap = { last: near, n: 1, dir: 0, t: clock };
+      }
+    }
+    // a night flight: ten seconds aloft after dark, once a flight
+    if (night > 0.8 && !p.nightDone && (p.nightT = (p.nightT || 0) + dt) > 10) { p.nightDone = true; trick('night', 100); }
     // children look up and wave
     for (const o of people) {
       if (o.hidden || o.kind !== 'kid' || o.waveT > clock || Math.hypot(o.x - p.x, o.y - p.y) > 12) continue;
