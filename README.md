@@ -35,7 +35,9 @@ lights up. Nothing hurries you. When the camp fills, the longest-staying guests 
 - **Seasons.** From 20 September to the end of November some of the trees are gold and russet, leaves fall instead
   of butterflies, pumpkins sit by the reception door, the campers have a few seasonal things to say, and eight
   mushrooms come up in the grass each shift to be picked by rolling over them.
-  `?season=autumn` or `?season=summer` forces either.
+  From December to February the camp is under snow: white ground and roofs, frosted trees, snow on the pines,
+  a frozen pond with no lilies, and snowflakes in place of the leaves. `?season=summer`, `?season=autumn` or
+  `?season=winter` forces one.
 - **Before you start.** A campervan or a car and caravan drives itself to a pitch behind the start card.
 
 Controls: arrow keys or WASD, Space for the handbrake, H for the horn, M to mute, R for the radio, P to pause.
