@@ -146,7 +146,7 @@
       sayPlane: ['Wow!', 'Again! Again!', 'Look, a plane!', 'Do another one!'], sayKid: ['A plane!', 'Hello up there!', 'Look! Look!'],
       sayArrive: ['What a lovely spot!', 'Finally, holidays.', 'Kettle on!', 'Thank you, that was easy.', 'I can see the mountain from here.', 'Who has the tent pegs?'],
       kind: 'Kind driver',
-      honk: 'Beep beep!', vip: 'A VIP guest: double points, less patience',
+      honk: 'Beep beep!', quack: 'Quack!', vip: 'A VIP guest: double points, less patience',
       ranks: ['Trainee', 'Gate keeper', 'Camp host', 'Site warden', 'Camp manager', 'Legend of Vitosha'],
       rankNext: (n, r) => `${n} more for ${r}`, short: (n) => `only ${n} short of your best`,
       perfect: 'Perfect!', newBest: 'New best score!', lifeBack: 'Five clean in a row: ♥ back',
@@ -278,7 +278,7 @@
       sayPlane: ['Уау!', 'Пак! Пак!', 'Вижте, самолет!', 'Още веднъж!'], sayKid: ['Самолет!', 'Ехо, там горе!', 'Виж! Виж!'],
       sayArrive: ['Какво хубаво място!', 'Най-после почивка.', 'Слагам кафето!', 'Благодаря, лесно беше.', 'Оттук се вижда планината.', 'У кого са колчетата?'],
       kind: 'Мил шофьор',
-      honk: 'Бийп-бийп!', vip: 'VIP гост: двойни точки, по-малко търпение',
+      honk: 'Бийп-бийп!', quack: 'Па-па!', vip: 'VIP гост: двойни точки, по-малко търпение',
       ranks: ['Стажант', 'Пазач на портала', 'Домакин на къмпинга', 'Управител на терена', 'Директор на къмпинга', 'Легенда на Витоша'],
       rankNext: (n, r) => `още ${n} до „${r}“`, short: (n) => `само ${n} до рекорда ви`,
       perfect: 'Перфектно!', newBest: 'Нов рекорд!', lifeBack: 'Пет чисти поред: +♥',
@@ -810,6 +810,8 @@
   function honk() {
     hornCool = 1.2; sfx.horn(); stats.honks++;
     pop(car.x, car.y, L.honk, '#f6f1df', 22);
+    if (Math.hypot(car.x - pond.x, car.y - pond.y) < 18) { ducks.forEach((d) => { d.rush = 2.5; }); pop(pond.x, pond.y, L.quack, '#f6f1df', 20); }   // the ducks paddle off in a huff
+    if (night >= 0.2 && Math.hypot(car.x - 33, car.y - 88.6) < 16) deerGone = clock + 25;                                                            // and the deer slips back into the trees
     let said = false;
     for (const o of people) {
       if (o.hidden || o.kind === 'pet' || !o.path) continue;
@@ -1654,7 +1656,7 @@
   function stepNature(dt) {
     if (mode !== 'play' || !car || demo || Math.abs(car.v) > 0.4) { noteT = 0; return; }
     if (rainbow > 6 && rainbow < 44 && night < 0.45 && !noted.has('rainbow')) { if ((noteT += dt) > 2.5) { noteT = 0; jot('rainbow'); } return; }
-    const near = NATURE.find(([k, x, y, reach, dark]) => x !== undefined && !noted.has(k) && night >= dark && Math.hypot(car.x - x, car.y - y) < reach);
+    const near = NATURE.find(([k, x, y, reach, dark]) => x !== undefined && !noted.has(k) && night >= dark && !(k === 'deer' && clock < deerGone) && Math.hypot(car.x - x, car.y - y) < reach);
     if (!near) { noteT = 0; return; }
     if ((noteT += dt) > 2.5) { noteT = 0; jot(near[0]); }
   }
@@ -1800,7 +1802,7 @@
   }
   function stepAmbient(dt) {
     stepTents(); stepBalloon(dt); stepHog(dt); stepNature(dt); stepSquirrel(dt); stepWarm(dt);
-    for (const d of ducks) d.a += d.s * dt;
+    for (const d of ducks) { d.a += d.s * dt * (d.rush > 0 ? 5 : 1); if (d.rush > 0) d.rush -= dt; }
     if (!flock && clock > nextFlock) { const fromLeft = Math.random() < 0.5; flock = { x: fromLeft ? -12 : W + 12, y: 10 + Math.random() * (H - 30), vx: (fromLeft ? 1 : -1) * 7, vy: 1.2 - Math.random() * 2.4 }; }
     if (flock) { flock.x += flock.vx * dt; flock.y += flock.vy * dt; if (flock.x < -20 || flock.x > W + 20) { flock = null; nextFlock = clock + 45 + Math.random() * 50; } }
     if (night > 0.2 && !reduceMotion && (smokeT -= dt) <= 0) { smokeT = 0.35; smoke.push({ x: fire.x + (Math.random() - 0.5) * 0.4, y: fire.y, z: 0.6, life: 4.5, d: Math.random() - 0.5 }); }
@@ -2019,8 +2021,9 @@
     ctx.globalAlpha = 1;
   }
   // From dusk a roe deer comes to the edge of the forest, just outside the fence. It looks up when a vehicle is near.
+  let deerGone = 0;   // until when it stays hidden after being honked at
   function drawDeer() {
-    if (night < 0.2) return;
+    if (night < 0.2 || clock < deerGone) return;
     const dx = 33, dy = 88.6, [x, y] = P(dx, dy, 0.3), k = cam.s;
     if (x < -40 || x > vw + 40 || y < -40 || y > vh + 40) return;
     const near = car && Math.hypot(car.x - dx, car.y - dy) < 12, t = reduceMotion ? 0 : clock;
