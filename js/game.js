@@ -995,6 +995,7 @@
       if (d < best) { best = d; who = o; }
     }
     if (who) say(who, pick(lines));
+    return !!who;
   }
   function drawBubbles() {
     ctx.font = '800 13px Overpass, "Segoe UI", sans-serif'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; ctx.lineJoin = 'round';
@@ -1879,7 +1880,9 @@
     if (mode !== 'play' || !car || demo || night < 0.5 || clock < warmNext || Math.abs(car.v) > 0.4 || Math.hypot(car.x - fire.x, car.y - fire.y) > 7.5) { warmT = 0; return; }
     if ((warmT += dt) < 3) return;
     warmT = 0; warmNext = clock + 240; total += 30;
-    pop(fire.x, fire.y, `${L.fireside} +30`, '#f0b83a', 24); remark(L.sayFire, fire.x, fire.y, 10); sfx.life(); hud();
+    pop(fire.x, fire.y, `${L.fireside} +30`, '#f0b83a', 24); sfx.life(); hud();
+    // the ring round the fire is scenery, not campers who can speak, so when nobody real is in earshot the words rise from the fire
+    if (!remark(L.sayFire, fire.x, fire.y, 10)) setTimeout(() => { if (mode === 'play') pop(fire.x, fire.y - 2.2, pick(L.sayFire), '#f6f1df', 18); }, 900);
   }
   function stepFireside(dt) {
     for (let i = notes.length - 1; i >= 0; i--) { const n = notes[i]; n.z += 0.9 * dt; n.x += 0.3 * dt; if ((n.life -= dt) <= 0) notes.splice(i, 1); }
