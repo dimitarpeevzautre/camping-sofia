@@ -2114,6 +2114,25 @@
     ctx.beginPath(); ctx.arc(0.26 * k, 0, 0.1 * k, 0, TAU); ctx.fill(); ctx.stroke();                       // head
     ctx.restore();
   }
+  // In winter the children have built a snowman in the meadow by the gate.
+  function drawSnowman() {
+    if (!WINTER) return;
+    const sx = 49.6, sy = 69.2, k = cam.s, [bx, by] = P(sx, sy);
+    if (bx < -60 || bx > vw + 60 || by < -60 || by > vh + 60) return;
+    const [mx, my] = P(sx, sy, 0.9), [hx, hy] = P(sx, sy, 1.7);
+    ctx.fillStyle = 'rgba(15,30,20,0.16)'; ctx.beginPath(); ctx.ellipse(bx + 0.5 * k, by + 0.5 * k, 0.95 * k, 0.8 * k, 0, 0, TAU); ctx.fill();
+    ctx.strokeStyle = 'rgba(70,95,110,0.55)'; ctx.lineWidth = 1.2;
+    ctx.fillStyle = '#f7fafb'; ctx.beginPath(); ctx.arc(bx, by, 0.9 * k, 0, TAU); ctx.fill(); ctx.stroke();                       // base
+    ctx.strokeStyle = '#6e4a2c'; ctx.lineWidth = Math.max(1.5, k * 0.07); ctx.lineCap = 'round';                               // twig arms
+    ctx.beginPath(); ctx.moveTo(mx - 0.5 * k, my); ctx.lineTo(mx - 1.25 * k, my - 0.35 * k); ctx.moveTo(mx + 0.5 * k, my); ctx.lineTo(mx + 1.25 * k, my - 0.3 * k); ctx.stroke(); ctx.lineCap = 'butt';
+    ctx.strokeStyle = 'rgba(70,95,110,0.55)'; ctx.lineWidth = 1.2;
+    ctx.fillStyle = '#ffffff'; ctx.beginPath(); ctx.arc(mx, my, 0.65 * k, 0, TAU); ctx.fill(); ctx.stroke();                       // middle
+    ctx.strokeStyle = '#d5503c'; ctx.lineWidth = Math.max(2, k * 0.14); ctx.beginPath(); ctx.arc(hx, hy, 0.46 * k, 0, TAU); ctx.stroke();   // scarf
+    ctx.strokeStyle = 'rgba(70,95,110,0.55)'; ctx.lineWidth = 1.2;
+    ctx.fillStyle = '#ffffff'; ctx.beginPath(); ctx.arc(hx, hy, 0.42 * k, 0, TAU); ctx.fill(); ctx.stroke();                       // head
+    ctx.fillStyle = '#12211a'; for (const s of [-1, 1]) { ctx.beginPath(); ctx.arc(hx + s * 0.15 * k, hy + 0.08 * k, 0.05 * k, 0, TAU); ctx.fill(); }   // coal eyes
+    ctx.fillStyle = '#e8792c'; ctx.beginPath(); ctx.moveTo(hx - 0.07 * k, hy + 0.18 * k); ctx.lineTo(hx + 0.07 * k, hy + 0.18 * k); ctx.lineTo(hx, hy + 0.55 * k); ctx.closePath(); ctx.fill();   // carrot
+  }
   function drawKite() {
     if (night > 0.4 || rain > 0.3) return;
     const k = cam.s, t = reduceMotion ? 0 : clock, kx = 55.5 + Math.sin(t * 0.5) * 2.2, ky = 74.5 + Math.cos(t * 0.37) * 1.4;
@@ -2167,7 +2186,7 @@
     ctx.restore();
   }
   function drawAmbient(ground) {   // ground: the ducks, drawn with the world; otherwise what is in the air
-    if (ground) { drawHog(); drawDeer(); drawSquirrel(); }
+    if (ground) { drawHog(); drawDeer(); drawSquirrel(); drawSnowman(); }
     if (ground) drawAngler(); else { drawWashing(); drawKite(); drawOwl(); drawMoon(); }
     if (!ground) drawMist();
     if (!ground) { drawStork(); drawBalloon(); }
