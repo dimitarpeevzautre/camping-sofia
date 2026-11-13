@@ -28,8 +28,9 @@ lights up. Nothing hurries you. When the camp fills, the longest-staying guests 
   skein of birds by day; a golden hour at dusk; fairy lights, fireflies, woodsmoke and a ring of campers round
   the fire at night; a playground the children walk to; backpackers' tents going up in the field. Very quiet
   birdsong by day and crickets after dark.
-- **Seasons.** From 20 September to the end of November some of the trees are gold and russet. `?season=autumn`
-  or `?season=summer` forces either.
+- **Seasons.** From 20 September to the end of November some of the trees are gold and russet, leaves fall instead
+  of butterflies, and eight mushrooms come up in the grass each shift to be picked by rolling over them.
+  `?season=autumn` or `?season=summer` forces either.
 - **Before you start.** A campervan or a car and caravan drives itself to a pitch behind the start card.
 
 Controls: arrow keys or WASD, Space for the handbrake, H for the horn, M to mute, R for the radio, P to pause.
