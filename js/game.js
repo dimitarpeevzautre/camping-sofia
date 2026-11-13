@@ -20,6 +20,10 @@
     return q ? q[1] : (m === 9 && d.getDate() >= 20) || m === 10 || m === 11 ? 'autumn' : m === 12 || m <= 2 ? 'winter' : m <= 5 ? 'spring' : 'summer';
   })();
   const AUTUMN = SEASON === 'autumn', WINTER = SEASON === 'winter', SPRING = SEASON === 'spring';
+  // ?simple is the game with only the parking in it: no tips or boosts on the lanes, no errands, no runaway dog,
+  // no goals and no patience bar. It is there so the owner can compare the two and choose.
+  const SIMPLE = new URLSearchParams(location.search).has('simple');
+  if (SIMPLE) document.body.classList.add('simple');
 
   // ---------- language ----------
   // English or Bulgarian: ?lang=, then the visitor's earlier choice, then the browser's language. The page is
@@ -814,8 +818,8 @@
     }
   }
   function stepTips() {
-    for (let n = tips.filter((t) => !t.boost && !t.until).length; n < 2; n++) addTip();   // two at a time: four made the lanes look littered
-    if (clock > nextBoost && !tips.some((t) => t.boost)) addTip(pick(['double', 'auto', 'shield']));
+    for (let n = tips.filter((t) => !t.boost && !t.until).length; n < (SIMPLE ? 0 : 2); n++) addTip();   // two at a time: four made the lanes look littered
+    if (!SIMPLE && clock > nextBoost && !tips.some((t) => t.boost)) addTip(pick(['double', 'auto', 'shield']));
     if (!car) return;
     const rects = rectsOf(car);
     for (let i = tips.length - 1; i >= 0; i--) {
@@ -1099,7 +1103,7 @@
   let job = null, nextJob = 0;
   function stepJobs() {
     if (!job) {
-      if (clock < nextJob || thief) return;
+      if (SIMPLE || clock < nextJob || thief) return;
       const homes = guests.filter((g) => g.parked && !g.packing && !g.leaving && g.parked.pitch !== target);
       if (!homes.length) { nextJob = clock + 5; return; }
       const g = pick(homes), p = g.parked.pitch, s = pick(SPOTS), item = pick(s[3]);
@@ -1217,7 +1221,7 @@
   let thief = null, nextThief = 50;
   function stepThief(dt) {
     if (!thief) {
-      if (clock < nextThief || job) return;
+      if (SIMPLE || clock < nextThief || job) return;
       const far = Object.keys(NODES).filter((k) => k !== 'G' && nodeGap(k, car.x, car.y) > 30), at = pick(far.length ? far : ['A']);
       thief = { x: NODES[at][0], y: NODES[at][1], at, to: at, until: clock + 80, th: 0 };
       toast(L.dogOn, 3200); remark(L.sayDog, NODES[at][0], NODES[at][1], 60); note(520, 0, 0.09, 'square', 0.1); note(390, 0.12, 0.12, 'square', 0.1);
@@ -2298,6 +2302,7 @@
   let goals = [];
   const goalNow = (g) => Math.min(g.n, g.key === 'parked' ? parkedCount : stats[g.key]);
   function drawGoals() {
+    if (SIMPLE) { goals = []; return; }
     const pool = GOAL_POOL.slice();
     goals = [0, 1, 2].map(() => { const [key, n] = pool.splice((Math.random() * pool.length) | 0, 1)[0]; return { key, n, done: false }; });
   }
@@ -2563,7 +2568,7 @@
     const dx = Math.abs(r.cx - (p.x + p.w / 2)) / 1.5, dy = Math.abs(r.cy - (p.y + p.d / 2)) / 2.5, skew = Math.abs(Math.cos(r.a)) / 0.3;
     const fit = towing ? 0.55 * (1 - clamp(dx, 0, 1)) + 0.45 * (1 - clamp(skew, 0, 1))   // a caravan is pushed in the last metre, so depth does not count
       : 0.45 * (1 - clamp(dx, 0, 1)) + 0.2 * (1 - clamp(dy, 0, 1)) + 0.35 * (1 - clamp(skew, 0, 1));
-    const accuracy = forced === true ? 100 : Math.round(100 * fit), speed = chill ? 50 : Math.round(100 * clamp(patience / patienceMax, 0, 1));
+    const accuracy = forced === true ? 100 : Math.round(100 * fit), speed = chill || SIMPLE ? 50 : Math.round(100 * clamp(patience / patienceMax, 0, 1));   // with no clock shown, time earns a flat 50
     car.v = 0; car.steer = 0; car.braking = false; car.reversing = false;
     let stay = car;
     if (towing) {   // the caravan stays; its car unhitches and heads into town
