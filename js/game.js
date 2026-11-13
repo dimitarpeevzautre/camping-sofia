@@ -3134,12 +3134,20 @@
     }
   }
 
+  // From late September to the end of November some of the broadleaved trees turn. ?season=autumn or
+  // ?season=summer forces it either way.
+  const AUTUMN = (() => {
+    const q = /[?&]season=(\w+)/.exec(location.search), d = new Date(), m = d.getMonth() + 1;
+    return q ? q[1] === 'autumn' : (m === 9 && d.getDate() >= 20) || m === 10 || m === 11;
+  })();
   function drawTree(t, fade) {
     const [bx, by] = P(t.x, t.y, 0), [tx, ty] = P(t.x, t.y, t.z * 0.6);
     ctx.strokeStyle = '#5a4330'; ctx.lineWidth = cam.s * 0.5; ctx.lineCap = 'round';
     ctx.beginPath(); ctx.moveTo(bx, by); ctx.lineTo(tx, ty); ctx.stroke();
     ctx.globalAlpha = fade;
-    const tones = t.hue < 0.33 ? ['#2f6b3a', '#3c8046', '#57994f'] : t.hue < 0.66 ? ['#2a5f3f', '#35774a', '#4c9058'] : ['#3d6a2c', '#527f33', '#6f9a3f'];
+    const tones = AUTUMN && t.hue < 0.2 ? ['#b07a2a', '#cc9a36', '#e3bb52']        // gold
+      : AUTUMN && t.hue > 0.33 && t.hue < 0.47 ? ['#9a502c', '#b8683a', '#d18548']   // russet
+      : t.hue < 0.33 ? ['#2f6b3a', '#3c8046', '#57994f'] : t.hue < 0.66 ? ['#2a5f3f', '#35774a', '#4c9058'] : ['#3d6a2c', '#527f33', '#6f9a3f'];
     const pine = t.hue > 0.74 && t.hue < 0.9;
     (pine ? [[0.5, 1], [0.8, 0.68], [1.1, 0.36]] : [[0.62, 1], [0.82, 0.78], [1, 0.5]]).forEach(([zf, rf], i) => {
       const [x, y] = P(t.x, t.y, t.z * zf), rad = t.r * rf * cam.s * (1 + t.z * zf * LEAN);
