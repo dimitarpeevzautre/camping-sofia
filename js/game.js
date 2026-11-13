@@ -3243,12 +3243,14 @@
   // when the camera has moved a metre and a half relative to it, or zoomed noticeably.
   const sprites = new WeakMap();
   // Draws `o` (centred on wx, wy; `tag` changes when its look does, e.g. its heading) through its own small canvas.
+  let frameMs = 30;   // a running average of the time a frame takes; a device with time to spare redraws sprites more often
   function viaSprite(o, wx, wy, tag, draw, reach = 8.5, zmid = 1.3) {
     const [sx, sy] = P(wx, wy), far = cam.s * reach;
     if (sx < -far || sx > vw + far || sy < -far || sy > vh + far) return;   // off screen
     const rx = wx - cam.x, ry = wy - cam.y;
     let sp = sprites.get(o);
-    if (!sp || sp.tag !== tag || Math.abs(rx - sp.rx) > 1 || Math.abs(ry - sp.ry) > 1 || Math.abs(cam.s / sp.s - 1) > 0.07 || sp.dpr !== dpr) {
+    const step = frameMs < 19 ? 0.3 : frameMs < 27 ? 0.6 : 1;   // metres of camera travel a sprite may fall behind
+    if (!sp || sp.tag !== tag || Math.abs(rx - sp.rx) > step || Math.abs(ry - sp.ry) > step || Math.abs(cam.s / sp.s - 1) > 0.07 || sp.dpr !== dpr) {
       const half = Math.ceil(cam.s * reach), px = Math.round(half * 2 * dpr);
       if (!sp) { sp = { cv: document.createElement('canvas') }; sp.cx = sp.cv.getContext('2d'); sprites.set(o, sp); }
       if (sp.cv.width !== px) { sp.cv.width = px; sp.cv.height = px; } else { sp.cx.setTransform(1, 0, 0, 1, 0, 0); sp.cx.clearRect(0, 0, px, px); }
@@ -3784,6 +3786,7 @@
   // ---------- loop ----------
   let last = performance.now();
   function tick(now) {
+    frameMs += (Math.min(100, now - last) - frameMs) * 0.05;
     const dt = Math.min(0.05, (now - last) / 1000); last = now;
     pollPad();
     if (demo && !paused) stepDemo(dt);
