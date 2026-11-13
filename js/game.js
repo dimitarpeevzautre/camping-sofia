@@ -3257,7 +3257,11 @@
     // A sprite keeps the lean it was drawn with, so between redraws it is slid by what its middle height would
     // have moved. That halves the step when it is redrawn, which was visible as a twitch on tall parked vehicles.
     const k = cam.s / sp.s, lean = cam.s * zmid * LEAN;
-    ctx.drawImage(sp.cv, sx - sp.half * k + (rx - sp.rx) * lean, sy - sp.half * k + (ry - sp.ry) * lean, sp.half * 2 * k, sp.half * 2 * k);
+    let dx = sx - sp.half * k + (rx - sp.rx) * lean, dy = sy - sp.half * k + (ry - sp.ry) * lean;
+    // On a dense screen the copy is put down on whole device pixels, so its fine lines stay sharp instead of
+    // blurring and sharpening as the camera drifts; the error is a third of a CSS pixel at most there.
+    if (dpr >= 2 && k === 1) { dx = Math.round(dx * dpr) / dpr; dy = Math.round(dy * dpr) / dpr; }
+    ctx.drawImage(sp.cv, dx, dy, sp.half * 2 * k, sp.half * 2 * k);
   }
   const PROBE = location.search.includes('debug') && location.search.includes('probe');
   function drawParked(v) {
