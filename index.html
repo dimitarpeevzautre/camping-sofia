@@ -19,7 +19,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Overpass:wght@400;600;800;900&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="/css/site.css?v=26">
+<link rel="stylesheet" href="/css/site.css?v=27">
 </head>
 <body>
 <canvas id="camp" data-a="camp" aria-label="A top-down view of a campsite. Drive each arriving camper to its pitch."></canvas>
@@ -88,11 +88,14 @@
     <h2 id="card-title" data-t="cardTitle">Your camp so far</h2>
     <div class="totals">
       <div class="plate"><span class="k" data-t="score">Score</span><span class="v" id="st-score">0</span></div>
-      <div class="plate" id="best-plate"><span class="k" data-t="best">Best</span><span class="v" id="st-best">0</span></div>
+      <div class="plate"><span class="k" data-t="best">Best</span><span class="v" id="st-best">0</span></div>
     </div>
     <p class="rank" id="st-rank"></p>
     <p class="bossline" id="st-boss"></p>
     <button type="button" id="card-again" hidden>Play again</button>
+    <button type="button" id="card-close" data-t="close">Back to parking</button>
+    <button type="button" id="card-finish" data-t="finish">Finish the shift and bank the points</button>
+    <button type="button" id="card-restart" data-t="restart">Back to the gate</button>
     <section class="lb" id="lb" hidden>
       <h3 data-t="lbTitle">Top campers</h3>
       <form id="lb-form" hidden>
@@ -105,6 +108,8 @@
         <div><h4 data-t="lbAll">All time</h4><ol id="lb-all"></ol></div>
       </div>
     </section>
+    <details class="more">
+    <summary data-t="moreStats">This shift in numbers</summary>
     <h3 id="runs-title" data-t="runsTitle" hidden>Your best shifts</h3>
     <ol class="runs" id="runs"></ol>
     <dl class="stats">
@@ -125,6 +130,9 @@
     </dl>
     <h3 data-t="clubsTitle">What the clubs think</h3>
     <dl class="stats" id="st-clubs"></dl>
+    </details>
+    <details class="more">
+    <summary data-t="moreAlbums">Collections and badges</summary>
     <h3 id="rare-title">Rare vehicles spotted</h3>
     <ul class="badges" id="rare-list"></ul>
     <h3 id="nature-title">Nature notebook</h3>
@@ -133,7 +141,9 @@
     <ul class="badges" id="trick-list"></ul>
     <h3 id="bd-title">Badges</h3>
     <ul class="badges" id="bd-list"></ul>
-    <h3 data-t="shareTitle">Share your score</h3>
+    </details>
+    <details class="more">
+    <summary data-t="shareTitle">Share your score</summary>
     <img class="pic" id="sh-img" alt="" width="1200" height="630" hidden>
     <div class="share">
       <button type="button" id="sh-native" data-t="shareNative" hidden>Share</button>
@@ -145,9 +155,7 @@
       <a id="sh-pic" download="camping-sofia-score.png" data-t="savePic" hidden>Save picture</a>
       <button type="button" id="sh-card" data-t="postcard">Save a postcard of the camp</button>
     </div>
-    <button type="button" id="card-close" data-t="close">Back to parking</button>
-    <button type="button" id="card-finish" data-t="finish">Finish the shift and bank the points</button>
-    <button type="button" id="card-restart" data-t="restart">Back to the gate</button>
+    </details>
     <p class="by" data-t="by">Camping Sofia is a project by <a href="https://thestable.bg" target="_blank" rel="noopener">thestable.bg</a></p>
   </div>
 </dialog>
@@ -168,6 +176,6 @@
 <footer class="note" data-t="note">This camp is made up. The real one is on its way to Sofia, from <a href="https://thestable.bg" target="_blank" rel="noopener">thestable.bg</a>.</footer>
 
 <noscript><p class="noscript">Camping Sofia is coming soon. Your base to enjoy Sofia.</p></noscript>
-<script src="/js/game.js?v=126" defer></script>
+<script src="/js/game.js?v=127" defer></script>
 </body>
 </html>
