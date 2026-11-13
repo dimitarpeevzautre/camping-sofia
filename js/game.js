@@ -13,6 +13,13 @@
   let ctx = cv.getContext('2d');   // swapped for a moment when a parked vehicle is drawn onto its own small canvas
   const $ = (id) => document.getElementById(id);
   const reduceMotion = matchMedia('(prefers-reduced-motion: reduce)').matches;
+  // The camp follows the calendar: autumn from 20 September to the end of November, winter from December to
+  // February, summer otherwise. ?season=summer, autumn or winter forces one.
+  const SEASON = (() => {
+    const q = /[?&]season=(summer|autumn|winter)/.exec(location.search), d = new Date(), m = d.getMonth() + 1;
+    return q ? q[1] : (m === 9 && d.getDate() >= 20) || m === 10 || m === 11 ? 'autumn' : m === 12 || m <= 2 ? 'winter' : 'summer';
+  })();
+  const AUTUMN = SEASON === 'autumn', WINTER = SEASON === 'winter';
 
   // ---------- language ----------
   // English or Bulgarian: ?lang=, then the visitor's earlier choice, then the browser's language. The page is
@@ -373,6 +380,7 @@
     { x: 29, y: 8.6, w: 24, h: 0.8 }, { x: 67, y: 8.6, w: 18, h: 0.8 },
     { x: 17, y: 68.1, w: 36, h: 0.8 }, { x: 67, y: 68.1, w: 36, h: 0.8 },
   ];
+  if (WINTER) buildings.forEach((b) => { if (b.label) b.roof = '#dfe6ea'; });   // snow on the roofs
   const pond = { x: 94.5, y: 14.2, rx: 8.6, ry: 4.4 };
   const fire = { x: 31, y: 77 };
   const tents = [{ x: 19, y: 75, a: 0.3, c: '#d9a13b' }, { x: 42, y: 79.5, a: -0.5, c: '#3f7fa6' }, { x: 97, y: 77, a: 1.1, c: '#c8553d' }];
@@ -1808,7 +1816,7 @@
     if (!flock && clock > nextFlock) { const fromLeft = Math.random() < 0.5; flock = { x: fromLeft ? -12 : W + 12, y: 10 + Math.random() * (H - 30), vx: (fromLeft ? 1 : -1) * 7, vy: 1.2 - Math.random() * 2.4 }; }
     if (flock) { flock.x += flock.vx * dt; flock.y += flock.vy * dt; if (flock.x < -20 || flock.x > W + 20) { flock = null; nextFlock = clock + 45 + Math.random() * 50; } }
     if (night > 0.2 && !reduceMotion && (smokeT -= dt) <= 0) { smokeT = 0.35; smoke.push({ x: fire.x + (Math.random() - 0.5) * 0.4, y: fire.y, z: 0.6, life: 4.5, d: Math.random() - 0.5 }); }
-    if (AUTUMN && !reduceMotion && (stoveT -= dt) <= 0) { stoveT = 0.6; smoke.push({ x: 76.3 + (Math.random() - 0.5) * 0.2, y: 73.7, z: 5.4, life: 4.5, d: Math.random() - 0.5, stove: true }); }   // in autumn the reception stove is lit all day
+    if ((AUTUMN || WINTER) && !reduceMotion && (stoveT -= dt) <= 0) { stoveT = 0.6; smoke.push({ x: 76.3 + (Math.random() - 0.5) * 0.2, y: 73.7, z: 5.4, life: 4.5, d: Math.random() - 0.5, stove: true }); }   // in autumn the reception stove is lit all day
     for (let i = smoke.length - 1; i >= 0; i--) { const s = smoke[i]; s.z += 1.1 * dt; s.x += (0.35 + s.d * 0.3) * dt; if ((s.life -= dt) <= 0) smoke.splice(i, 1); }
   }
   // In the evening a few campers sit round the fire and somebody plays the guitar: three or four soft notes now
@@ -1891,7 +1899,7 @@
   function drawPondLife() {
     const k = cam.s, [px, py] = P(pond.x, pond.y);
     if (px > -pond.rx * k - 60 && px < vw + pond.rx * k + 60 && py > -pond.ry * k - 60 && py < vh + pond.ry * k + 60) {
-      for (const l of lilies) {
+      for (const l of WINTER ? [] : lilies) {   // none on the ice
         const [x, y] = P(l.x, l.y);
         ctx.fillStyle = '#4f8a4a'; ctx.strokeStyle = 'rgba(18,33,26,0.3)'; ctx.lineWidth = 1;
         ctx.beginPath(); ctx.moveTo(x, y); ctx.arc(x, y, l.s * k, l.a + 0.35, l.a + TAU - 0.35); ctx.closePath(); ctx.fill(); ctx.stroke();   // a pad with its notch
@@ -2177,17 +2185,17 @@
       ctx.fillStyle = '#f0b83a'; ctx.beginPath(); ctx.moveTo(0.44 * k, -0.06 * k); ctx.lineTo(0.6 * k, 0); ctx.lineTo(0.44 * k, 0.06 * k); ctx.closePath(); ctx.fill();
       ctx.restore();
     }
-    if (!ground && AUTUMN && night < 0.6 && !reduceMotion) flutter.forEach((f, i) => {   // in autumn, leaves coming down instead
+    if (!ground && (AUTUMN || WINTER) && night < (WINTER ? 2 : 0.6) && !reduceMotion) flutter.forEach((f, i) => {   // in autumn, leaves coming down instead; in winter, snow
       for (let j = 0; j < 3; j++) {
         const q = f.p + j * 2.1, ph = (clock * 0.05 + q) % 1, fx = (f.x + j * 37) % W, fy = (f.y + j * 23) % H;
         const [x, y] = P(fx + (ph - 0.5) * 22 + Math.sin(clock * 0.9 + q * 3) * 1.4, fy + (ph - 0.5) * 9 + Math.cos(clock * 0.7 + q) * 0.9, 3 * (1 - ph));
         if (x < 0 || x > vw || y < 0 || y > vh) continue;
-        ctx.globalAlpha = Math.sin(Math.PI * ph) * (1 - night / 0.6); ctx.fillStyle = ['#cc9a36', '#b8683a', '#e3bb52', '#9a502c'][(i + j) % 4];
-        ctx.beginPath(); ctx.ellipse(x, y, 0.3 * k, 0.14 * k, clock * 0.8 + q * 5, 0, TAU); ctx.fill();
+        ctx.globalAlpha = Math.sin(Math.PI * ph) * (WINTER ? 0.9 - 0.4 * night : 1 - night / 0.6); ctx.fillStyle = WINTER ? '#ffffff' : ['#cc9a36', '#b8683a', '#e3bb52', '#9a502c'][(i + j) % 4];
+        ctx.beginPath(); if (WINTER) ctx.arc(x, y, 0.13 * k, 0, TAU); else ctx.ellipse(x, y, 0.3 * k, 0.14 * k, clock * 0.8 + q * 5, 0, TAU); ctx.fill();
       }
       ctx.globalAlpha = 1;
     });
-    if (!ground && !AUTUMN && night < 0.35 && !reduceMotion) for (const f of flutter) {   // butterflies, by day
+    if (!ground && SEASON === 'summer' && night < 0.35 && !reduceMotion) for (const f of flutter) {   // butterflies, by day
       const x0 = f.x + Math.sin(clock * 0.5 + f.p) * 4 + Math.sin(clock * 1.7 + f.p * 3) * 0.8, y0 = f.y + Math.cos(clock * 0.37 + f.p * 2) * 4, [x, y] = P(x0, y0, 0.8);
       if (x < 0 || x > vw || y < 0 || y > vh) continue;
       const flap = 0.25 + 0.75 * Math.abs(Math.sin(clock * 9 + f.p)), r = 0.2 * k;
@@ -2884,27 +2892,27 @@
     const g = ground.getContext('2d');
     let s = 77; const r = () => (s = (s * 1664525 + 1013904223) >>> 0) / 4294967296;
     g.setTransform(GPX, 0, 0, GPX, 0, 0);
-    g.fillStyle = '#6a9447'; g.fillRect(0, 0, W, H);
+    g.fillStyle = WINTER ? '#e6ecee' : '#6a9447'; g.fillRect(0, 0, W, H);
     for (let i = 0; i < 1500; i++) {
-      g.fillStyle = r() < 0.5 ? 'rgba(118,160,78,0.35)' : 'rgba(78,118,56,0.3)';
+      g.fillStyle = WINTER ? (r() < 0.5 ? 'rgba(255,255,255,0.55)' : 'rgba(196,210,218,0.35)') : r() < 0.5 ? 'rgba(118,160,78,0.35)' : 'rgba(78,118,56,0.3)';
       g.beginPath(); g.ellipse(r() * W, r() * H, 1 + r() * 3.5, 0.8 + r() * 2.5, r() * 3, 0, TAU); g.fill();
     }
-    g.fillStyle = '#4c7a3e'; g.fillRect(0, CAMP_BOTTOM, W, H - CAMP_BOTTOM);          // outside the fence
-    for (let i = 0; i < 260; i++) {                                                   // meadow flowers
+    g.fillStyle = WINTER ? '#d9e2e6' : '#4c7a3e'; g.fillRect(0, CAMP_BOTTOM, W, H - CAMP_BOTTOM);          // outside the fence
+    for (let i = 0; i < (WINTER ? 0 : 260); i++) {                                    // meadow flowers
       g.fillStyle = ['#f6e27a', '#ffffff', '#e59ac0'][(r() * 3) | 0];
       g.beginPath(); g.arc(6 + r() * 108, 70 + r() * 15, 0.12, 0, TAU); g.fill();
     }
     // pitches
     for (const p of pitches) {
-      g.fillStyle = '#84ad55'; g.fillRect(p.x, p.y, p.w, p.d);
-      g.fillStyle = 'rgba(255,255,255,0.07)';
+      g.fillStyle = WINTER ? '#f3f6f7' : '#84ad55'; g.fillRect(p.x, p.y, p.w, p.d);
+      g.fillStyle = WINTER ? 'rgba(170,190,202,0.13)' : 'rgba(255,255,255,0.07)';
       for (let x = p.x + 0.4; x < p.x + p.w; x += 1.6) g.fillRect(x, p.y, 0.8, p.d);
-      g.strokeStyle = 'rgba(246,241,223,0.85)'; g.lineWidth = 0.14; g.setLineDash([0.7, 0.5]);
+      g.strokeStyle = WINTER ? 'rgba(110,132,144,0.6)' : 'rgba(246,241,223,0.85)'; g.lineWidth = 0.14; g.setLineDash([0.7, 0.5]);
       g.strokeRect(p.x + 0.07, p.y + 0.07, p.w - 0.14, p.d - 0.14); g.setLineDash([]);
     }
     // roads: a darker shoulder, then gravel
-    g.fillStyle = '#9d8f70'; for (const rd of roads) g.fillRect(rd.x - 0.25, rd.y - 0.25, rd.w + 0.5, rd.h + 0.5);
-    g.fillStyle = '#cfc19f'; for (const rd of roads) g.fillRect(rd.x, rd.y, rd.w, rd.h);
+    g.fillStyle = WINTER ? '#aeb0aa' : '#9d8f70'; for (const rd of roads) g.fillRect(rd.x - 0.25, rd.y - 0.25, rd.w + 0.5, rd.h + 0.5);
+    g.fillStyle = WINTER ? '#c9c7bd' : '#cfc19f'; for (const rd of roads) g.fillRect(rd.x, rd.y, rd.w, rd.h);
     for (let i = 0; i < 9000; i++) {
       const rd = roads[(r() * roads.length) | 0];
       g.fillStyle = r() < 0.5 ? 'rgba(120,105,80,0.35)' : 'rgba(255,250,235,0.4)';
@@ -2921,14 +2929,14 @@
       g.fillStyle = '#12211a'; g.fillText(String(p.n), cx, cy + 0.08);
     }
     // pond
-    g.fillStyle = '#d8c99a'; g.beginPath(); g.ellipse(pond.x, pond.y, pond.rx + 1, pond.ry + 1, 0, 0, TAU); g.fill();
-    g.fillStyle = '#3b8cb0'; g.beginPath(); g.ellipse(pond.x, pond.y, pond.rx, pond.ry, 0, 0, TAU); g.fill();
-    g.fillStyle = '#58a8c7'; g.beginPath(); g.ellipse(pond.x - 1.2, pond.y - 0.6, pond.rx * 0.7, pond.ry * 0.6, 0, 0, TAU); g.fill();
+    g.fillStyle = WINTER ? '#dfe5e8' : '#d8c99a'; g.beginPath(); g.ellipse(pond.x, pond.y, pond.rx + 1, pond.ry + 1, 0, 0, TAU); g.fill();
+    g.fillStyle = WINTER ? '#a9cbd9' : '#3b8cb0'; g.beginPath(); g.ellipse(pond.x, pond.y, pond.rx, pond.ry, 0, 0, TAU); g.fill();
+    g.fillStyle = WINTER ? '#c6dfe9' : '#58a8c7'; g.beginPath(); g.ellipse(pond.x - 1.2, pond.y - 0.6, pond.rx * 0.7, pond.ry * 0.6, 0, 0, TAU); g.fill();
     g.fillStyle = '#7a5a3a'; g.fillRect(pond.x - 0.7, pond.y + pond.ry - 2.4, 1.4, 4.2);  // jetty
     // hedges
     for (const hd of hedges) {
       for (let x = hd.x; x < hd.x + hd.w; x += 0.55) {
-        g.fillStyle = r() < 0.5 ? '#2f5a34' : '#3b6b3d';
+        g.fillStyle = WINTER ? (r() < 0.45 ? '#eef3f4' : r() < 0.5 ? '#46705a' : '#5a8068') : r() < 0.5 ? '#2f5a34' : '#3b6b3d';
         g.beginPath(); g.arc(x + 0.3, hd.y + hd.h / 2 + (r() - 0.5) * 0.25, 0.55, 0, TAU); g.fill();
       }
     }
@@ -3244,24 +3252,20 @@
     }
   }
 
-  // From late September to the end of November some of the broadleaved trees turn. ?season=autumn or
-  // ?season=summer forces it either way.
-  const AUTUMN = (() => {
-    const q = /[?&]season=(\w+)/.exec(location.search), d = new Date(), m = d.getMonth() + 1;
-    return q ? q[1] === 'autumn' : (m === 9 && d.getDate() >= 20) || m === 10 || m === 11;
-  })();
+  // In autumn some of the broadleaved trees turn; in winter they are white with frost and the pines carry snow.
   function drawTree(t, fade) {
     const [bx, by] = P(t.x, t.y, 0), [tx, ty] = P(t.x, t.y, t.z * 0.6);
     ctx.strokeStyle = '#5a4330'; ctx.lineWidth = cam.s * 0.5; ctx.lineCap = 'round';
     ctx.beginPath(); ctx.moveTo(bx, by); ctx.lineTo(tx, ty); ctx.stroke();
     ctx.globalAlpha = fade;
-    const tones = AUTUMN && t.hue < 0.2 ? ['#b07a2a', '#cc9a36', '#e3bb52']        // gold
+    const tones = WINTER ? (t.hue < 0.5 ? ['#aebfbd', '#cbd9d8', '#eef3f3'] : ['#9fb3b6', '#c2d2d4', '#e6eeef'])   // frost
+      : AUTUMN && t.hue < 0.2 ? ['#b07a2a', '#cc9a36', '#e3bb52']        // gold
       : AUTUMN && t.hue > 0.33 && t.hue < 0.47 ? ['#9a502c', '#b8683a', '#d18548']   // russet
       : t.hue < 0.33 ? ['#2f6b3a', '#3c8046', '#57994f'] : t.hue < 0.66 ? ['#2a5f3f', '#35774a', '#4c9058'] : ['#3d6a2c', '#527f33', '#6f9a3f'];
     const pine = t.hue > 0.74 && t.hue < 0.9;
     (pine ? [[0.5, 1], [0.8, 0.68], [1.1, 0.36]] : [[0.62, 1], [0.82, 0.78], [1, 0.5]]).forEach(([zf, rf], i) => {
       const [x, y] = P(t.x, t.y, t.z * zf), rad = t.r * rf * cam.s * (1 + t.z * zf * LEAN);
-      ctx.fillStyle = pine ? ['#1f4a33', '#2a5d40', '#37724d'][i] : tones[i]; ctx.beginPath();
+      ctx.fillStyle = pine ? (WINTER ? ['#234f3a', '#3b6b54', '#e9f0f0'] : ['#1f4a33', '#2a5d40', '#37724d'])[i] : tones[i]; ctx.beginPath();
       if (pine) { for (let k = 0; k < 22; k++) { const a = (k / 22) * TAU + t.x + i * 0.3, q = rad * (k % 2 ? 0.74 : 1); if (k) ctx.lineTo(x + Math.cos(a) * q, y + Math.sin(a) * q); else ctx.moveTo(x + Math.cos(a) * q, y + Math.sin(a) * q); } ctx.closePath(); }
       else ctx.arc(x, y, rad, 0, TAU);
       ctx.fill();
@@ -3304,7 +3308,7 @@
         for (let i = 0; i < 8; i++) { const w0 = -r.hw * 0.7 + i * (r.hw * 1.4 / 8), w1 = w0 + r.hw * 1.4 / 8; poly([RP(r, -r.hl, w0, 2.5), RP(r, -r.hl, w1, 2.5), RP(r, -r.hl - 1.7, w1, 2.05), RP(r, -r.hl - 1.7, w0, 2.05)], i % 2 ? '#f6f1df' : '#f4c531', EDGE); }
       }
       const [x, y] = RP(r, 0, r.hw * 0.5, b.z + 0.45);
-      ctx.fillStyle = '#f6f1df'; ctx.font = `800 ${Math.round(cam.s * 1.15)}px Overpass, sans-serif`; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+      ctx.fillStyle = WINTER ? '#2f5d49' : '#f6f1df'; ctx.font = `800 ${Math.round(cam.s * 1.15)}px Overpass, sans-serif`; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
       ctx.fillText(L.labels[b.label] || b.label, x, y);
     }
   }
