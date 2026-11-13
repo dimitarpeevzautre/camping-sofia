@@ -683,8 +683,9 @@
 
   let toastTimer = 0, toastUntil = 0;
   const toastQ = [];   // remarks from the owner wait here until the screen is clear
-  function boss(key) { if (!demo && toastQ.length < 2) toastQ.push(pick(L.boss[key])); }
-  function stepToasts() { if (toastQ.length && mode === 'play' && performance.now() > toastUntil + 500) toast(toastQ.shift(), 3400); }
+  let bossSpoke = false;   // she has one thing to say, at the start of the first shift
+  function boss(key) { if (demo || bossSpoke || key !== 'start') return; bossSpoke = true; toastQ.push(pick(L.boss[key])); }
+  function stepToasts() { if (toastQ.length && mode === 'play' && performance.now() > toastUntil + 500) toast(toastQ.shift(), 2600); }
   function toast(text, ms = 1800) {
     if (demo) return;
     toastUntil = performance.now() + ms;
@@ -1240,7 +1241,7 @@
   let SHOT = location.search.includes('shot');   // ?debug&shot: no map, goals or pointer, for taking the preview picture
   function drawMap() {
     if (SHOT || mode !== 'play' || clock - playT < 5.6) return;
-    const k = Math.min(1.15, (vw * 0.34) / W), x0 = 12, y0 = 12, mw = W * k, mh = H * k;
+    const small = vw < 560, k = Math.min(1.15, (vw * (small ? 0.25 : 0.34)) / W), x0 = small ? 8 : 12, y0 = small ? 8 : 12, mw = W * k, mh = H * k;
     const dot = (x, y, r, c) => { ctx.fillStyle = c; ctx.beginPath(); ctx.arc(x0 + x * k, y0 + y * k, r, 0, TAU); ctx.fill(); };
     ctx.save();
     ctx.globalAlpha = 0.85; ctx.fillStyle = '#12211a';
@@ -1259,7 +1260,7 @@
       ctx.fillStyle = '#fff'; ctx.strokeStyle = '#12211a'; ctx.lineWidth = 1.5;
       ctx.beginPath(); ctx.moveTo(cx + c * 6, cy + s * 6); ctx.lineTo(cx - c * 4 - s * 4, cy - s * 4 + c * 4); ctx.lineTo(cx - c * 4 + s * 4, cy - s * 4 - c * 4); ctx.closePath(); ctx.fill(); ctx.stroke();
     }
-    drawGoalList(x0 - 2, y0 + mh + 10);
+    if (!small) drawGoalList(x0 - 2, y0 + mh + 10);   // on a phone the goals are on the score card only
     ctx.restore();
   }
 
@@ -1940,9 +1941,9 @@
     }
     // the playground, the picnic tables and the benches are drawn once and reused; the playground a few times a
     // second, because its swing and seesaw move
-    viaSprite(PLAY, 86.5, 79.5, reduceMotion ? 0 : Math.floor(clock * 6), drawPlayground, 6.5);
-    for (const t of TABLES) viaSprite(t, t.x, t.y, 0, () => drawTable(t), 2.4);
-    for (const t of BENCHES) viaSprite(t, t.x, t.y, 0, () => drawBench(t), 1.8);
+    viaSprite(PLAY, 86.5, 79.5, reduceMotion ? 0 : Math.floor(clock * 6), drawPlayground, 6.5, 0.5);
+    for (const t of TABLES) viaSprite(t, t.x, t.y, 0, () => drawTable(t), 2.4, 0.4);
+    for (const t of BENCHES) viaSprite(t, t.x, t.y, 0, () => drawBench(t), 1.8, 0.3);
     for (const [tx, ty] of tubs) {
       const [x, y] = P(tx, ty, 0.5);
       if (x < -30 || x > vw + 30 || y < -30 || y > vh + 30) continue;
@@ -3222,12 +3223,12 @@
   // when the camera has moved a metre and a half relative to it, or zoomed noticeably.
   const sprites = new WeakMap();
   // Draws `o` (centred on wx, wy; `tag` changes when its look does, e.g. its heading) through its own small canvas.
-  function viaSprite(o, wx, wy, tag, draw, reach = 8.5) {
+  function viaSprite(o, wx, wy, tag, draw, reach = 8.5, zmid = 1.3) {
     const [sx, sy] = P(wx, wy), far = cam.s * reach;
     if (sx < -far || sx > vw + far || sy < -far || sy > vh + far) return;   // off screen
     const rx = wx - cam.x, ry = wy - cam.y;
     let sp = sprites.get(o);
-    if (!sp || sp.tag !== tag || Math.abs(rx - sp.rx) > 1.5 || Math.abs(ry - sp.ry) > 1.5 || Math.abs(cam.s / sp.s - 1) > 0.07 || sp.dpr !== dpr) {
+    if (!sp || sp.tag !== tag || Math.abs(rx - sp.rx) > 1 || Math.abs(ry - sp.ry) > 1 || Math.abs(cam.s / sp.s - 1) > 0.07 || sp.dpr !== dpr) {
       const half = Math.ceil(cam.s * reach), px = Math.round(half * 2 * dpr);
       if (!sp) { sp = { cv: document.createElement('canvas') }; sp.cx = sp.cv.getContext('2d'); sprites.set(o, sp); }
       if (sp.cv.width !== px) { sp.cv.width = px; sp.cv.height = px; } else { sp.cx.setTransform(1, 0, 0, 1, 0, 0); sp.cx.clearRect(0, 0, px, px); }
@@ -3236,8 +3237,10 @@
       try { ctx.setTransform(dpr, 0, 0, dpr, (half - sx) * dpr, (half - sy) * dpr); ctx.lineWidth = 1; ctx.lineJoin = 'round'; draw(); } finally { ctx = main; }
       sp.rx = rx; sp.ry = ry; sp.s = cam.s; sp.dpr = dpr; sp.half = half; sp.tag = tag;
     }
-    const k = cam.s / sp.s;
-    ctx.drawImage(sp.cv, sx - sp.half * k, sy - sp.half * k, sp.half * 2 * k, sp.half * 2 * k);
+    // A sprite keeps the lean it was drawn with, so between redraws it is slid by what its middle height would
+    // have moved. That halves the step when it is redrawn, which was visible as a twitch on tall parked vehicles.
+    const k = cam.s / sp.s, lean = cam.s * zmid * LEAN;
+    ctx.drawImage(sp.cv, sx - sp.half * k + (rx - sp.rx) * lean, sy - sp.half * k + (ry - sp.ry) * lean, sp.half * 2 * k, sp.half * 2 * k);
   }
   function drawParked(v) {
     if (!v.parked || v.packing || v.leaving || v.slide || v.alpha < 1 || clock - v.parked.t < 2.4) return false;
@@ -3427,8 +3430,8 @@
       poly([RP(r, hl, -hw * 0.28, 0), RP(r, hl, hw * 0.28, 0), RP(r, hl, 0, zt * 0.72)], '#26343d');
     }
     // buildings and the gate beam never change, so each is drawn once and reused like a parked camper
-    for (const b of buildings) viaSprite(b, b.x + b.w / 2, b.y + b.h / 2, 0, () => drawBuilding(b), Math.max(b.w, b.h) / 2 + 4.5);
-    viaSprite(GATE, 60, 85.8, 0, drawGate, 7.5);
+    for (const b of buildings) viaSprite(b, b.x + b.w / 2, b.y + b.h / 2, 0, () => drawBuilding(b), Math.max(b.w, b.h) / 2 + 4.5, b.z / 2 + 0.2);
+    viaSprite(GATE, 60, 85.8, 0, drawGate, 7.5, 1.6);
     // lamp posts
     for (const l of lamps) {
       const [x0, y0] = P(l.x, l.y), [x1, y1] = P(l.x, l.y, 4.2);

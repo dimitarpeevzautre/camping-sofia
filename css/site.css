@@ -110,9 +110,9 @@ button:focus-visible { outline: 3px solid var(--lake); outline-offset: 3px; }
 }
 
 .toast {
-  position: fixed; left: 50%; top: 24%; transform: translate(-50%, 0) scale(0.9);
-  background: var(--ink); color: var(--paper); font-weight: 800; font-size: 1.25rem;
-  padding: 10px 18px; border-radius: 10px; opacity: 0; pointer-events: none; width: max-content; max-width: calc(100vw - 24px); text-align: center;
+  position: fixed; left: 50%; top: 13%; transform: translate(-50%, 0) scale(0.9);
+  background: rgba(18, 33, 26, 0.8); color: var(--paper); font-weight: 700; font-size: 1.05rem;
+  padding: 7px 14px; border-radius: 10px; opacity: 0; pointer-events: none; width: max-content; max-width: calc(100vw - 24px); text-align: center;
   transition: opacity .18s ease, transform .18s ease;
 }
 .toast.on { opacity: 1; transform: translate(-50%, 0) scale(1); }
@@ -239,5 +239,20 @@ body.playing .note { display: none; }
   .plate { min-width: 54px; padding: 3px 8px; }
   .plate .v { font-size: 1.2rem; }
   .start h2 { font-size: 1.35rem; }
+  /* a phone has little room: two plates, one sound button, a thin bar, small quiet messages, lighter controls */
+  .hud { grid-template-columns: repeat(2, auto); gap: 5px; }
+  #best-plate, #radio { display: none; }
+  .plate { min-width: 46px; padding: 2px 7px; }
+  .plate .k { font-size: 0.62rem; }
+  .plate .v { font-size: 1.05rem; }
+  .patience { height: 9px; border-width: 2px; }
+  .mute { width: 30px; height: 26px; }
+  .toast { top: max(112px, calc(env(safe-area-inset-top) + 112px)); font-size: 0.86rem; padding: 5px 10px; max-width: calc(100vw - 32px); }
+  .pad { padding: 0 12px; }
+  .pad > div { gap: 10px; }
+  .pad button { width: 64px; height: 64px; font-size: 1.35rem; background: rgba(246, 241, 223, 0.72); box-shadow: 0 3px 0 var(--ink); }
+  .pad .hbrake, .pad .horn { width: 44px; height: 44px; font-size: 1.05rem; bottom: 78px; }
+  .pad .hbrake { left: 12px; }
+  .pad .horn { right: 12px; }
 }
 @media (prefers-reduced-motion: reduce) { .toast, .sign, .hud { transition: none; } }
