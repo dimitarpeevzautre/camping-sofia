@@ -3583,19 +3583,22 @@
   const fsQuery = (week) => fsJson('runQuery', { structuredQuery: {
     from: [{ collectionId: 'scores' }],
     ...(week ? { where: { fieldFilter: { field: { fieldPath: 'week' }, op: 'EQUAL', value: { stringValue: week } } } } : {}),
-    orderBy: [{ field: { fieldPath: 'score' }, direction: 'DESCENDING' }], limit: 40,
+    orderBy: [{ field: { fieldPath: 'score' }, direction: 'DESCENDING' }], limit: 20,
   } }).then((rows) => {
     const seen = new Set(), out = [];   // each nickname once, at its best
     for (const r of rows) { const f = r.document && r.document.fields; if (!f || seen.has(f.name.stringValue) || RUDE.test(f.name.stringValue)) continue; seen.add(f.name.stringValue); out.push({ name: f.name.stringValue, score: +f.score.integerValue }); }
     return out;
   });
-  const fsTop = () => Promise.all([fsQuery(isoWeek()), fsQuery()]).then(([week, all]) => ({ week, all }));
+  // The free tier allows a fixed number of reads a day, so the lists are fetched at most once a minute.
+  let topAt = -1e9, topData = null;
+  const fsTop = (fresh) => (!fresh && topData && performance.now() - topAt < 60000 ? Promise.resolve(topData)
+    : Promise.all([fsQuery(isoWeek()), fsQuery()]).then(([week, all]) => { topAt = performance.now(); topData = { week, all }; return topData; }));
   const fsPost = (name, n) => {
     const id = Array.from(crypto.getRandomValues(new Uint8Array(10)), (b) => b.toString(16).padStart(2, '0')).join(''), int = (v) => ({ integerValue: String(Math.round(v)) });
     return fsJson('commit', { writes: [{
       update: { name: `${FS.slice(FS.indexOf('projects/'))}/scores/${id}`, fields: { name: { stringValue: name }, score: int(n), parked: int(parkedCount), time: int(stats.time), week: { stringValue: isoWeek() } } },
       updateTransforms: [{ fieldPath: 'at', setToServerValue: 'REQUEST_TIME' }], currentDocument: { exists: false },
-    }] }).then(fsTop).then((d) => {
+    }] }).then(() => fsTop(true)).then((d) => {
       const place = (rows) => rows.findIndex((r) => r.name === name) + 1;   // 0 when below what was fetched
       return { ...d, placeWeek: place(d.week), placeAll: place(d.all) };
     });
@@ -3629,7 +3632,7 @@
         myName = name; try { localStorage.setItem('camp-name', name); } catch (e) { /* private window */ }
         lastPost = { name, score: n };
         try { localStorage.setItem('camp-posted', JSON.stringify({ week: isoWeek(), name, score: n })); } catch (e) { /* private window */ }
-        $('lb-status').textContent = d.placeWeek ? L.lbPlace(name, d.placeWeek, d.placeAll || '40+') : `${name} ✓`;
+        $('lb-status').textContent = d.placeWeek ? L.lbPlace(name, d.placeWeek, d.placeAll || '20+') : `${name} ✓`;
         showTop(d);
       })
       .catch(() => { posted = false; $('lb-form').hidden = false; $('lb-status').textContent = L.lbFail; });
