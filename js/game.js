@@ -2912,7 +2912,7 @@
   // ---------- camera and projection ----------
   let vw = 0, vh = 0, dpr = 1;
   const cam = { x: 60, y: 60, s: 14, zoom: 1 };
-  const LEAN = 0.028;   // how far a point one metre up is pushed from the centre
+  const LEAN = 0.02;   // how far a point one metre up is pushed from the centre. It was 0.028; the owner found tall parked vehicles swayed too much as the camera passed
   const P = (x, y, z = 0) => { const k = cam.s * (1 + z * LEAN); return [(x - cam.x) * k + vw / 2, (y - cam.y) * k + vh / 2]; };
 
   function resize() {
