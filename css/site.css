@@ -260,4 +260,11 @@ body.playing .note { display: none; }
   .pad .hbrake { left: 12px; }
   .pad .horn { right: 12px; }
 }
+/* a phone on its side: the start card stands beside the name plate, full height, so its buttons need no scrolling */
+@media (max-height: 480px) and (orientation: landscape) {
+  .start { left: auto; right: max(14px, env(safe-area-inset-right)); top: max(12px, env(safe-area-inset-top)); bottom: 40px; width: min(430px, 52vw); max-height: none; padding: 14px 18px 12px; }
+  .start h2 { font-size: 1.15rem; margin-bottom: 6px; }
+  .start p { font-size: 0.9rem; line-height: 1.35; margin-bottom: 8px; }
+  #play { padding: 8px 22px; }
+}
 @media (prefers-reduced-motion: reduce) { .toast, .sign, .hud { transition: none; } }
