@@ -723,7 +723,7 @@
     const now = score();
     if (mode === 'play' && now > best && !chill) {
       best = now; try { localStorage.setItem('camp-best-score', String(best)); } catch (e) { /* private window */ }
-      if (startBest > 0 && !newBestSaid) { newBestSaid = true; toast(L.newBest, 2600); sfx.best(); banner(L.bBest); }
+      if (startBest > 0 && !newBestSaid) { newBestSaid = true; if (!SIMPLE) toast(L.newBest, 2000); sfx.best(); }
     }
     if (mode === 'play') scoreBadges(now);
     $('hud-lives').textContent = '♥'.repeat(Math.max(0, lives)) + '♡'.repeat(maxLives() - Math.max(0, lives));
@@ -887,7 +887,7 @@
     earned.add(id);
     try { localStorage.setItem('camp-badges', JSON.stringify([...earned])); } catch (e) { /* private window */ }
     badgeQ++;   // several at once take turns
-    setTimeout(() => { badgeQ--; toast(L.badge(L.badges[id].split(':')[0]), 2400); sfx.life(); }, 2200 + (badgeQ - 1) * 2500);
+    setTimeout(() => { badgeQ--; if (!SIMPLE) toast(L.badge(L.badges[id].split(':')[0]), 1800); sfx.life(); }, 2200 + (badgeQ - 1) * 2500);   // in ?simple a badge is only a chime; it is on the score card
   }
   function parkBadges(o) {
     award('first');
@@ -1046,6 +1046,7 @@
     } catch (e) { /* no speech: the banner is enough */ }
   }
   function banner(text) {
+    return;   // the big slanted banners are off: a calm game says things once, quietly, in the small message
     if (demo) return;
     const el = $('banner');
     el.textContent = text; el.classList.remove('on'); void el.offsetWidth; el.classList.add('on');
