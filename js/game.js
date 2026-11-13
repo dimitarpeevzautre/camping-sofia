@@ -1886,18 +1886,20 @@
   function drawWashing() {
     const ax = 45.8, ay = 83.0, bx = 51.4, by = 84.1, [x0, y0] = P(ax, ay, 1.7), [x1, y1] = P(bx, by, 1.7), k = cam.s;
     if (Math.max(x0, x1) < -40 || Math.min(x0, x1) > vw + 40 || Math.max(y0, y1) < -40 || Math.min(y0, y1) > vh + 40) return;
+    ctx.globalAlpha = 1 - 0.6 * night;   // it is drawn above the dusk, so it dims itself
     for (const [wx, wy] of [[ax, ay], [bx, by]]) {   // the two posts, and their feet
       const [fx, fy] = P(wx, wy), [tx, ty] = P(wx, wy, 1.7);
       ctx.strokeStyle = '#6e4a2c'; ctx.lineWidth = Math.max(2, k * 0.14); ctx.lineCap = 'round'; ctx.beginPath(); ctx.moveTo(fx, fy); ctx.lineTo(tx, ty); ctx.stroke();
     }
     ctx.lineCap = 'butt'; ctx.strokeStyle = 'rgba(246,241,223,0.8)'; ctx.lineWidth = 1; ctx.beginPath(); ctx.moveTo(x0, y0); ctx.lineTo(x1, y1); ctx.stroke();
-    if (rain > 0.3) return;
+    if (rain > 0.3) { ctx.globalAlpha = 1; return; }
     const t = reduceMotion ? 0 : clock, ux = (x1 - x0), uy = (y1 - y0);
     ctx.strokeStyle = 'rgba(18,33,26,0.4)'; ctx.lineJoin = 'round';
     WASHING.forEach(([c, w], i) => {
       const f = (i + 0.7) / (WASHING.length + 0.4), x = x0 + ux * f, y = y0 + uy * f, hw = w * k * 0.5, sway = Math.sin(t * 1.3 + i * 1.7) * 0.1 * k, drop = (0.8 + (i % 3) * 0.2) * k;
       ctx.fillStyle = c; ctx.beginPath(); ctx.moveTo(x - hw, y); ctx.lineTo(x + hw, y + hw * 2 * uy / ux); ctx.lineTo(x + hw + sway, y + hw * 2 * uy / ux + drop); ctx.lineTo(x - hw + sway, y + drop); ctx.closePath(); ctx.fill(); ctx.stroke();
     });
+    ctx.globalAlpha = 1;
   }
   function drawKite() {
     if (night > 0.4 || rain > 0.3) return;
