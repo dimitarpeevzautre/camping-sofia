@@ -133,7 +133,7 @@
       rares: { bus: 'a 1960s camper bus', beetle: 'a little old car with a roof tent', woodie: 'a wood-panelled estate', firetruck: 'a fire engine turned camper', airstream: 'a polished aluminium caravan', teardrop: 'a teardrop caravan', landy: 'an old green four-by-four', schoolbus: 'a school bus turned camper', bubble: 'a little round caravan from the sixties' },
       rareSpot: (name, n, of) => `A rare sight: ${name}! ${n} of ${of} spotted`, rareTitle: 'Rare vehicles spotted',
       noteNew: (name, n, of) => `In the notebook: ${name}. ${n} of ${of}`, noteTitle: 'Nature notebook',
-      nature: { cat: 'the cat asleep on the roof', stork: 'the stork on its nest', ducks: 'the ducks on the pond', hedgehog: 'the hedgehog crossing the lane', fireflies: 'the fireflies over the meadow' },
+      nature: { cat: 'the cat asleep on the roof', stork: 'the stork on its nest', ducks: 'the ducks on the pond', hedgehog: 'the hedgehog crossing the lane', fireflies: 'the fireflies over the meadow', deer: 'the deer at the edge of the forest' },
       flyHint: 'Steer left and right. It cannot stop. The children are watching', trickNew: (n) => `You found one: ${n}`, secretsTitle: 'Pilot\'s secrets',
       tricks: { circle: 'A full circle', eight: 'A figure of eight', pond: 'A low pass over the pond', flypast: 'A flypast down the main road', lap: 'A lap round the whole camp', night: 'A night flight', balloon: 'A wave to the balloon' },
       sayPlane: ['Wow!', 'Again! Again!', 'Look, a plane!', 'Do another one!'], sayKid: ['A plane!', 'Hello up there!', 'Look! Look!'],
@@ -258,7 +258,7 @@
       rares: { bus: 'кемпер бус от шейсетте', beetle: 'малка стара кола с палатка на покрива', woodie: 'комби с дървени панели', firetruck: 'пожарна, превърната в кемпер', airstream: 'лъскава алуминиева каравана', teardrop: 'каравана капка', landy: 'стар зелен джип', schoolbus: 'училищен автобус, превърнат в кемпер', bubble: 'малка кръгла каравана от шейсетте' },
       rareSpot: (name, n, of) => `Рядка гледка: ${name}! Забелязани ${n} от ${of}`, rareTitle: 'Забелязани редки возила',
       noteNew: (name, n, of) => `В бележника: ${name}. ${n} от ${of}`, noteTitle: 'Природен бележник',
-      nature: { cat: 'котката, заспала на покрива', stork: 'щъркелът в гнездото', ducks: 'патиците в езерцето', hedgehog: 'таралежът на алеята', fireflies: 'светулките над поляната' },
+      nature: { cat: 'котката, заспала на покрива', stork: 'щъркелът в гнездото', ducks: 'патиците в езерцето', hedgehog: 'таралежът на алеята', fireflies: 'светулките над поляната', deer: 'сърната в края на гората' },
       flyHint: 'Завивайте наляво и надясно. Самолетът не може да спре. Децата гледат', trickNew: (n) => `Открихте: ${n}`, secretsTitle: 'Тайните на пилота',
       tricks: { circle: 'Пълен кръг', eight: 'Осморка', pond: 'Нисък полет над езерцето', flypast: 'Прелитане над главната алея', lap: 'Обиколка на целия къмпинг', night: 'Нощен полет', balloon: 'Поздрав към балона' },
       sayPlane: ['Уау!', 'Пак! Пак!', 'Вижте, самолет!', 'Още веднъж!'], sayKid: ['Самолет!', 'Ехо, там горе!', 'Виж! Виж!'],
@@ -1564,7 +1564,7 @@
 
   // The nature notebook. Nothing announces it: stop the vehicle for a moment near one of the camp's quieter
   // residents and it is written down. The score card shows how many there are and names the ones found.
-  const NATURE = [['cat', 71.4, 78.5, 8, 0], ['stork', 16, 34, 10, 0], ['ducks', pond.x, pond.y, 14, 0], ['fireflies', 37, 72, 12, 0.6], ['hedgehog']];
+  const NATURE = [['cat', 71.4, 78.5, 8, 0], ['stork', 16, 34, 10, 0], ['ducks', pond.x, pond.y, 14, 0], ['fireflies', 37, 72, 12, 0.6], ['deer', 33, 88.6, 9.5, 0.3], ['hedgehog']];
   const noted = new Set();
   let noteT = 0;
   try { JSON.parse(localStorage.getItem('camp-nature') || '[]').forEach((k) => { if (NATURE.some(([n]) => n === k)) noted.add(k); }); } catch (e) { /* private window */ }
@@ -1932,6 +1932,28 @@
     });
     ctx.globalAlpha = 1;
   }
+  // From dusk a roe deer comes to the edge of the forest, just outside the fence. It looks up when a vehicle is near.
+  function drawDeer() {
+    if (night < 0.2) return;
+    const dx = 33, dy = 88.6, [x, y] = P(dx, dy, 0.3), k = cam.s;
+    if (x < -40 || x > vw + 40 || y < -40 || y > vh + 40) return;
+    const near = car && Math.hypot(car.x - dx, car.y - dy) < 12, t = reduceMotion ? 0 : clock;
+    const a = near ? Math.atan2(car.y - dy, car.x - dx) : -0.5 + Math.sin(t * 0.3) * 0.25;   // where the head points
+    ctx.globalAlpha = clamp((night - 0.2) * 5, 0, 1);
+    ctx.fillStyle = 'rgba(18,33,26,0.18)'; ctx.beginPath(); ctx.ellipse(x + 0.2 * k, y + 0.25 * k, 0.75 * k, 0.4 * k, -0.5, 0, TAU); ctx.fill();
+    ctx.save(); ctx.translate(x, y); ctx.rotate(-0.5);
+    ctx.fillStyle = '#a9743f'; ctx.strokeStyle = 'rgba(18,33,26,0.45)'; ctx.lineWidth = 1;
+    ctx.beginPath(); ctx.ellipse(0, 0, 0.7 * k, 0.34 * k, 0, 0, TAU); ctx.fill(); ctx.stroke();                              // body
+    ctx.fillStyle = '#f6f1df'; ctx.beginPath(); ctx.ellipse(-0.66 * k, 0, 0.12 * k, 0.16 * k, 0, 0, TAU); ctx.fill();        // white tail
+    ctx.restore();
+    const hx = x + Math.cos(-0.5) * 0.7 * k + Math.cos(a) * (near ? 0.3 : 0.42) * k, hy = y + Math.sin(-0.5) * 0.7 * k + Math.sin(a) * (near ? 0.3 : 0.42) * k;
+    ctx.save(); ctx.translate(hx, hy); ctx.rotate(a);
+    ctx.fillStyle = '#b98248'; ctx.strokeStyle = 'rgba(18,33,26,0.45)';
+    for (const s of [-1, 1]) { ctx.beginPath(); ctx.ellipse(-0.12 * k, s * 0.2 * k, 0.16 * k, 0.07 * k, s * 0.7, 0, TAU); ctx.fill(); ctx.stroke(); }   // ears
+    ctx.beginPath(); ctx.ellipse(0, 0, 0.26 * k, 0.17 * k, 0, 0, TAU); ctx.fill(); ctx.stroke();                              // head
+    ctx.fillStyle = '#12211a'; ctx.beginPath(); ctx.arc(0.24 * k, 0, 0.05 * k, 0, TAU); ctx.fill();                           // nose
+    ctx.restore(); ctx.globalAlpha = 1;
+  }
   function drawKite() {
     if (night > 0.4 || rain > 0.3) return;
     const k = cam.s, t = reduceMotion ? 0 : clock, kx = 55.5 + Math.sin(t * 0.5) * 2.2, ky = 74.5 + Math.cos(t * 0.37) * 1.4;
@@ -1985,7 +2007,7 @@
     ctx.restore();
   }
   function drawAmbient(ground) {   // ground: the ducks, drawn with the world; otherwise what is in the air
-    if (ground) drawHog();
+    if (ground) { drawHog(); drawDeer(); }
     if (ground) drawAngler(); else { drawWashing(); drawKite(); }
     if (!ground) drawMist();
     if (!ground) { drawStork(); drawBalloon(); }
