@@ -64,6 +64,12 @@
       ouch: ['Hey! Watch it!', 'Use your eyes!', 'Slow down!', 'That was close!'],
       honked: ['Alright, alright!', 'Keep your hair on!', 'Coming through, is it?', 'Charming.'],
       nice: ['Nicely parked!', 'Now that is how it is done.', 'Smooth!', 'Dead centre. Respect.', 'Somebody has done this before.'],
+      chatsAutumn: [
+        ['Are those ceps by the fence?', 'They were. I got there first.', 'Then you are cooking.'],
+        ['The leaves have turned.', 'So have the nights. Bring a blanket to the fire.', 'I will bring two.'],
+        ['Roast chestnuts tonight?', 'If someone finds chestnuts.', 'I found a shop.'],
+        ['Quiet, this time of year.', 'That is why we come.', 'Do not tell anyone.'],
+      ],
       chats: [
         ['Is that Vitosha up there?', 'Cherni Vrah. Two hours on foot.', 'Tomorrow, then.'],
         ['Where are you in from?', 'Rotterdam. Three days on the road.', 'We came from Plovdiv. Forty minutes.'],
@@ -190,6 +196,12 @@
       ouch: ['Ей! Внимавай!', 'Гледай къде караш!', 'По-бавно!', 'На косъм!'],
       honked: ['Добре де, добре!', 'Спокойно!', 'Път ли искаш?', 'Много мило.'],
       nice: ['Браво, чисто паркиране!', 'Така се прави.', 'Като по конец!', 'Точно в средата. Респект.', 'Личи си опитът.'],
+      chatsAutumn: [
+        ['Това до оградата манатарки ли са?', 'Бяха. Изпреварих ви.', 'Значи вие готвите.'],
+        ['Листата пожълтяха.', 'И нощите застудяха. Вземете одеяло за огъня.', 'Ще взема две.'],
+        ['Печени кестени довечера?', 'Ако някой намери кестени.', 'Аз намерих магазин.'],
+        ['Тихо е по това време на годината.', 'Затова идваме.', 'Не казвайте на никого.'],
+      ],
       chats: [
         ['Това горе Витоша ли е?', 'Черни връх. Два часа пеша.', 'Утре тогава.'],
         ['Откъде идвате?', 'От Ротердам. Три дни път.', 'Ние сме от Пловдив. Четирийсет минути.'],
@@ -917,7 +929,7 @@
       for (let j = i + 1; j < people.length; j++) {
         const b = people[j];
         if (!talker(b) || a.g === b.g || Math.hypot(a.x - b.x, a.y - b.y) > 3.4) continue;
-        const lines = pick(L.chats), stand = lines.length * 2.9 + 1;
+        const lines = pick(AUTUMN && Math.random() < 0.4 ? L.chatsAutumn : L.chats), stand = lines.length * 2.9 + 1;
         a.chat = b.chat = true; a.wait = Math.max(a.wait, stand); b.wait = Math.max(b.wait, stand);
         a.dir = Math.atan2(b.y - a.y, b.x - a.x); b.dir = a.dir + Math.PI;
         chats.push({ a, b, lines, i: 0, t: clock + 0.4 });
