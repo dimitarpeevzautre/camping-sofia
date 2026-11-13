@@ -2590,13 +2590,11 @@
     regard(car.kind, clean ? 1 : -1);
     if (boost.double) boost.double--;
     const quick = '';   // very fast, or at the last second: a little extra
-    if (quick) { total += 30; pop(r.cx, r.cy, `${quick} +30`, '#f6f1df', 22, dark ? 100 : 74); }
-    if (clean && clock - lastDrift < 4) { total += 50; pop(r.cx, r.cy, `${L.driftPark} +50`, '#f6f1df', 22, quick ? 126 : 100); award('driftpark'); }
+    if (quick) total += 30;
+    if (clean && clock - lastDrift < 4) { total += 50; pop(r.cx, r.cy, `${L.driftPark} +50`, '#f6f1df', 22, 74); award('driftpark'); }
     total += pts; stats.streak = Math.max(stats.streak, streak); if (perfect) stats.perfect++;
-    pop(r.cx, r.cy, `+${pts}`, '#f4c531', 40);
+    pop(r.cx, r.cy, `+${pts}`, '#f4c531', 34);   // one figure floats up; what went into it is on the score card
     if (perfect) { pop(r.cx, r.cy, L.perfect, '#f6f1df', 26, 40); confetti(r.cx, r.cy); if (Math.random() < 0.3) remark(L.nice, r.cx, r.cy); }
-    else if (mult > 1 || car.vip) pop(r.cx, r.cy, `×${mult * (car.vip ? 2 : 1)}`, '#f6f1df', 26, 40);
-    if (dark) pop(r.cx, r.cy, L.nightBonus, '#6fb6d9', 22, 74); else if (rain > 0.3) pop(r.cx, r.cy, L.rainBonus, '#6fb6d9', 22, 74);
     sfx.park(streak, perfect);
     if (clean) { heat = Math.max(0, heat - 0.5); heatStars(); }
     if (streak === 5) boss('roll');
