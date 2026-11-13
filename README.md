@@ -22,6 +22,8 @@ lights up. Nothing hurries you. When the camp fills, the longest-staying guests 
 - **The biplane.** "Fly the biplane" on the start card. It cannot land or stop. Four things you can do with it
   are worth points and are not announced (seven of them); the score card counts the ones found. It leaves a
   trail in the sky.
+- **The nature notebook.** Not announced either: stop for a moment near one of the camp's quieter residents and
+  it is written down (five entries, listed on the score card).
 - **To look at.** Ducks, lily pads and reeds on the pond; butterflies, cloud shadows, a hot-air balloon and a
   skein of birds by day; a golden hour at dusk; fairy lights, fireflies, woodsmoke and a ring of campers round
   the fire at night; a playground the children walk to; backpackers' tents going up in the field. Very quiet
