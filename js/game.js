@@ -20,9 +20,10 @@
     return q ? q[1] : (m === 9 && d.getDate() >= 20) || m === 10 || m === 11 ? 'autumn' : m === 12 || m <= 2 ? 'winter' : m <= 5 ? 'spring' : 'summer';
   })();
   const AUTUMN = SEASON === 'autumn', WINTER = SEASON === 'winter', SPRING = SEASON === 'spring';
-  // ?simple is the game with only the parking in it: no tips or boosts on the lanes, no errands, no runaway dog,
-  // no goals and no patience bar. It is there so the owner can compare the two and choose.
-  const SIMPLE = new URLSearchParams(location.search).has('simple');
+  // The game is the simple one: only the parking, with no tips or boosts on the lanes, no errands, no runaway dog,
+  // no goals and no patience bar. The owner compared the two on 2026-11-13 and chose this. ?full brings the
+  // fuller version back for anyone who wants to look at it.
+  const SIMPLE = !new URLSearchParams(location.search).has('full');
   if (SIMPLE) document.body.classList.add('simple');
 
   // ---------- language ----------
@@ -751,6 +752,9 @@
     if (flying) return;   // nobody arrives while the gate keeper is up in the air
     const free = freePitches();
     if (free.length < 8 && !guests.some((g) => g.packing)) checkout();
+    // Every pitch taken (it takes parking faster than anyone can drive, but it must not break): the gate stays
+    // empty until someone has driven out.
+    if (!free.length) { car = null; target = null; setTimeout(() => { if (mode === 'play' && !car) nextGuest(); }, 1500); hud(); return; }
     const roll = rnd();
     // The second guest always tows a caravan, so everyone meets one early.
     const kind = demo ? (Math.random() < 0.4 ? 'combo' : 'van') : parkedCount === 0 ? 'van' : parkedCount === 1 && !metCaravan ? 'combo' : roll < 0.3 ? 'van' : roll < 0.52 ? 'roofcar' : roll < 0.72 ? 'motorhome' : 'combo';
