@@ -3394,7 +3394,12 @@
     const ids = Object.keys(L.badges), list = $('bd-list');
     set('bd-title', `${L.badgesTitle} ${ids.filter((id) => earned.has(id)).length}/${ids.length}`);
     list.textContent = '';
-    ids.forEach((id) => { const li = document.createElement('li'); li.textContent = L.badges[id]; if (earned.has(id)) li.className = 'got'; list.append(li); });
+    // the ones earned, then the next few to try for, then only a count: the whole list is a long read on a phone
+    const row = (text, got) => { const li = document.createElement('li'); li.textContent = text; if (got) li.className = 'got'; list.append(li); };
+    const open = ids.filter((id) => !earned.has(id));
+    ids.filter((id) => earned.has(id)).forEach((id) => row(L.badges[id], true));
+    open.slice(0, 4).forEach((id) => row(L.badges[id], false));
+    if (open.length > 4) row(L.toFind(open.length - 4, true), false);
     set('st-bumps', stats.bumps); set('st-scares', stats.scares);
     set('st-time', `${Math.floor(stats.time / 60)}:${String(Math.floor(stats.time % 60)).padStart(2, '0')}`);
     $('sh-fb').href = `https://www.facebook.com/sharer/sharer.php?u=${enc(SITE)}`;
