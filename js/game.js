@@ -2517,7 +2517,7 @@
         car.x = px; car.y = py; car.th = pth; car.ph = pph; car.vh = pvh;
         if (Math.abs(v0) > 1.2 && bumpCool <= 0) {
           const cost = Math.round(5 + Math.abs(v0) * 2);
-          bumpCool = 0.5; shake = reduceMotion ? 0 : Math.min(0.4, Math.abs(v0) / 12);
+          bumpCool = 0.5;   // the screen used to shake here; a calm game does not rattle the whole camp for a bump
           if (boost.shield) { boost.shield--; sfx.bump(Math.abs(v0)); pop(car.x, car.y, L.shielded, '#b98ce0', 26); }
           else { trouble(0.7); bumps++; damage += cost; stats.bumps++; streak = 0; sfx.bump(Math.abs(v0)); pop(car.x, car.y, `−${cost}`, '#e2553d', 26); hud(); }
         }
@@ -2709,7 +2709,7 @@
     const safe = boost.shield > 0;
     if (safe) { boost.shield--; pop(o.x, o.y, L.shielded, '#b98ce0', 26); } else { regard(car.kind, -1); trouble(1.2); damage += 20; stats.scares++; streak = 0; pop(o.x, o.y, '−20', '#e2553d', 26); }
     sfx.startle(); say(o, pick(L.ouch)); o.cool = 2.5; o.flee = 1.2; o.wait = 0;
-    car.v = 0; shake = reduceMotion ? 0 : 0.2;
+    car.v = 0;
     const a = Math.atan2(o.y - car.y, o.x - car.x);
     o.path.unshift([o.x + Math.cos(a) * 2.5, o.y + Math.sin(a) * 2.5]);
     if (!safe && Math.random() < 0.5) boss('scare');
