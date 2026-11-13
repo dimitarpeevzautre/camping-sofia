@@ -47,6 +47,7 @@
         gnomes: 'Gnome hunter: find all ten hidden gnomes', driftpark: 'Handbrake parking: slide straight into a clean parking',
         wash: 'Squeaky clean: roll slowly through the wash bay',
         collector: 'Spotter: see every rare vehicle',
+        naturalist: 'Naturalist: fill the nature notebook',
         pilot: 'Barnstormer: find every one of the pilot\'s secrets',
         hedgehog: 'After you: wait for the hedgehog to cross',
         goals: 'To-do list: all three goals in one shift',
@@ -131,6 +132,8 @@
       bAir: 'BIG AIR!',
       rares: { bus: 'a 1960s camper bus', beetle: 'a little old car with a roof tent', woodie: 'a wood-panelled estate', firetruck: 'a fire engine turned camper', airstream: 'a polished aluminium caravan', teardrop: 'a teardrop caravan', landy: 'an old green four-by-four', schoolbus: 'a school bus turned camper', bubble: 'a little round caravan from the sixties' },
       rareSpot: (name, n, of) => `A rare sight: ${name}! ${n} of ${of} spotted`, rareTitle: 'Rare vehicles spotted',
+      noteNew: (name, n, of) => `In the notebook: ${name}. ${n} of ${of}`, noteTitle: 'Nature notebook',
+      nature: { cat: 'the cat asleep on the roof', stork: 'the stork on its nest', ducks: 'the ducks on the pond', hedgehog: 'the hedgehog crossing the lane', fireflies: 'the fireflies over the meadow' },
       flyHint: 'Steer left and right. It cannot stop. The children are watching', trickNew: (n) => `You found one: ${n}`, secretsTitle: 'Pilot\'s secrets',
       tricks: { circle: 'A full circle', eight: 'A figure of eight', pond: 'A low pass over the pond', flypast: 'A flypast down the main road', lap: 'A lap round the whole camp', night: 'A night flight', balloon: 'A wave to the balloon' },
       sayPlane: ['Wow!', 'Again! Again!', 'Look, a plane!', 'Do another one!'], sayKid: ['A plane!', 'Hello up there!', 'Look! Look!'],
@@ -171,6 +174,7 @@
         wash: 'Блести от чистота: минете бавно през автомивката',
         pilot: 'Въздушен ас: открийте всички тайни на пилота', collector: 'Наблюдател: вижте всички редки возила',
         hedgehog: 'След вас: изчакайте таралежа да пресече',
+        naturalist: 'Природолюбител: попълнете природния бележник',
         goals: 'По списък: и трите цели в една смяна',
         errand: 'Рум сървис: пет поръчки в една смяна', dog: 'Герой на наденичките: хванете кучето крадец', host: 'Домакин на къмпинга: 1500 точки в една смяна', legend: 'Легенда на Витоша: 8000 точки в една смяна',
       },
@@ -253,6 +257,8 @@
       bAir: 'ПОЛЕТ!',
       rares: { bus: 'кемпер бус от шейсетте', beetle: 'малка стара кола с палатка на покрива', woodie: 'комби с дървени панели', firetruck: 'пожарна, превърната в кемпер', airstream: 'лъскава алуминиева каравана', teardrop: 'каравана капка', landy: 'стар зелен джип', schoolbus: 'училищен автобус, превърнат в кемпер', bubble: 'малка кръгла каравана от шейсетте' },
       rareSpot: (name, n, of) => `Рядка гледка: ${name}! Забелязани ${n} от ${of}`, rareTitle: 'Забелязани редки возила',
+      noteNew: (name, n, of) => `В бележника: ${name}. ${n} от ${of}`, noteTitle: 'Природен бележник',
+      nature: { cat: 'котката, заспала на покрива', stork: 'щъркелът в гнездото', ducks: 'патиците в езерцето', hedgehog: 'таралежът на алеята', fireflies: 'светулките над поляната' },
       flyHint: 'Завивайте наляво и надясно. Самолетът не може да спре. Децата гледат', trickNew: (n) => `Открихте: ${n}`, secretsTitle: 'Тайните на пилота',
       tricks: { circle: 'Пълен кръг', eight: 'Осморка', pond: 'Нисък полет над езерцето', flypast: 'Прелитане над главната алея', lap: 'Обиколка на целия къмпинг', night: 'Нощен полет', balloon: 'Поздрав към балона' },
       sayPlane: ['Уау!', 'Пак! Пак!', 'Вижте, самолет!', 'Още веднъж!'], sayKid: ['Самолет!', 'Ехо, там горе!', 'Виж! Виж!'],
@@ -1556,6 +1562,31 @@
     RARE_ALL.forEach((k) => { const li = document.createElement('li'); li.textContent = spotted.has(k) ? L.rares[k] : '???'; if (spotted.has(k)) li.className = 'got'; ul.append(li); });
   }
 
+  // The nature notebook. Nothing announces it: stop the vehicle for a moment near one of the camp's quieter
+  // residents and it is written down. The score card shows how many there are and names the ones found.
+  const NATURE = [['cat', 71.4, 78.5, 8, 0], ['stork', 16, 34, 10, 0], ['ducks', pond.x, pond.y, 14, 0], ['fireflies', 37, 72, 12, 0.6], ['hedgehog']];
+  const noted = new Set();
+  let noteT = 0;
+  try { JSON.parse(localStorage.getItem('camp-nature') || '[]').forEach((k) => { if (NATURE.some(([n]) => n === k)) noted.add(k); }); } catch (e) { /* private window */ }
+  function jot(key) {
+    if (demo || noted.has(key)) return;
+    noted.add(key); total += 60; sfx.best(); hud();
+    try { localStorage.setItem('camp-nature', JSON.stringify([...noted])); } catch (e) { /* private window */ }
+    toast(L.noteNew(L.nature[key], noted.size, NATURE.length), 3400);
+    if (noted.size === NATURE.length) award('naturalist');
+  }
+  function stepNature(dt) {
+    if (mode !== 'play' || !car || demo || Math.abs(car.v) > 0.4) { noteT = 0; return; }
+    const near = NATURE.find(([k, x, y, reach, dark]) => x !== undefined && !noted.has(k) && night >= dark && Math.hypot(car.x - x, car.y - y) < reach);
+    if (!near) { noteT = 0; return; }
+    if ((noteT += dt) > 2.5) { noteT = 0; jot(near[0]); }
+  }
+  function natureRows() {
+    const ul = $('nature-list');
+    ul.textContent = ''; $('nature-title').textContent = `${L.noteTitle} ${noted.size}/${NATURE.length}`;
+    NATURE.forEach(([k]) => { const li = document.createElement('li'); li.textContent = noted.has(k) ? L.nature[k] : '???'; if (noted.has(k)) li.className = 'got'; ul.append(li); });
+  }
+
   // ---------- the biplane ----------
   // A second way to spend time at the camp: fly over it. The biplane cannot land or stop, only turn and go a
   // little faster or slower. Nothing says so, but some things you can do with it are worth points: the list on
@@ -1691,7 +1722,7 @@
     tents.push({ x, y, a, c, born: clock, small: true }); nextTent = clock + 90 + Math.random() * 60;
   }
   function stepAmbient(dt) {
-    stepTents(); stepBalloon(dt); stepHog(dt);
+    stepTents(); stepBalloon(dt); stepHog(dt); stepNature(dt);
     for (const d of ducks) d.a += d.s * dt;
     if (!flock && clock > nextFlock) { const fromLeft = Math.random() < 0.5; flock = { x: fromLeft ? -12 : W + 12, y: 10 + Math.random() * (H - 30), vx: (fromLeft ? 1 : -1) * 7, vy: 1.2 - Math.random() * 2.4 }; }
     if (flock) { flock.x += flock.vx * dt; flock.y += flock.vy * dt; if (flock.x < -20 || flock.x > W + 20) { flock = null; nextFlock = clock + 45 + Math.random() * 50; } }
@@ -1938,7 +1969,7 @@
     if (h.curl <= 0) h.y += h.vy * dt;
     if (car && near < 12 && Math.abs(car.v) < 0.6) h.waited += dt;
     if ((h.vy < 0 && h.y <= h.end) || (h.vy > 0 && h.y >= h.end)) {
-      if (h.waited > 4 && near < 14 && mode === 'play') { total += 40; pop(h.x, h.y, `${L.kind} +40`, '#8fd18a', 24); award('hedgehog'); sfx.life(); hud(); }
+      if (h.waited > 4 && near < 14 && mode === 'play') { total += 40; pop(h.x, h.y, `${L.kind} +40`, '#8fd18a', 24); award('hedgehog'); sfx.life(); hud(); jot('hedgehog'); }
       hog = null; nextHog = clock + 80 + Math.random() * 60;
     }
   }
@@ -3284,7 +3315,7 @@
     set('st-top', n ? stats.top : '–'); set('st-streak', stats.streak); set('st-perfect', stats.perfect); set('st-tips', stats.tips); set('st-errands', stats.errands); set('st-bank', bank); set('st-gnomes', `${found.size}/${GNOMES.length}`);
     set('st-rank', rankLine(now, startBest));
     { let i = 0; while (i < RANKS.length - 1 && now >= RANKS[i + 1]) i++; set('st-boss', over === true ? L.boss.over[i] : ''); }
-    boardFor(over); clubRows(); runRows(now); rareRows(); trickRows();
+    boardFor(over); clubRows(); runRows(now); rareRows(); natureRows(); trickRows();
     const ids = Object.keys(L.badges), list = $('bd-list');
     set('bd-title', `${L.badgesTitle} ${ids.filter((id) => earned.has(id)).length}/${ids.length}`);
     list.textContent = '';
