@@ -1715,7 +1715,7 @@
   function stepNature(dt) {
     if (mode !== 'play' || !car || demo || Math.abs(car.v) > 0.4) { noteT = 0; return; }
     if (rainbow > 6 && rainbow < 44 && night < 0.45 && !noted.has('rainbow')) { if ((noteT += dt) > 2.5) { noteT = 0; jot('rainbow'); } return; }
-    const near = NATURE.find(([k, x, y, reach, dark]) => x !== undefined && !noted.has(k) && night >= dark && !(k === 'deer' && clock < deerGone) && Math.hypot(car.x - x, car.y - y) < reach);
+    const near = NATURE.find(([k, x, y, reach, dark]) => x !== undefined && !noted.has(k) && night >= dark && !(k === 'deer' && clock < deerGone) && !(k === 'moon' && rain > 0.3) && Math.hypot(car.x - x, car.y - y) < reach);
     if (!near) { noteT = 0; return; }
     if ((noteT += dt) > 2.5) { noteT = 0; jot(near[0]); }
   }
