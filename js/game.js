@@ -140,7 +140,7 @@
       rares: { bus: 'a 1960s camper bus', beetle: 'a little old car with a roof tent', woodie: 'a wood-panelled estate', firetruck: 'a fire engine turned camper', airstream: 'a polished aluminium caravan', teardrop: 'a teardrop caravan', landy: 'an old green four-by-four', schoolbus: 'a school bus turned camper', bubble: 'a little round caravan from the sixties' },
       rareSpot: (name, n, of) => `A rare sight: ${name}! ${n} of ${of} spotted`, rareTitle: 'Rare vehicles spotted',
       noteNew: (name, n, of) => `In the notebook: ${name}. ${n} of ${of}`, noteTitle: 'Nature notebook', noteHint: 'Baba Ginka: No rush. Stop now and then and look about. Not everyone here came by car.', toFind: (n, have) => (have ? `${n} more to find` : `${n} to find`),
-      nature: { cat: 'the cat asleep on the roof', stork: 'the stork on its nest', ducks: 'the ducks on the pond', hedgehog: 'the hedgehog crossing the lane', fireflies: 'the fireflies over the meadow', deer: 'the deer at the edge of the forest', owl: 'the owl on the gate', rainbow: 'the rainbow after the rain', moon: 'the moon in the pond' },
+      nature: { cat: 'the cat asleep on the roof', stork: 'the stork on its nest', ducks: 'the ducks on the pond', hedgehog: 'the hedgehog crossing the lane', fireflies: 'the fireflies over the meadow', deer: 'the deer at the edge of the forest', owl: 'the owl on the gate', rainbow: 'the rainbow after the rain', moon: 'the moon in the pond', squirrel: 'the squirrel between the trees' },
       flyHint: 'Steer left and right. It cannot stop. The children are watching', trickNew: (n) => `You found one: ${n}`, secretsTitle: 'Pilot\'s secrets',
       tricks: { circle: 'A full circle', eight: 'A figure of eight', pond: 'A low pass over the pond', flypast: 'A flypast down the main road', lap: 'A lap round the whole camp', night: 'A night flight', balloon: 'A wave to the balloon' },
       sayPlane: ['Wow!', 'Again! Again!', 'Look, a plane!', 'Do another one!'], sayKid: ['A plane!', 'Hello up there!', 'Look! Look!'],
@@ -272,7 +272,7 @@
       rares: { bus: 'кемпер бус от шейсетте', beetle: 'малка стара кола с палатка на покрива', woodie: 'комби с дървени панели', firetruck: 'пожарна, превърната в кемпер', airstream: 'лъскава алуминиева каравана', teardrop: 'каравана капка', landy: 'стар зелен джип', schoolbus: 'училищен автобус, превърнат в кемпер', bubble: 'малка кръгла каравана от шейсетте' },
       rareSpot: (name, n, of) => `Рядка гледка: ${name}! Забелязани ${n} от ${of}`, rareTitle: 'Забелязани редки возила',
       noteNew: (name, n, of) => `В бележника: ${name}. ${n} от ${of}`, noteTitle: 'Природен бележник', noteHint: 'Баба Гинка: Няма бързане. Спирай понякога и се оглеждай. Не всички тук са дошли с кола.', toFind: (n, have) => (have ? `Още ${n} за откриване` : `${n} за откриване`),
-      nature: { cat: 'котката, заспала на покрива', stork: 'щъркелът в гнездото', ducks: 'патиците в езерцето', hedgehog: 'таралежът на алеята', fireflies: 'светулките над поляната', deer: 'сърната в края на гората', owl: 'совата на портата', rainbow: 'дъгата след дъжда', moon: 'луната в езерцето' },
+      nature: { cat: 'котката, заспала на покрива', stork: 'щъркелът в гнездото', ducks: 'патиците в езерцето', hedgehog: 'таралежът на алеята', fireflies: 'светулките над поляната', deer: 'сърната в края на гората', owl: 'совата на портата', rainbow: 'дъгата след дъжда', moon: 'луната в езерцето', squirrel: 'катерицата между дърветата' },
       flyHint: 'Завивайте наляво и надясно. Самолетът не може да спре. Децата гледат', trickNew: (n) => `Открихте: ${n}`, secretsTitle: 'Тайните на пилота',
       tricks: { circle: 'Пълен кръг', eight: 'Осморка', pond: 'Нисък полет над езерцето', flypast: 'Прелитане над главната алея', lap: 'Обиколка на целия къмпинг', night: 'Нощен полет', balloon: 'Поздрав към балона' },
       sayPlane: ['Уау!', 'Пак! Пак!', 'Вижте, самолет!', 'Още веднъж!'], sayKid: ['Самолет!', 'Ехо, там горе!', 'Виж! Виж!'],
@@ -1640,7 +1640,7 @@
 
   // The nature notebook. Nothing announces it: stop the vehicle for a moment near one of the camp's quieter
   // residents and it is written down. The score card shows how many there are and names the ones found.
-  const NATURE = [['cat', 71.4, 78.5, 8, 0], ['stork', 16, 34, 10, 0], ['ducks', pond.x, pond.y, 14, 0], ['fireflies', 37, 72, 12, 0.6], ['deer', 33, 88.6, 9.5, 0.3], ['owl', 55, 86.5, 5.5, 0.7], ['moon', pond.x, pond.y, 13, 0.8], ['hedgehog'], ['rainbow']];
+  const NATURE = [['cat', 71.4, 78.5, 8, 0], ['stork', 16, 34, 10, 0], ['ducks', pond.x, pond.y, 14, 0], ['fireflies', 37, 72, 12, 0.6], ['deer', 33, 88.6, 9.5, 0.3], ['owl', 55, 86.5, 5.5, 0.7], ['moon', pond.x, pond.y, 13, 0.8], ['hedgehog'], ['rainbow'], ['squirrel']];
   const noted = new Set();
   let noteT = 0;
   try { JSON.parse(localStorage.getItem('camp-nature') || '[]').forEach((k) => { if (NATURE.some(([n]) => n === k)) noted.add(k); }); } catch (e) { /* private window */ }
@@ -1799,7 +1799,7 @@
     tents.push({ x, y, a, c, born: clock, small: true }); nextTent = clock + 90 + Math.random() * 60;
   }
   function stepAmbient(dt) {
-    stepTents(); stepBalloon(dt); stepHog(dt); stepNature(dt);
+    stepTents(); stepBalloon(dt); stepHog(dt); stepNature(dt); stepSquirrel(dt);
     for (const d of ducks) d.a += d.s * dt;
     if (!flock && clock > nextFlock) { const fromLeft = Math.random() < 0.5; flock = { x: fromLeft ? -12 : W + 12, y: 10 + Math.random() * (H - 30), vx: (fromLeft ? 1 : -1) * 7, vy: 1.2 - Math.random() * 2.4 }; }
     if (flock) { flock.x += flock.vx * dt; flock.y += flock.vy * dt; if (flock.x < -20 || flock.x > W + 20) { flock = null; nextFlock = clock + 45 + Math.random() * 50; } }
@@ -2064,6 +2064,32 @@
     for (const s of pondStars) { if (Math.sin(t * 0.9 + s.p) < -0.5) continue; const [sx, sy] = P(s.x, s.y); ctx.moveTo(sx + 1.4, sy); ctx.arc(sx, sy, 1.4, 0, TAU); }
     ctx.fill();
   }
+  // By day a squirrel dashes from one tree to another in the meadow west of the gate, then is gone for a while.
+  const sqTrees = trees.filter((t) => t.x > 18 && t.x < 54 && t.y > 58 && t.y < 86);
+  const sq = { from: 0, to: 0, t: 1, wait: 6, seen: 0, x: 0, y: 0, a: 0 };
+  function stepSquirrel(dt) {
+    if (sqTrees.length < 2 || night > 0.5 || rain > 0.3) { sq.wait = Math.max(sq.wait, 3); return; }
+    if (sq.wait > 0) {
+      if ((sq.wait -= dt) > 0) return;
+      const a = sqTrees[sq.from], near = sqTrees.map((t, i) => i).filter((i) => i !== sq.from && Math.hypot(sqTrees[i].x - a.x, sqTrees[i].y - a.y) < 18);
+      sq.to = near.length ? pick(near) : (sq.from + 1) % sqTrees.length; sq.t = 0; sq.seen = 0;
+    }
+    const a = sqTrees[sq.from], b = sqTrees[sq.to], d = Math.hypot(b.x - a.x, b.y - a.y) || 1;
+    sq.t += dt * 3.2 / d; sq.x = lerp(a.x, b.x, sq.t); sq.y = lerp(a.y, b.y, sq.t); sq.a = Math.atan2(b.y - a.y, b.x - a.x);
+    if (sq.t >= 1) { sq.from = sq.to; sq.wait = 8 + Math.random() * 10; return; }
+    if (mode === 'play' && car && !demo && Math.abs(car.v) < 0.4 && Math.hypot(car.x - sq.x, car.y - sq.y) < 14 && (sq.seen += dt) > 0.8) jot('squirrel');
+  }
+  function drawSquirrel() {
+    if (sq.wait > 0 || sq.t >= 1) return;
+    const hop = reduceMotion ? 0 : Math.abs(Math.sin(clock * 11)) * 0.25, [x, y] = P(sq.x, sq.y, 0.15 + hop), k = cam.s;
+    if (x < -30 || x > vw + 30 || y < -30 || y > vh + 30) return;
+    ctx.save(); ctx.translate(x, y); ctx.rotate(sq.a);
+    ctx.fillStyle = '#c9783c'; ctx.strokeStyle = 'rgba(18,33,26,0.45)'; ctx.lineWidth = 1;
+    ctx.beginPath(); ctx.ellipse(-0.42 * k, 0, 0.3 * k, 0.17 * k, 0, 0, TAU); ctx.fill(); ctx.stroke();   // the tail
+    ctx.fillStyle = '#b5652c'; ctx.beginPath(); ctx.ellipse(0, 0, 0.26 * k, 0.15 * k, 0, 0, TAU); ctx.fill(); ctx.stroke();   // body
+    ctx.beginPath(); ctx.arc(0.26 * k, 0, 0.1 * k, 0, TAU); ctx.fill(); ctx.stroke();                       // head
+    ctx.restore();
+  }
   function drawKite() {
     if (night > 0.4 || rain > 0.3) return;
     const k = cam.s, t = reduceMotion ? 0 : clock, kx = 55.5 + Math.sin(t * 0.5) * 2.2, ky = 74.5 + Math.cos(t * 0.37) * 1.4;
@@ -2117,7 +2143,7 @@
     ctx.restore();
   }
   function drawAmbient(ground) {   // ground: the ducks, drawn with the world; otherwise what is in the air
-    if (ground) { drawHog(); drawDeer(); }
+    if (ground) { drawHog(); drawDeer(); drawSquirrel(); }
     if (ground) drawAngler(); else { drawWashing(); drawKite(); drawOwl(); drawMoon(); }
     if (!ground) drawMist();
     if (!ground) { drawStork(); drawBalloon(); }
@@ -3646,5 +3672,5 @@
   setTimeout(beginDemo, 2500);
 
   // For automated checks only: /?debug exposes the state.
-  if (location.search.includes('debug')) window.camp = { get car() { return car; }, get shrooms() { return shrooms; }, get target() { return target; }, get parked() { return parkedCount; }, get score() { return score(); }, get night() { return night; }, people, skids, packUp, guests, pitches, stats, rectsOf, rectRect, keys, blocked, livingRect, corners, setClock: (t) => { clock = t; }, setPatience: (t) => { patience = t; }, get lives() { return lives; }, get hog() { return hog; }, callHog: () => { nextHog = 0; }, postcard, holdNight: (v) => { nightLock = v; }, get balloon() { return balloon; }, callBalloon: () => { nextBalloon = 0; }, get plane() { return plane; }, tricks, get demo() { return demo; }, roamers, respect, owned, get bank() { return bank; }, setBank: (n) => { bank = n; saveShop(); shop(); }, props, get goals() { return goals; }, get ice() { return ice; }, found, GNOMES, get thief() { return thief; }, get rain() { return rain; }, setNext: (o) => { if (o.rain !== undefined) nextRain = o.rain; if (o.thief !== undefined) nextThief = o.thief; }, get job() { return job; }, setNextJob: (t) => { nextJob = t; }, tuneRadio, get station() { return station; }, get heat() { return heat; }, get warden() { return warden; }, trouble, boost, chats, takeBoost, say, addTip, earned, award, tips, honk, rankLine, get streak() { return streak; }, get mode() { return mode; }, get patienceMax() { return patienceMax; }, pops, bits, give: (kind) => { car = makeVehicle(kind, 61.8, 80.5, -Math.PI / 2); car.born = -9; }, next: () => { car = null; nextGuest(); } };
+  if (location.search.includes('debug')) window.camp = { get car() { return car; }, sq, get shrooms() { return shrooms; }, get target() { return target; }, get parked() { return parkedCount; }, get score() { return score(); }, get night() { return night; }, people, skids, packUp, guests, pitches, stats, rectsOf, rectRect, keys, blocked, livingRect, corners, setClock: (t) => { clock = t; }, setPatience: (t) => { patience = t; }, get lives() { return lives; }, get hog() { return hog; }, callHog: () => { nextHog = 0; }, postcard, holdNight: (v) => { nightLock = v; }, get balloon() { return balloon; }, callBalloon: () => { nextBalloon = 0; }, get plane() { return plane; }, tricks, get demo() { return demo; }, roamers, respect, owned, get bank() { return bank; }, setBank: (n) => { bank = n; saveShop(); shop(); }, props, get goals() { return goals; }, get ice() { return ice; }, found, GNOMES, get thief() { return thief; }, get rain() { return rain; }, setNext: (o) => { if (o.rain !== undefined) nextRain = o.rain; if (o.thief !== undefined) nextThief = o.thief; }, get job() { return job; }, setNextJob: (t) => { nextJob = t; }, tuneRadio, get station() { return station; }, get heat() { return heat; }, get warden() { return warden; }, trouble, boost, chats, takeBoost, say, addTip, earned, award, tips, honk, rankLine, get streak() { return streak; }, get mode() { return mode; }, get patienceMax() { return patienceMax; }, pops, bits, give: (kind) => { car = makeVehicle(kind, 61.8, 80.5, -Math.PI / 2); car.born = -9; }, next: () => { car = null; nextGuest(); } };
 })();
