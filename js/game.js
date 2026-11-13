@@ -198,7 +198,7 @@
       nice: ['Браво, чисто паркиране!', 'Така се прави.', 'Като по конец!', 'Точно в средата. Респект.', 'Личи си опитът.'],
       chatsAutumn: [
         ['Това до оградата манатарки ли са?', 'Бяха. Изпреварих ви.', 'Значи вие готвите.'],
-        ['Листата пожълтяха.', 'И нощите застудяха. Вземете одеяло за огъня.', 'Ще взема две.'],
+        ['Листата пожълтяха.', 'И нощите застудяха. Вземете си одеяло за край огъня.', 'Ще взема две.'],
         ['Печени кестени довечера?', 'Ако някой намери кестени.', 'Аз намерих магазин.'],
         ['Тихо е по това време на годината.', 'Затова идваме.', 'Не казвайте на никого.'],
       ],
@@ -3238,6 +3238,15 @@
       ctx.strokeStyle = shade(b.roof, 0.7); ctx.lineWidth = Math.max(1.5, cam.s * 0.1); ctx.beginPath(); ctx.moveTo(...RP(r, -r.hl, 0, b.z + 0.9)); ctx.lineTo(...RP(r, r.hl, 0, b.z + 0.9)); ctx.stroke(); ctx.lineWidth = 1;
       const ch = { cx: r.cx + r.hl * 0.55, cy: r.cy - r.hw * 0.45, hl: 0.45, hw: 0.45, a: 0 }, co = box(-0.45, 0.45, -0.45, 0.45);
       solid(ch, co, b.z + 0.3, co, b.z + 1.5, '#b98a70', '#8f6a55');                                // chimney
+      if (b.label === 'Reception' && AUTUMN) {   // pumpkins by the door in autumn
+        for (const [l, w, sz] of [[-1.5, 2.6, 0.42], [-2.2, 2.9, 0.3], [-1.6, 3.4, 0.26]]) {
+          const [x, y] = RP(r, -r.hl + l, w, 0.25), q = cam.s * sz;
+          ctx.fillStyle = '#e07b28'; ctx.strokeStyle = 'rgba(18,33,26,0.5)'; ctx.lineWidth = 1;
+          ctx.beginPath(); ctx.ellipse(x, y, q * 1.1, q, 0, 0, TAU); ctx.fill(); ctx.stroke();
+          ctx.strokeStyle = 'rgba(150,70,20,0.7)'; ctx.beginPath(); ctx.ellipse(x, y, q * 0.45, q, 0, 0, TAU); ctx.stroke();   // its ribs
+          ctx.fillStyle = '#4f6b2e'; ctx.beginPath(); ctx.arc(x, y, q * 0.2, 0, TAU); ctx.fill();                            // the stalk
+        }
+      }
       if (b.label === 'Reception') {   // a cat asleep on the sunny side of the roof
         const [cx, cy] = RP(r, -r.hl * 0.45, r.hw * 0.55, b.z + 0.45), q = cam.s;
         ctx.fillStyle = '#c98f4a'; ctx.strokeStyle = 'rgba(18,33,26,0.45)'; ctx.lineWidth = 1;
