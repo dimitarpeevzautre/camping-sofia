@@ -71,6 +71,16 @@
       ouch: ['Hey! Watch it!', 'Use your eyes!', 'Slow down!', 'That was close!'],
       honked: ['Alright, alright!', 'Keep your hair on!', 'Coming through, is it?', 'Charming.'],
       nice: ['Nicely parked!', 'Now that is how it is done.', 'Smooth!', 'Dead centre. Respect.', 'Somebody has done this before.'],
+      chatsWinter: [
+        ['Is the pond frozen solid?', 'The ducks think so.', 'I will take their word.'],
+        ['Who built the snowman?', 'The children. I only supplied the carrot.', 'And the scarf?', 'That was mine too, it turns out.'],
+        ['Camping in winter. Are we mad?', 'A little.', 'Good. Pass the tea.'],
+      ],
+      chatsSpring: [
+        ['The storks are back.', 'Same nest as last year.', 'Good neighbours.'],
+        ['Is that wild garlic by the fence?', 'It is. Your hands will smell of it for a week.', 'Worth it.'],
+        ['Everything is in blossom.', 'So is my hay fever.', 'Bless you.'],
+      ],
       chatsAutumn: [
         ['Are those ceps by the fence?', 'They were. I got there first.', 'Then you are cooking.'],
         ['The leaves have turned.', 'So have the nights. Bring a blanket to the fire.', 'I will bring two.'],
@@ -208,6 +218,16 @@
       ouch: ['Ей! Внимавай!', 'Гледай къде караш!', 'По-бавно!', 'На косъм!'],
       honked: ['Добре де, добре!', 'Спокойно!', 'Път ли искаш?', 'Много мило.'],
       nice: ['Браво, чисто паркиране!', 'Така се прави.', 'Като по конец!', 'Точно в средата. Респект.', 'Личи си опитът.'],
+      chatsWinter: [
+        ['Езерцето замръзнало ли е до дъно?', 'Патиците смятат, че да.', 'Ще им се доверя.'],
+        ['Кой направи снежния човек?', 'Децата. Аз дадох само моркова.', 'А шала?', 'Оказа се, че и той е мой.'],
+        ['Къмпинг през зимата. Луди ли сме?', 'Малко.', 'Добре. Подайте чая.'],
+      ],
+      chatsSpring: [
+        ['Щъркелите се върнаха.', 'В същото гнездо като миналата година.', 'Добри съседи.'],
+        ['Това до оградата левурда ли е?', 'Да. Ръцете ви ще миришат цяла седмица.', 'Заслужава си.'],
+        ['Всичко е цъфнало.', 'И сенната ми хрема.', 'Наздраве.'],
+      ],
       chatsAutumn: [
         ['Това до оградата манатарки ли са?', 'Бяха. Изпреварих ви.', 'Значи вие готвите.'],
         ['Листата пожълтяха.', 'И нощите застудяха. Вземете си одеяло за край огъня.', 'Ще взема две.'],
@@ -951,7 +971,7 @@
       for (let j = i + 1; j < people.length; j++) {
         const b = people[j];
         if (!talker(b) || a.g === b.g || Math.hypot(a.x - b.x, a.y - b.y) > 3.4) continue;
-        const lines = pick(AUTUMN && Math.random() < 0.4 ? L.chatsAutumn : L.chats), stand = lines.length * 2.9 + 1;
+        const seasonal = { autumn: L.chatsAutumn, winter: L.chatsWinter, spring: L.chatsSpring }[SEASON], lines = pick(seasonal && Math.random() < 0.4 ? seasonal : L.chats), stand = lines.length * 2.9 + 1;
         a.chat = b.chat = true; a.wait = Math.max(a.wait, stand); b.wait = Math.max(b.wait, stand);
         a.dir = Math.atan2(b.y - a.y, b.x - a.x); b.dir = a.dir + Math.PI;
         chats.push({ a, b, lines, i: 0, t: clock + 0.4 });
