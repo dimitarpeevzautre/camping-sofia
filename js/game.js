@@ -13,13 +13,13 @@
   let ctx = cv.getContext('2d');   // swapped for a moment when a parked vehicle is drawn onto its own small canvas
   const $ = (id) => document.getElementById(id);
   const reduceMotion = matchMedia('(prefers-reduced-motion: reduce)').matches;
-  // The camp follows the calendar: autumn from 20 September to the end of November, winter from December to
-  // February, summer otherwise. ?season=summer, autumn or winter forces one.
+  // The camp follows the calendar: spring from March to May, autumn from 20 September to the end of November,
+  // winter from December to February, summer otherwise. ?season=spring, summer, autumn or winter forces one.
   const SEASON = (() => {
-    const q = /[?&]season=(summer|autumn|winter)/.exec(location.search), d = new Date(), m = d.getMonth() + 1;
-    return q ? q[1] : (m === 9 && d.getDate() >= 20) || m === 10 || m === 11 ? 'autumn' : m === 12 || m <= 2 ? 'winter' : 'summer';
+    const q = /[?&]season=(spring|summer|autumn|winter)/.exec(location.search), d = new Date(), m = d.getMonth() + 1;
+    return q ? q[1] : (m === 9 && d.getDate() >= 20) || m === 10 || m === 11 ? 'autumn' : m === 12 || m <= 2 ? 'winter' : m <= 5 ? 'spring' : 'summer';
   })();
-  const AUTUMN = SEASON === 'autumn', WINTER = SEASON === 'winter';
+  const AUTUMN = SEASON === 'autumn', WINTER = SEASON === 'winter', SPRING = SEASON === 'spring';
 
   // ---------- language ----------
   // English or Bulgarian: ?lang=, then the visitor's earlier choice, then the browser's language. The page is
@@ -2204,17 +2204,17 @@
       ctx.fillStyle = '#f0b83a'; ctx.beginPath(); ctx.moveTo(0.44 * k, -0.06 * k); ctx.lineTo(0.6 * k, 0); ctx.lineTo(0.44 * k, 0.06 * k); ctx.closePath(); ctx.fill();
       ctx.restore();
     }
-    if (!ground && (AUTUMN || WINTER) && night < (WINTER ? 2 : 0.6) && !reduceMotion) flutter.forEach((f, i) => {   // in autumn, leaves coming down instead; in winter, snow
+    if (!ground && (AUTUMN || WINTER || SPRING) && night < (WINTER ? 2 : 0.6) && !reduceMotion) flutter.forEach((f, i) => {   // in autumn, leaves coming down instead; in winter, snow
       for (let j = 0; j < 3; j++) {
         const q = f.p + j * 2.1, ph = (clock * 0.05 + q) % 1, fx = (f.x + j * 37) % W, fy = (f.y + j * 23) % H;
         const [x, y] = P(fx + (ph - 0.5) * 22 + Math.sin(clock * 0.9 + q * 3) * 1.4, fy + (ph - 0.5) * 9 + Math.cos(clock * 0.7 + q) * 0.9, 3 * (1 - ph));
         if (x < 0 || x > vw || y < 0 || y > vh) continue;
-        ctx.globalAlpha = Math.sin(Math.PI * ph) * (WINTER ? 0.9 - 0.4 * night : 1 - night / 0.6); ctx.fillStyle = WINTER ? '#ffffff' : ['#cc9a36', '#b8683a', '#e3bb52', '#9a502c'][(i + j) % 4];
-        ctx.beginPath(); if (WINTER) ctx.arc(x, y, 0.13 * k, 0, TAU); else ctx.ellipse(x, y, 0.3 * k, 0.14 * k, clock * 0.8 + q * 5, 0, TAU); ctx.fill();
+        ctx.globalAlpha = Math.sin(Math.PI * ph) * (WINTER ? 0.9 - 0.4 * night : 1 - night / 0.6); ctx.fillStyle = WINTER ? '#ffffff' : SPRING ? ['#f6c9d5', '#ffffff', '#f0b4c5', '#fbe1e9'][(i + j) % 4] : ['#cc9a36', '#b8683a', '#e3bb52', '#9a502c'][(i + j) % 4];
+        ctx.beginPath(); if (WINTER) ctx.arc(x, y, 0.13 * k, 0, TAU); else ctx.ellipse(x, y, (SPRING ? 0.16 : 0.3) * k, (SPRING ? 0.1 : 0.14) * k, clock * 0.8 + q * 5, 0, TAU); ctx.fill();
       }
       ctx.globalAlpha = 1;
     });
-    if (!ground && SEASON === 'summer' && night < 0.35 && !reduceMotion) for (const f of flutter) {   // butterflies, by day
+    if (!ground && (SEASON === 'summer' || SPRING) && night < 0.35 && !reduceMotion) for (const f of flutter) {   // butterflies, by day
       const x0 = f.x + Math.sin(clock * 0.5 + f.p) * 4 + Math.sin(clock * 1.7 + f.p * 3) * 0.8, y0 = f.y + Math.cos(clock * 0.37 + f.p * 2) * 4, [x, y] = P(x0, y0, 0.8);
       if (x < 0 || x > vw || y < 0 || y > vh) continue;
       const flap = 0.25 + 0.75 * Math.abs(Math.sin(clock * 9 + f.p)), r = 0.2 * k;
@@ -2917,7 +2917,7 @@
       g.beginPath(); g.ellipse(r() * W, r() * H, 1 + r() * 3.5, 0.8 + r() * 2.5, r() * 3, 0, TAU); g.fill();
     }
     g.fillStyle = WINTER ? '#d9e2e6' : '#4c7a3e'; g.fillRect(0, CAMP_BOTTOM, W, H - CAMP_BOTTOM);          // outside the fence
-    for (let i = 0; i < (WINTER ? 0 : 260); i++) {                                    // meadow flowers
+    for (let i = 0; i < (WINTER ? 0 : SPRING ? 520 : 260); i++) {                                    // meadow flowers
       g.fillStyle = ['#f6e27a', '#ffffff', '#e59ac0'][(r() * 3) | 0];
       g.beginPath(); g.arc(6 + r() * 108, 70 + r() * 15, 0.12, 0, TAU); g.fill();
     }
@@ -3278,6 +3278,8 @@
     ctx.beginPath(); ctx.moveTo(bx, by); ctx.lineTo(tx, ty); ctx.stroke();
     ctx.globalAlpha = fade;
     const tones = WINTER ? (t.hue < 0.5 ? ['#aebfbd', '#cbd9d8', '#eef3f3'] : ['#9fb3b6', '#c2d2d4', '#e6eeef'])   // frost
+      : SPRING && t.hue < 0.2 ? ['#e3a3b8', '#f0c0cd', '#fbe1e9']                   // pink blossom
+      : SPRING && t.hue > 0.33 && t.hue < 0.47 ? ['#d5e2c8', '#e9f1df', '#ffffff']   // white blossom
       : AUTUMN && t.hue < 0.2 ? ['#b07a2a', '#cc9a36', '#e3bb52']        // gold
       : AUTUMN && t.hue > 0.33 && t.hue < 0.47 ? ['#9a502c', '#b8683a', '#d18548']   // russet
       : t.hue < 0.33 ? ['#2f6b3a', '#3c8046', '#57994f'] : t.hue < 0.66 ? ['#2a5f3f', '#35774a', '#4c9058'] : ['#3d6a2c', '#527f33', '#6f9a3f'];
