@@ -230,7 +230,7 @@ body.chill .patience, body.chill .lives { visibility: hidden; }
 body.playing .note { display: none; }
 .noscript { position: fixed; top: 40%; left: 0; right: 0; text-align: center; color: var(--paper); font-size: 1.25rem; }
 
-@media (max-width: 640px) {
+@media (max-width: 640px), (max-height: 480px) {
   .sign h1 { font-size: 1.2rem; }
   .sign p { font-size: 0.78rem; }
   .sign img { width: 44px; height: 44px; }
