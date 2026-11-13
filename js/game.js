@@ -1283,6 +1283,8 @@
       if (onRoadOrPitch(x, y, 1.5) || buildings.some((b) => x > b.x - 2 && x < b.x + b.w + 2 && y > b.y - 2 && y < b.y + b.h + 2)) continue;
       if (Math.hypot(x - fire.x, y - fire.y) < 4 || tents.some((t) => Math.hypot(x - t.x, y - t.y) < 3)) continue;
       if (trees.some((t) => Math.hypot(x - t.x, y - t.y) < t.r + 0.8) || shrooms.some((m) => Math.hypot(x - m.x, y - m.y) < 7)) continue;
+      if (TABLES.some((t) => Math.hypot(x - t.x, y - t.y) < 2.6) || GNOMES.some(([gx, gy]) => Math.hypot(x - gx, y - gy) < 2.6)) continue;   // not under the furniture
+      if (Math.hypot(x - 86, y - 79) < 6 || (x > 44.5 && x < 52.5 && y > 77.5 && y < 85.5)) continue;                                    // nor in the playground, nor under the washing or the kite flyer
       shrooms.push({ x, y, s: 0.85 + Math.random() * 0.35, got: false });
     }
   }
