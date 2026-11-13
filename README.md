@@ -23,13 +23,18 @@ lights up. Nothing hurries you. When the camp fills, the longest-staying guests 
   are worth points and are not announced (seven of them); the score card counts the ones found. It leaves a
   trail in the sky.
 - **The nature notebook.** Not announced either: stop for a moment near one of the camp's quieter residents and
-  it is written down (ten entries, listed on the score card).
+  it is written down (ten entries, listed on the score card): the cat on the reception roof, the stork, the ducks,
+  a squirrel, a deer at dusk, fireflies, an owl on the gate and the moon in the pond after dark, a hedgehog to
+  wait for, and the rainbow after a daytime shower. After the third guest of a shift the owner hints at it, until
+  the first entry is made. Stopping by the campfire at night gets a word from whoever is sitting there.
 - **To look at.** Ducks, lily pads and reeds on the pond; butterflies, cloud shadows, a hot-air balloon and a
   skein of birds by day; a golden hour at dusk; fairy lights, fireflies, woodsmoke and a ring of campers round
-  the fire at night; a playground the children walk to; backpackers' tents going up in the field. Very quiet
+  the fire at night; a playground the children walk to; backpackers' tents going up in the field; a washing line
+  that comes in when it rains. Very quiet
   birdsong by day and crickets after dark.
 - **Seasons.** From 20 September to the end of November some of the trees are gold and russet, leaves fall instead
-  of butterflies, and eight mushrooms come up in the grass each shift to be picked by rolling over them.
+  of butterflies, pumpkins sit by the reception door, the campers have a few seasonal things to say, and eight
+  mushrooms come up in the grass each shift to be picked by rolling over them.
   `?season=autumn` or `?season=summer` forces either.
 - **Before you start.** A campervan or a car and caravan drives itself to a pitch behind the start card.
 
