@@ -3259,10 +3259,12 @@
     const k = cam.s / sp.s, lean = cam.s * zmid * LEAN;
     ctx.drawImage(sp.cv, sx - sp.half * k + (rx - sp.rx) * lean, sy - sp.half * k + (ry - sp.ry) * lean, sp.half * 2 * k, sp.half * 2 * k);
   }
+  const PROBE = location.search.includes('debug') && location.search.includes('probe');
   function drawParked(v) {
     if (!v.parked || v.packing || v.leaving || v.slide || v.alpha < 1 || clock - v.parked.t < 2.4) return false;
     const b = bodyRect(v);
-    viaSprite(v, b.cx, b.cy, 0, () => drawVehicle(v), 7.5);
+    viaSprite(v, b.cx, b.cy, 0, () => { drawVehicle(v); if (PROBE && v === guests[0]) { const [x, y] = P(b.cx, b.cy, 2.6); ctx.fillStyle = '#ff00ff'; ctx.fillRect(x - 4, y - 4, 8, 8); } }, 7.5, 1.9);   // slid as its roof would move: the roof is what is seen, the wheels are under it
+    if (PROBE && v === guests[0]) { const [x, y] = P(b.cx, b.cy, 0); ctx.fillStyle = '#00ffff'; ctx.fillRect(x - 4, y - 4, 8, 8); }   // ?debug&probe: a mark in the cached drawing and one drawn fresh, to measure how far the cache lags
     return true;
   }
   function drawVehicle(v) {
