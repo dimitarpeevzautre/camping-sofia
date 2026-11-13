@@ -1261,7 +1261,8 @@
   let SHOT = location.search.includes('shot');   // ?debug&shot: no map, goals or pointer, for taking the preview picture
   function drawMap() {
     if (SHOT || mode !== 'play' || clock - playT < 5.6) return;
-    const small = vw < 560, k = Math.min(1.15, (vw * (small ? 0.25 : 0.34)) / W), x0 = small ? 8 : 12, y0 = small ? 8 : 12, mw = W * k, mh = H * k;
+    // small: a phone, upright or on its side
+    const small = Math.min(vw, vh) < 560, k = small ? Math.min(1.15, (vw * 0.25) / W, (vh * 0.28) / H) : Math.min(1.15, (vw * 0.34) / W), x0 = small ? 8 : 12, y0 = small ? 8 : 12, mw = W * k, mh = H * k;
     const dot = (x, y, r, c) => { ctx.fillStyle = c; ctx.beginPath(); ctx.arc(x0 + x * k, y0 + y * k, r, 0, TAU); ctx.fill(); };
     ctx.save();
     ctx.globalAlpha = 0.85; ctx.fillStyle = '#12211a';
