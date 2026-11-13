@@ -2114,7 +2114,14 @@
     trapCool = 8; trouble(0.6); toast(L.trap, 2200); note(1800, 0, 0.05, 'square', 0.08);
     if (!reduceMotion) $('flash').classList.remove('on'), void $('flash').offsetWidth, $('flash').classList.add('on');
   }
-  const flies = Array.from({ length: 46 }, () => ({ x: 4 + Math.random() * (W - 8), y: 4 + Math.random() * (H - 8), p: Math.random() * TAU, s: 0.5 + Math.random() }));
+  // Fireflies: a scattering over the whole camp, and more where they would really gather: round the pond and
+  // over the meadow inside the gate.
+  const fly = (x, y) => ({ x, y, p: Math.random() * TAU, s: 0.5 + Math.random() });
+  const flies = [
+    ...Array.from({ length: 40 }, () => fly(4 + Math.random() * (W - 8), 4 + Math.random() * (H - 8))),
+    ...Array.from({ length: 18 }, () => { const q = Math.random() * TAU, r = 0.7 + Math.random() * 0.9; return fly(pond.x + Math.cos(q) * pond.rx * r, pond.y + Math.sin(q) * pond.ry * r); }),
+    ...Array.from({ length: 22 }, () => fly(20 + Math.random() * 34, 60 + Math.random() * 25)),
+  ];
   function drawFlies() {
     if (night < 0.5 || reduceMotion) return;
     const groups = [[], []], lit = (night - 0.5) * 2;   // [faint, bright]
