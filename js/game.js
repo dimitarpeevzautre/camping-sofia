@@ -135,7 +135,7 @@
         winter: { first: 'A pine cone for the fire! There are eight about the camp', all: 'A full sack of pine cones!' },
       }, bGnomes: 'ALL THE GNOMES!', driftPark: 'Handbrake parking',
       boss: {
-        start: ['Baba Ginka: The gate is yours. Do not scratch anything.', 'Baba Ginka: Guests are coming. Smile and park.', 'Baba Ginka: Remember, the hedge costs more than you do.'],
+        start: ['Baba Ginka: The gate is yours. Do not scratch anything.', 'Baba Ginka: Guests are coming. Smile and park.', 'Baba Ginka: No hurry. The guests are on holiday, and so is the clock.'],
         fine: ['Baba Ginka: That fine comes out of your banitsa money.', 'Baba Ginka: The warden is my cousin. No discounts.'],
         roll: ['Baba Ginka: Five clean ones! I knew I hired you for a reason.', 'Baba Ginka: Keep this up and you get the good chair.'],
         gaveUp: ['Baba Ginka: That guest went to a hotel. A HOTEL.', 'Baba Ginka: They left a review. I am not reading it to you.'],
@@ -282,7 +282,7 @@
         winter: { first: 'Шишарка за огъня! Из къмпинга има осем', all: 'Пълен чувал с шишарки!' },
       }, bGnomes: 'ВСИЧКИ ДЖУДЖЕТА!', driftPark: 'Паркиране с ръчна',
       boss: {
-        start: ['Баба Гинка: Порталът е твой. Да не одраскаш нищо.', 'Баба Гинка: Гостите идват. Усмихни се и паркирай.', 'Баба Гинка: Запомни, живият плет струва повече от теб.'],
+        start: ['Баба Гинка: Порталът е твой. Да не одраскаш нищо.', 'Баба Гинка: Гостите идват. Усмихни се и паркирай.', 'Баба Гинка: Не бързай. Гостите са на почивка, часовникът също.'],
         fine: ['Баба Гинка: Глобата се удържа от парите ти за баница.', 'Баба Гинка: Управителят ми е братовчед. Отстъпки няма.'],
         roll: ['Баба Гинка: Пет чисти! Знаех си защо те взех.', 'Баба Гинка: Карай така и столът с облегалката е твой.'],
         gaveUp: ['Баба Гинка: Този гост отиде на хотел. НА ХОТЕЛ.', 'Баба Гинка: Оставиха отзив. Няма да ти го чета.'],
