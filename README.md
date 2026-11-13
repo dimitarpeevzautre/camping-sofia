@@ -39,6 +39,9 @@ lights up. Nothing hurries you. When the camp fills, the longest-staying guests 
   a frozen pond with no lilies, and snowflakes in place of the leaves. From March to May some trees are in pink or white
   blossom, petals drift down and the meadow has twice the flowers. `?season=spring`, `summer`, `autumn` or `winter`
   forces one.
+- **Foraging.** Eight things to gather lie in the grass each shift, in new places every time: mushrooms in
+  autumn, pine cones in winter, wild garlic in spring, wild strawberries in summer. Rolling over one picks it;
+  all eight in a shift earn a badge.
 - **Before you start.** A campervan or a car and caravan drives itself to a pitch behind the start card.
 
 Controls: arrow keys or WASD, Space for the handbrake, H for the horn, M to mute, R for the radio, P to pause.

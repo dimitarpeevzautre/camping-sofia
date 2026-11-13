@@ -55,7 +55,7 @@
         wash: 'Squeaky clean: roll slowly through the wash bay',
         collector: 'Spotter: see every rare vehicle',
         naturalist: 'Naturalist: fill the nature notebook',
-        forager: 'Forager: pick all eight mushrooms in one autumn shift',
+        forager: 'Forager: gather all eight seasonal finds in one shift',
         pilot: 'Barnstormer: find every one of the pilot\'s secrets',
         hedgehog: 'After you: wait for the hedgehog to cross',
         goals: 'To-do list: all three goals in one shift',
@@ -114,7 +114,12 @@
       radioOff: 'Radio off',
       rainOn: 'Rain! The roads are slippery', rainBonus: 'Rain +20%', bRush: 'TIP RUSH!', bDog: 'GOOD DOG!',
       dogOn: 'A dog has run off with the sausages! Catch up with it for a reward', dogWon: 'Sausages rescued! +200', dogLost: 'The dog got away with the sausages',
-      gnome: (n, of) => `You found a garden gnome! ${n} of ${of}`, shroomFirst: 'A mushroom! There are eight about the camp this autumn', shroomAll: 'A full basket of mushrooms!', bGnomes: 'ALL THE GNOMES!', driftPark: 'Handbrake parking',
+      gnome: (n, of) => `You found a garden gnome! ${n} of ${of}`, forage: {
+        autumn: { first: 'A mushroom! There are eight about the camp this autumn', all: 'A full basket of mushrooms!' },
+        summer: { first: 'Wild strawberries! There are eight patches about the camp', all: 'A full bowl of strawberries!' },
+        spring: { first: 'Wild garlic! There are eight clumps about the camp', all: 'A fine bunch of wild garlic!' },
+        winter: { first: 'A pine cone for the fire! There are eight about the camp', all: 'A full sack of pine cones!' },
+      }, bGnomes: 'ALL THE GNOMES!', driftPark: 'Handbrake parking',
       boss: {
         start: ['Baba Ginka: The gate is yours. Do not scratch anything.', 'Baba Ginka: Guests are coming. Smile and park.', 'Baba Ginka: Remember, the hedge costs more than you do.'],
         fine: ['Baba Ginka: That fine comes out of your banitsa money.', 'Baba Ginka: The warden is my cousin. No discounts.'],
@@ -189,7 +194,7 @@
         pilot: 'Въздушен ас: открийте всички тайни на пилота', collector: 'Наблюдател: вижте всички редки возила',
         hedgehog: 'След вас: изчакайте таралежа да пресече',
         naturalist: 'Природолюбител: попълнете природния бележник',
-        forager: 'Гъбар: наберете и осемте гъби в една есенна смяна',
+        forager: 'Събирач: съберете и осемте сезонни находки в една смяна',
         goals: 'По списък: и трите цели в една смяна',
         errand: 'Рум сървис: пет поръчки в една смяна', dog: 'Герой на наденичките: хванете кучето крадец', host: 'Домакин на къмпинга: 1500 точки в една смяна', legend: 'Легенда на Витоша: 8000 точки в една смяна',
       },
@@ -246,7 +251,12 @@
       radioOff: 'Радиото е изключено',
       rainOn: 'Дъжд! Пътищата са хлъзгави', rainBonus: 'Дъжд +20%', bRush: 'БАКШИШИ!', bDog: 'ДОБРО КУЧЕ!',
       dogOn: 'Куче избяга с наденичките! Настигнете го за награда', dogWon: 'Наденичките са спасени! +200', dogLost: 'Кучето избяга с наденичките',
-      gnome: (n, of) => `Намерихте градинско джудже! ${n} от ${of}`, shroomFirst: 'Гъба! Тази есен из къмпинга има осем', shroomAll: 'Пълна кошница с гъби!', bGnomes: 'ВСИЧКИ ДЖУДЖЕТА!', driftPark: 'Паркиране с ръчна',
+      gnome: (n, of) => `Намерихте градинско джудже! ${n} от ${of}`, forage: {
+        autumn: { first: 'Гъба! Тази есен из къмпинга има осем', all: 'Пълна кошница с гъби!' },
+        summer: { first: 'Диви ягоди! Из къмпинга има осем места с тях', all: 'Пълна купа с ягоди!' },
+        spring: { first: 'Левурда! Из къмпинга има осем туфи', all: 'Хубава връзка левурда!' },
+        winter: { first: 'Шишарка за огъня! Из къмпинга има осем', all: 'Пълен чувал с шишарки!' },
+      }, bGnomes: 'ВСИЧКИ ДЖУДЖЕТА!', driftPark: 'Паркиране с ръчна',
       boss: {
         start: ['Баба Гинка: Порталът е твой. Да не одраскаш нищо.', 'Баба Гинка: Гостите идват. Усмихни се и паркирай.', 'Баба Гинка: Запомни, живият плет струва повече от теб.'],
         fine: ['Баба Гинка: Глобата се удържа от парите ти за баница.', 'Баба Гинка: Управителят ми е братовчед. Отстъпки няма.'],
@@ -1284,12 +1294,12 @@
     });
   }
 
-  // In autumn eight mushrooms come up in the grass south of the lower lane, in new places every shift. Rolling
-  // over one picks it; there is no hurry and nothing is lost by leaving them.
+  // Eight things to gather lie in the grass south of the lower lane, in new places every shift: mushrooms in
+  // autumn, pine cones in winter, wild garlic in spring, wild strawberries in summer. Rolling over one picks it;
+  // there is no hurry and nothing is lost by leaving them.
   let shrooms = [];
   function plantShrooms() {
     shrooms = [];
-    if (!AUTUMN) return;
     for (let tries = 0; shrooms.length < 8 && tries < 600; tries++) {
       const x = 8 + Math.random() * (W - 16), y = 59 + Math.random() * 26;
       if (onRoadOrPitch(x, y, 1.5) || buildings.some((b) => x > b.x - 2 && x < b.x + b.w + 2 && y > b.y - 2 && y < b.y + b.h + 2)) continue;
@@ -1307,8 +1317,8 @@
       if (m.got || Math.abs(m.x - car.x) > 12 || Math.abs(m.y - car.y) > 12 || !rects.some((r) => rectCircle(r, m.x, m.y, 1.4))) continue;
       m.got = true; total += 20; sfx.best(); pop(m.x, m.y, '+20', '#c98f4a', 22);
       const n = shrooms.filter((q) => q.got).length;
-      if (n === 1) toast(L.shroomFirst, 3200);
-      if (n === shrooms.length) { total += 100; toast(L.shroomAll, 3200); award('forager'); }
+      if (n === 1) toast(L.forage[SEASON].first, 3200);
+      if (n === shrooms.length) { total += 100; toast(L.forage[SEASON].all, 3200); award('forager'); }
       hud();
     }
   }
@@ -1319,6 +1329,21 @@
       const [x, y] = P(m.x, m.y), [cx, cy] = P(m.x, m.y, 0.35);
       if (x < -20 || x > vw + 20 || y < -20 || y > vh + 20) continue;
       ctx.strokeStyle = 'rgba(18,33,26,0.5)'; ctx.lineWidth = 1;
+      if (WINTER) {   // a pine cone on the snow
+        ctx.fillStyle = '#7a5232'; ctx.beginPath(); ctx.ellipse(x, y, 0.34 * k * m.s, 0.22 * k * m.s, 0.6, 0, TAU); ctx.fill(); ctx.stroke();
+        ctx.fillStyle = '#a3764c'; for (let i = -1; i <= 1; i++) { ctx.beginPath(); ctx.arc(x + i * 0.14 * k, y + i * 0.1 * k, 0.07 * k, 0, TAU); ctx.fill(); }
+        continue;
+      }
+      if (SPRING) {   // a clump of wild garlic: broad leaves and white flowers
+        ctx.fillStyle = '#3f8a3a'; for (let i = 0; i < 5; i++) { const a = i * 1.257 + m.x; ctx.beginPath(); ctx.ellipse(x + Math.cos(a) * 0.22 * k, y + Math.sin(a) * 0.22 * k, 0.3 * k * m.s, 0.1 * k, a, 0, TAU); ctx.fill(); }
+        ctx.fillStyle = '#ffffff'; for (let i = 0; i < 4; i++) { const a = i * 1.57 + m.y; ctx.beginPath(); ctx.arc(x + Math.cos(a) * 0.14 * k, y + Math.sin(a) * 0.14 * k, 0.07 * k, 0, TAU); ctx.fill(); }
+        continue;
+      }
+      if (SEASON === 'summer') {   // a patch of wild strawberries
+        ctx.fillStyle = '#3f8a3a'; ctx.beginPath(); ctx.arc(x, y, 0.36 * k * m.s, 0, TAU); ctx.fill();
+        ctx.fillStyle = '#d5372d'; for (let i = 0; i < 4; i++) { const a = i * 1.7 + m.x; ctx.beginPath(); ctx.arc(x + Math.cos(a) * 0.19 * k, y + Math.sin(a) * 0.19 * k, 0.085 * k, 0, TAU); ctx.fill(); }
+        continue;
+      }
       ctx.fillStyle = '#efe6cf'; ctx.beginPath(); ctx.arc(x, y, 0.14 * k * m.s, 0, TAU); ctx.fill();                       // the stem, seen under the cap
       ctx.fillStyle = '#8a5a34'; ctx.beginPath(); ctx.arc(cx, cy, 0.3 * k * m.s, 0, TAU); ctx.fill(); ctx.stroke();        // the cap
       ctx.fillStyle = '#a8744a'; ctx.beginPath(); ctx.arc(cx - 0.08 * k, cy - 0.08 * k, 0.13 * k * m.s, 0, TAU); ctx.fill();
