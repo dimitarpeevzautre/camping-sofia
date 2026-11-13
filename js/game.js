@@ -139,7 +139,7 @@
       bAir: 'BIG AIR!',
       rares: { bus: 'a 1960s camper bus', beetle: 'a little old car with a roof tent', woodie: 'a wood-panelled estate', firetruck: 'a fire engine turned camper', airstream: 'a polished aluminium caravan', teardrop: 'a teardrop caravan', landy: 'an old green four-by-four', schoolbus: 'a school bus turned camper', bubble: 'a little round caravan from the sixties' },
       rareSpot: (name, n, of) => `A rare sight: ${name}! ${n} of ${of} spotted`, rareTitle: 'Rare vehicles spotted',
-      noteNew: (name, n, of) => `In the notebook: ${name}. ${n} of ${of}`, noteTitle: 'Nature notebook', toFind: (n, have) => (have ? `${n} more to find` : `${n} to find`),
+      noteNew: (name, n, of) => `In the notebook: ${name}. ${n} of ${of}`, noteTitle: 'Nature notebook', noteHint: 'Baba Ginka: No rush. Stop now and then and look about. Not everyone here came by car.', toFind: (n, have) => (have ? `${n} more to find` : `${n} to find`),
       nature: { cat: 'the cat asleep on the roof', stork: 'the stork on its nest', ducks: 'the ducks on the pond', hedgehog: 'the hedgehog crossing the lane', fireflies: 'the fireflies over the meadow', deer: 'the deer at the edge of the forest', owl: 'the owl on the gate', rainbow: 'the rainbow after the rain', moon: 'the moon in the pond' },
       flyHint: 'Steer left and right. It cannot stop. The children are watching', trickNew: (n) => `You found one: ${n}`, secretsTitle: 'Pilot\'s secrets',
       tricks: { circle: 'A full circle', eight: 'A figure of eight', pond: 'A low pass over the pond', flypast: 'A flypast down the main road', lap: 'A lap round the whole camp', night: 'A night flight', balloon: 'A wave to the balloon' },
@@ -271,7 +271,7 @@
       bAir: 'ПОЛЕТ!',
       rares: { bus: 'кемпер бус от шейсетте', beetle: 'малка стара кола с палатка на покрива', woodie: 'комби с дървени панели', firetruck: 'пожарна, превърната в кемпер', airstream: 'лъскава алуминиева каравана', teardrop: 'каравана капка', landy: 'стар зелен джип', schoolbus: 'училищен автобус, превърнат в кемпер', bubble: 'малка кръгла каравана от шейсетте' },
       rareSpot: (name, n, of) => `Рядка гледка: ${name}! Забелязани ${n} от ${of}`, rareTitle: 'Забелязани редки возила',
-      noteNew: (name, n, of) => `В бележника: ${name}. ${n} от ${of}`, noteTitle: 'Природен бележник', toFind: (n, have) => (have ? `Още ${n} за откриване` : `${n} за откриване`),
+      noteNew: (name, n, of) => `В бележника: ${name}. ${n} от ${of}`, noteTitle: 'Природен бележник', noteHint: 'Баба Гинка: Няма бързане. Спирай понякога и се оглеждай. Не всички тук са дошли с кола.', toFind: (n, have) => (have ? `Още ${n} за откриване` : `${n} за откриване`),
       nature: { cat: 'котката, заспала на покрива', stork: 'щъркелът в гнездото', ducks: 'патиците в езерцето', hedgehog: 'таралежът на алеята', fireflies: 'светулките над поляната', deer: 'сърната в края на гората', owl: 'совата на портата', rainbow: 'дъгата след дъжда', moon: 'луната в езерцето' },
       flyHint: 'Завивайте наляво и надясно. Самолетът не може да спре. Децата гледат', trickNew: (n) => `Открихте: ${n}`, secretsTitle: 'Тайните на пилота',
       tricks: { circle: 'Пълен кръг', eight: 'Осморка', pond: 'Нисък полет над езерцето', flypast: 'Прелитане над главната алея', lap: 'Обиколка на целия къмпинг', night: 'Нощен полет', balloon: 'Поздрав към балона' },
@@ -2488,7 +2488,8 @@
     if (clean && streak % 5 === 0 && lives < maxLives()) { lives++; back = true; setTimeout(() => sfx.life(), 600); }
     stay.points = pts; stay.stay = 150 + Math.random() * 170;
     target.guest = stay; guests.push(stay);
-    parkedCount++; stats.acc += accuracy; stats.spd += speed; stats.top = Math.max(stats.top, stay.points);
+    parkedCount++; if (parkedCount === 3 && !noted.size && !demo) toastQ.push(L.noteHint);   // a nudge towards the notebook, until its first entry
+    stats.acc += accuracy; stats.spd += speed; stats.top = Math.max(stats.top, stay.points);
     parkBadges({ clean, perfect, towing, vip, night: dark });
     if (!demo && Math.random() < 0.6) { const ax = r.cx, ay = r.cy; setTimeout(() => { if (mode === 'play' && !people.some((o) => o.sayT > clock && Math.hypot(o.x - ax, o.y - ay) < 12)) remark(L.sayArrive, ax, ay, 7); }, 3200); }
     toast(back ? L.lifeBack : L.parked(pts, accuracy, speed, mult), back ? 2600 : 2000);
