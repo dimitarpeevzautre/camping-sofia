@@ -96,7 +96,7 @@
         ['The new gate keeper is quick.', 'Quick, yes. Careful, we will see.', 'I moved my bins.'],
         ['Any plans for tonight?', 'Fire, guitar, three chords.', 'Which three?', 'Whichever turn up.'],
       ],
-      lbEmpty: 'Nobody yet. Be the first', lbFail: 'The scoreboard cannot be reached right now', lbNote: 'Only your nickname and score are stored.',
+      lbEmpty: 'Nobody yet. Be the first', lbFail: 'The scoreboard cannot be reached right now', lbNote: 'Only a nickname and the figures of the shift are stored, and shown to everyone.',
       lbPlace: (n, w, a) => `${n}: #${w} this week, #${a} of all time`, lead: (n, s) => `This week\'s best: ${n} with ${s}`,
       wardenOn: 'The warden has heard about your driving. Keep clear of the cart', fined: (n) => `The warden caught you. Fine: −${n}`,
       bWarden: 'WARDEN!', bFined: 'FINED!', bPerfect: 'PERFECT!', bRoll: 'ON A ROLL!', bMax: '×3!', bOver: 'SHIFT OVER', bBest: 'NEW BEST!',
@@ -228,7 +228,7 @@
         ['Новият на портала е бърз.', 'Бърз, да. Внимателен, ще видим.', 'Аз си преместих кофите.'],
         ['Планове за довечера?', 'Огън, китара, три акорда.', 'Кои три?', 'Които дойдат.'],
       ],
-      lbEmpty: 'Още няма никого. Бъдете първи', lbFail: 'Класацията е недостъпна в момента', lbNote: 'Пазим само прякора и резултата ви.',
+      lbEmpty: 'Още няма никого. Бъдете първи', lbFail: 'Класацията е недостъпна в момента', lbNote: 'Пазим само прякора и данните за смяната и ги показваме на всички.',
       lbPlace: (n, w, a) => `${n}: №${w} тази седмица, №${a} за всички времена`, lead: (n, s) => `Най-добър тази седмица: ${n} с ${s}`,
       wardenOn: 'Управителят чу как карате. Стойте далеч от количката', fined: (n) => `Управителят ви хвана. Глоба: −${n}`,
       bWarden: 'УПРАВИТЕЛЯТ!', bFined: 'ГЛОБА!', bPerfect: 'ПЕРФЕКТНО!', bRoll: 'В СЕРИЯ!', bMax: '×3!', bOver: 'КРАЙ НА СМЯНАТА', bBest: 'НОВ РЕКОРД!',
@@ -3566,9 +3566,40 @@
   card.addEventListener('close', () => { paused = false; last = performance.now(); cv.focus(); if (finishing) { finishing = false; gameOver(); } else if (mode === 'over') { if (flying) startFlight(); else start(chill); } });
 
   // ---------- leaderboard ----------
-  // A small service on Google Cloud keeps the best scores (see the `backend` branch). It stores a nickname and the
-  // figures of a shift, nothing else. With no address set here the leaderboard simply does not show.
-  const API = (location.search.includes('debug') && new URLSearchParams(location.search).get('api')) || '';
+  // The best scores are kept in a Firestore database on Google Cloud, which the page talks to directly: there is
+  // no server of ours in between and nobody signs in. The database's own rules (firestore.rules on the `backend`
+  // branch) allow reading the top of the list and adding one well-formed score, and nothing else. A score is a
+  // nickname and the figures of a shift. ?lb=off hides the lot.
+  const FS = 'https://firestore.googleapis.com/v1/projects/camping-sofia-game/databases/(default)/documents';
+  const API = !location.search.includes('lb=off');
+  const isoWeek = () => {
+    const d = new Date(), t = new Date(Date.UTC(d.getFullYear(), d.getMonth(), d.getDate()));
+    t.setUTCDate(t.getUTCDate() + 4 - (t.getUTCDay() || 7));
+    const y = t.getUTCFullYear();
+    return `${y}-W${String(Math.ceil(((t - Date.UTC(y, 0, 1)) / 864e5 + 1) / 7)).padStart(2, '0')}`;
+  };
+  const RUDE = /fuck|shit|cunt|bitch|nigg|fag|хуй|путк|педал|еба|курв|мамка/i;   // nicknames that are stored but never shown
+  const fsJson = (path, body) => fetch(`${FS}:${path}`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) }).then((r) => (r.ok ? r.json() : Promise.reject(r.status)));
+  const fsQuery = (week) => fsJson('runQuery', { structuredQuery: {
+    from: [{ collectionId: 'scores' }],
+    ...(week ? { where: { fieldFilter: { field: { fieldPath: 'week' }, op: 'EQUAL', value: { stringValue: week } } } } : {}),
+    orderBy: [{ field: { fieldPath: 'score' }, direction: 'DESCENDING' }], limit: 40,
+  } }).then((rows) => {
+    const seen = new Set(), out = [];   // each nickname once, at its best
+    for (const r of rows) { const f = r.document && r.document.fields; if (!f || seen.has(f.name.stringValue) || RUDE.test(f.name.stringValue)) continue; seen.add(f.name.stringValue); out.push({ name: f.name.stringValue, score: +f.score.integerValue }); }
+    return out;
+  });
+  const fsTop = () => Promise.all([fsQuery(isoWeek()), fsQuery()]).then(([week, all]) => ({ week, all }));
+  const fsPost = (name, n) => {
+    const id = Array.from(crypto.getRandomValues(new Uint8Array(10)), (b) => b.toString(16).padStart(2, '0')).join(''), int = (v) => ({ integerValue: String(Math.round(v)) });
+    return fsJson('commit', { writes: [{
+      update: { name: `${FS.slice(FS.indexOf('projects/'))}/scores/${id}`, fields: { name: { stringValue: name }, score: int(n), parked: int(parkedCount), time: int(stats.time), week: { stringValue: isoWeek() } } },
+      updateTransforms: [{ fieldPath: 'at', setToServerValue: 'REQUEST_TIME' }], currentDocument: { exists: false },
+    }] }).then(fsTop).then((d) => {
+      const place = (rows) => rows.findIndex((r) => r.name === name) + 1;   // 0 when below what was fetched
+      return { ...d, placeWeek: place(d.week), placeAll: place(d.all) };
+    });
+  };
   let myName = '', posted = false, lastPost = null;
   try { myName = localStorage.getItem('camp-name') || ''; } catch (e) { /* private window */ }
   function showTop(data) {
@@ -3587,18 +3618,17 @@
   }
   function loadTop() {
     if (!API) return;
-    fetch(`${API}/top`).then((r) => r.json()).then(showTop).catch(() => { /* the game works without it */ });
+    fsTop().then(showTop).catch(() => { /* the game works without it */ });
   }
   function postScore(name) {
     const n = score();
     if (!API || posted || chill || n <= 0 || !name) return;
     posted = true; $('lb-form').hidden = true; $('lb-status').textContent = '…';
-    fetch(`${API}/score`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ name, score: n, parked: parkedCount, time: Math.round(stats.time) }) })
-      .then((r) => (r.ok ? r.json() : Promise.reject(r.status)))
+    fsPost(name, n)
       .then((d) => {
         myName = name; try { localStorage.setItem('camp-name', name); } catch (e) { /* private window */ }
-        lastPost = { name: d.week.concat(d.all).map((r) => r.name).find((x) => x === name) || name, score: n };
-        $('lb-status').textContent = L.lbPlace(name, d.placeWeek, d.placeAll);
+        lastPost = { name, score: n };
+        $('lb-status').textContent = d.placeWeek ? L.lbPlace(name, d.placeWeek, d.placeAll || '40+') : `${name} ✓`;
         showTop(d);
       })
       .catch(() => { posted = false; $('lb-form').hidden = false; $('lb-status').textContent = L.lbFail; });
@@ -3611,7 +3641,7 @@
     if (!posted) $('lb-status').textContent = can ? L.lbNote : '';
     if (can && myName) postScore(myName); else loadTop();
   }
-  $('lb-form').addEventListener('submit', (e) => { e.preventDefault(); postScore($('lb-name').value.trim().slice(0, 16)); });
+  $('lb-form').addEventListener('submit', (e) => { e.preventDefault(); postScore($('lb-name').value.replace(/[^A-Za-z0-9Ѐ-ӿ _.-]/g, '').trim().slice(0, 16)); });   // the characters the database accepts
   $('lb-name').addEventListener('keydown', (e) => e.stopPropagation());   // typing a name is not driving
   loadTop();
 

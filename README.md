@@ -66,13 +66,23 @@ markup are in `index.html`, and elements carry `data-t` (text) or `data-a` (titl
 
 Everything a player keeps is in `localStorage`: best score, the five best shifts, badges, gnomes found, rare
 vehicles spotted, pilot's secrets, coins and perks, nickname, language and sound choices. Nothing is sent
-anywhere unless the leaderboard is switched on.
+anywhere except a score you choose to post to the leaderboard; once a nickname is saved, later finished shifts
+are posted under it automatically.
 
 ## Leaderboard
 
-The score card can show weekly and all-time top lists from a small service (Cloud Run in front of Firestore) on
-the `backend` branch of this repository. It stores a nickname and the figures of a shift, nothing else. Until
-the service's address is set in `API` in the leaderboard section of `js/game.js`, the lists stay hidden.
+The score card shows this week's and the all-time top lists, and offers to post a finished shift under a nickname.
+The scores are kept in a Firestore database in the Google Cloud project `camping-sofia-game` (Frankfurt, free tier,
+no billing account), which the page talks to directly: there is no server in between and nobody signs in. A score
+is a nickname, the points, the number of guests parked, the length of the shift, the ISO week and the time it was
+stored. Nothing else is sent.
+
+The database's rules are the only gate. They allow reading up to fifty entries at a time and adding one
+well-formed score (a nickname of up to 16 letters, digits, spaces or `_.-`, and figures within plausible bounds),
+and refuse every change or deletion. They are in `firestore.rules` on the `backend` branch, with a note on
+publishing them. Anyone can therefore post a made-up score: the list is for fun, not proof. Nicknames matching a
+short list of rude words are stored but not shown. `?lb=off` hides the leaderboard; setting `API` to `false` in the
+leaderboard section of `js/game.js` switches it off for everyone.
 
 ## How it is drawn
 
