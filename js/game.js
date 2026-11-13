@@ -939,7 +939,9 @@
   // Self-parking: close to the pitch the vehicle takes over and puts itself down dead centre.
   function autoPark() {
     const p = target, r = livingRect(car);
-    if (Math.hypot(r.cx - (p.x + p.w / 2), r.cy - (p.y + p.d / 2)) > 8) return false;
+    // ten metres: the middle of the lane in front of a pitch is 8.2 m from the pitch's centre, so at eight the vehicle
+    // could drive straight past with the boost in hand and nothing would happen
+    if (Math.hypot(r.cx - (p.x + p.w / 2), r.cy - (p.y + p.d / 2)) > 10) return false;
     boost.auto--; sfx.life(); pop(car.x, car.y, L.autoOn, '#b98ce0', 24);
     if (car.t.trailer) { arrived(true); return true; }   // the caravan is pushed onto the pitch anyway
     const th = (p.laneBelow ? -1 : 1) * Math.PI / 2, ghost = { ...car, th, ph: th, x: 0, y: 0 }, g = livingRect(ghost);
