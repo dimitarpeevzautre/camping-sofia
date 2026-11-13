@@ -52,6 +52,21 @@ The game was busier once (a warden who chased bad drivers, ramps, cones to knock
 owner played it and asked for something slower and prettier. Some of that code is still in `js/game.js`,
 switched off; treat it as removed.
 
+## What is on the screen
+
+The owner's standing instruction is that the game should be calm and the screen uncluttered, on a small phone
+above all. Treat every plate, button and message as a cost.
+
+- **Phone** (either side of the screen under about 560 px, upright or sideways): a small minimap with no goal list,
+  two plates (Pitch, Score), one sound button, a thin patience bar and small, see-through touch buttons. The radio
+  control is on the score card.
+- **Minimap**: lanes, the pitch to go to, an errand or the dog when there is one, and the vehicle. Nothing else.
+- **Messages**: small, translucent, near the top. A routine parking shows none: the points float up from the pitch.
+  What does appear is occasional (a VIP, a goal, a badge, a rare vehicle, a notebook entry, an errand, the dog,
+  rain). The owner, Baba Ginka, speaks once at the start of the first shift and gives one hint about the notebook.
+- **Score card**: the score, the buttons and the leaderboard first; statistics, collections and sharing are folded
+  away until opened.
+
 ## Files
 
 - `index.html`: the page and its English text (title, start card, score card, footer).
@@ -94,7 +109,9 @@ leaderboard section of `js/game.js` switches it off for everyone.
 
 Everything is drawn on one canvas each frame. Anything that does not change from frame to frame (a parked
 camper, traffic going straight, the driven vehicle while it holds its line) is drawn once onto a small canvas of
-its own and reused until the camera has moved a metre and a half; see `viaSprite` in `js/game.js`. Without that a
+its own and reused until the camera has moved between 0.3 m and a metre, depending on how fast the device is;
+in between it is slid by the lean of its roof, so tall parked vehicles do not twitch. See `viaSprite` in
+`js/game.js`. Without that a
 full camp ran at a few frames a second on a phone.
 
 ## Run it locally
@@ -105,6 +122,8 @@ python -m http.server 8123
 
 Then open http://127.0.0.1:8123/. Add `?debug` to the address to expose the game state as `window.camp` in the
 browser console, and `?debug&shot` to hide the map, goals and pointer when taking a picture such as `og.jpg`.
+`?debug&probe` paints a magenta mark inside the first parked vehicle's cached drawing at roof height and a cyan one
+fresh on the ground under it; tracking both while driving past measures how far the cache lags (see `viaSprite`).
 
 ## Deploy
 
