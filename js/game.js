@@ -2079,8 +2079,10 @@
     if (sqTrees.length < 2 || night > 0.5 || rain > 0.3) { sq.wait = Math.max(sq.wait, 3); return; }
     if (sq.wait > 0) {
       if ((sq.wait -= dt) > 0) return;
-      const a = sqTrees[sq.from], near = sqTrees.map((t, i) => i).filter((i) => i !== sq.from && Math.hypot(sqTrees[i].x - a.x, sqTrees[i].y - a.y) < 18);
-      sq.to = near.length ? pick(near) : (sq.from + 1) % sqTrees.length; sq.t = 0; sq.seen = 0;
+      const a = sqTrees[sq.from], clearOfFire = (b) => { const dx = b.x - a.x, dy = b.y - a.y, u = clamp(((fire.x - a.x) * dx + (fire.y - a.y) * dy) / (dx * dx + dy * dy || 1), 0, 1); return Math.hypot(a.x + dx * u - fire.x, a.y + dy * u - fire.y) > 3.6; };
+      const near = sqTrees.map((t, i) => i).filter((i) => i !== sq.from && Math.hypot(sqTrees[i].x - a.x, sqTrees[i].y - a.y) < 18 && clearOfFire(sqTrees[i]));   // it does not run through the campfire
+      if (!near.length) { sq.from = (sq.from + 1) % sqTrees.length; sq.wait = 4; return; }   // nowhere to go from this tree: turn up in the next one
+      sq.to = pick(near); sq.t = 0; sq.seen = 0;
     }
     const a = sqTrees[sq.from], b = sqTrees[sq.to], d = Math.hypot(b.x - a.x, b.y - a.y) || 1;
     sq.t += dt * 3.2 / d; sq.x = lerp(a.x, b.x, sq.t); sq.y = lerp(a.y, b.y, sq.t); sq.a = Math.atan2(b.y - a.y, b.x - a.x);
