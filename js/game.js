@@ -2197,7 +2197,7 @@
     }
     for (const s of ground ? [] : smoke) {   // woodsmoke drifting up from the fire
       const [x, y] = P(s.x, s.y, s.z), a = clamp(s.life / 4.5, 0, 1);
-      ctx.fillStyle = `rgba(226,224,214,${(s.stove ? 0.2 : 0.28 * Math.min(1, night * 2)) * a})`; ctx.beginPath(); ctx.arc(x, y, k * ((s.stove ? 0.25 : 0.35) + (1 - a) * 0.9), 0, TAU); ctx.fill();
+      ctx.fillStyle = `rgba(226,224,214,${(s.stove ? 0.2 * (1 - 0.65 * night) : 0.28 * Math.min(1, night * 2)) * a})`; ctx.beginPath(); ctx.arc(x, y, k * ((s.stove ? 0.25 : 0.35) + (1 - a) * 0.9), 0, TAU); ctx.fill();
     }
     if (flock && !ground) for (let i = 0; i < 5; i++) {   // five birds in a V, and their shadows on the ground
       const row = Math.ceil(i / 2), side = i % 2 ? 1 : -1, dir = Math.sign(flock.vx), bx = flock.x - dir * row * 1.6, by = flock.y + side * row * 1.2;
