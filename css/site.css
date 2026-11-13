@@ -183,6 +183,7 @@ body.simple .patience, body.simple .legend, body.simple #hud-combo { display: no
 .lives { visibility: hidden; }
 #card-finish { display: block; width: 100%; margin: 12px 0 0; font: inherit; font-weight: 900; padding: 10px 12px; color: var(--ink); background: var(--plate); border: 3px solid var(--ink); border-radius: 10px; box-shadow: 0 4px 0 var(--ink); cursor: pointer; }
 body.flying .patience { visibility: hidden; }
+body.flying .hud .plate:first-child { visibility: hidden; }   /* there is no pitch to go to from the air */
 body.flying .pad .hbrake, body.flying .pad .horn { display: none; }
 #play-chill, #play-fly, #card-restart { display: block; margin: 10px 0 0; font: inherit; font-size: 0.9rem; font-weight: 800; padding: 6px 12px; color: var(--ink); background: var(--paper); border: 3px solid var(--ink); border-radius: 8px; box-shadow: 0 3px 0 var(--ink); cursor: pointer; }
 #card-restart { margin: 12px auto 0; }
