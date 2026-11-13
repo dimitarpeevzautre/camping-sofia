@@ -132,7 +132,7 @@
       bAir: 'BIG AIR!',
       rares: { bus: 'a 1960s camper bus', beetle: 'a little old car with a roof tent', woodie: 'a wood-panelled estate', firetruck: 'a fire engine turned camper', airstream: 'a polished aluminium caravan', teardrop: 'a teardrop caravan', landy: 'an old green four-by-four', schoolbus: 'a school bus turned camper', bubble: 'a little round caravan from the sixties' },
       rareSpot: (name, n, of) => `A rare sight: ${name}! ${n} of ${of} spotted`, rareTitle: 'Rare vehicles spotted',
-      noteNew: (name, n, of) => `In the notebook: ${name}. ${n} of ${of}`, noteTitle: 'Nature notebook',
+      noteNew: (name, n, of) => `In the notebook: ${name}. ${n} of ${of}`, noteTitle: 'Nature notebook', toFind: (n, have) => (have ? `${n} more to find` : `${n} to find`),
       nature: { cat: 'the cat asleep on the roof', stork: 'the stork on its nest', ducks: 'the ducks on the pond', hedgehog: 'the hedgehog crossing the lane', fireflies: 'the fireflies over the meadow', deer: 'the deer at the edge of the forest', owl: 'the owl on the gate' },
       flyHint: 'Steer left and right. It cannot stop. The children are watching', trickNew: (n) => `You found one: ${n}`, secretsTitle: 'Pilot\'s secrets',
       tricks: { circle: 'A full circle', eight: 'A figure of eight', pond: 'A low pass over the pond', flypast: 'A flypast down the main road', lap: 'A lap round the whole camp', night: 'A night flight', balloon: 'A wave to the balloon' },
@@ -257,7 +257,7 @@
       bAir: 'ПОЛЕТ!',
       rares: { bus: 'кемпер бус от шейсетте', beetle: 'малка стара кола с палатка на покрива', woodie: 'комби с дървени панели', firetruck: 'пожарна, превърната в кемпер', airstream: 'лъскава алуминиева каравана', teardrop: 'каравана капка', landy: 'стар зелен джип', schoolbus: 'училищен автобус, превърнат в кемпер', bubble: 'малка кръгла каравана от шейсетте' },
       rareSpot: (name, n, of) => `Рядка гледка: ${name}! Забелязани ${n} от ${of}`, rareTitle: 'Забелязани редки возила',
-      noteNew: (name, n, of) => `В бележника: ${name}. ${n} от ${of}`, noteTitle: 'Природен бележник',
+      noteNew: (name, n, of) => `В бележника: ${name}. ${n} от ${of}`, noteTitle: 'Природен бележник', toFind: (n, have) => (have ? `Остават още ${n}` : `${n} за откриване`),
       nature: { cat: 'котката, заспала на покрива', stork: 'щъркелът в гнездото', ducks: 'патиците в езерцето', hedgehog: 'таралежът на алеята', fireflies: 'светулките над поляната', deer: 'сърната в края на гората', owl: 'совата на портата' },
       flyHint: 'Завивайте наляво и надясно. Самолетът не може да спре. Децата гледат', trickNew: (n) => `Открихте: ${n}`, secretsTitle: 'Тайните на пилота',
       tricks: { circle: 'Пълен кръг', eight: 'Осморка', pond: 'Нисък полет над езерцето', flypast: 'Прелитане над главната алея', lap: 'Обиколка на целия къмпинг', night: 'Нощен полет', balloon: 'Поздрав към балона' },
@@ -1556,10 +1556,18 @@
     setTimeout(() => { if (mode === 'play' && !demo) toast(note, 3400); }, 1700);   // after the line that says who is next
     if (spotted.size === RARE_ALL.length) award('collector');
   }
+  // The albums on the score card name what has been found and say only how many are left, so a new player is
+  // not shown three columns of question marks.
+  function albumRows(ul, keys, have, names) {
+    const row = (text, got) => { const li = document.createElement('li'); li.textContent = text; if (got) li.className = 'got'; ul.append(li); };
+    const found = keys.filter((k) => have.has(k));
+    found.forEach((k) => row(names[k].charAt(0).toUpperCase() + names[k].slice(1), true));
+    if (found.length < keys.length) row(L.toFind(keys.length - found.length, found.length), false);
+  }
   function rareRows() {
     const ul = $('rare-list');
     ul.textContent = ''; $('rare-title').textContent = `${L.rareTitle} ${spotted.size}/${RARE_ALL.length}`;
-    RARE_ALL.forEach((k) => { const li = document.createElement('li'); li.textContent = spotted.has(k) ? L.rares[k] : '???'; if (spotted.has(k)) li.className = 'got'; ul.append(li); });
+    albumRows(ul, RARE_ALL, spotted, L.rares);
   }
 
   // The nature notebook. Nothing announces it: stop the vehicle for a moment near one of the camp's quieter
@@ -1584,7 +1592,7 @@
   function natureRows() {
     const ul = $('nature-list');
     ul.textContent = ''; $('nature-title').textContent = `${L.noteTitle} ${noted.size}/${NATURE.length}`;
-    NATURE.forEach(([k]) => { const li = document.createElement('li'); li.textContent = noted.has(k) ? L.nature[k] : '???'; if (noted.has(k)) li.className = 'got'; ul.append(li); });
+    albumRows(ul, NATURE.map(([k]) => k), noted, L.nature);
   }
 
   // ---------- the biplane ----------
@@ -1702,7 +1710,7 @@
   function trickRows() {
     const ul = $('trick-list');
     ul.textContent = ''; $('trick-title').textContent = `${L.secretsTitle} ${tricks.size}/${TRICKS.length}`;
-    TRICKS.forEach((k) => { const li = document.createElement('li'); li.textContent = tricks.has(k) ? L.tricks[k] : '???'; if (tricks.has(k)) li.className = 'got'; ul.append(li); });
+    albumRows(ul, TRICKS, tricks, L.tricks);
   }
   $('play-fly').addEventListener('click', startFlight);
 
