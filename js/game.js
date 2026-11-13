@@ -3628,6 +3628,7 @@
       .then((d) => {
         myName = name; try { localStorage.setItem('camp-name', name); } catch (e) { /* private window */ }
         lastPost = { name, score: n };
+        try { localStorage.setItem('camp-posted', JSON.stringify({ week: isoWeek(), name, score: n })); } catch (e) { /* private window */ }
         $('lb-status').textContent = d.placeWeek ? L.lbPlace(name, d.placeWeek, d.placeAll || '40+') : `${name} ✓`;
         showTop(d);
       })
@@ -3639,7 +3640,10 @@
     const can = over === true && !posted && !chill && score() > 0;
     $('lb-form').hidden = !can; $('lb-name').value = myName;
     if (!posted) $('lb-status').textContent = can ? L.lbNote : '';
-    if (can && myName) postScore(myName); else loadTop();
+    // a saved nickname posts by itself, but only a shift that beats what it already posted this week
+    let mine = null; try { mine = JSON.parse(localStorage.getItem('camp-posted') || 'null'); } catch (e) { /* private window */ }
+    const beaten = mine && mine.week === isoWeek() && mine.name === myName && score() <= mine.score;
+    if (can && myName && !beaten) postScore(myName); else { if (can && beaten) { $('lb-form').hidden = true; $('lb-status').textContent = ''; } loadTop(); }
   }
   $('lb-form').addEventListener('submit', (e) => { e.preventDefault(); postScore($('lb-name').value.replace(/[^A-Za-z0-9Ѐ-ӿ _.-]/g, '').trim().slice(0, 16)); });   // the characters the database accepts
   $('lb-name').addEventListener('keydown', (e) => e.stopPropagation());   // typing a name is not driving
