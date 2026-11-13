@@ -1159,7 +1159,7 @@
     if (s.kick.includes(i)) note(120, 0, 0.12, 'sine', 0.18, 45);
     radioStep++;
   }
-  function showRadio() { $('radio').classList.toggle('off', !station); $('radio').title = station ? STATIONS[station].name : L.radioOff; }
+  function showRadio() { $('radio').classList.toggle('off', !station); $('radio').title = station ? STATIONS[station].name : L.radioOff; $('card-radio').textContent = `♫ ${station ? STATIONS[station].name : L.radioOff}`; }
   function tuneRadio() {
     station = (station + 1) % STATIONS.length; radioStep = 0; radioT = 0.3;
     try { localStorage.setItem('camp-radio', String(station)); } catch (e) { /* private window */ }
@@ -1167,6 +1167,7 @@
   }
   showRadio();
   $('radio').addEventListener('click', () => { tuneRadio(); cv.focus(); });
+  $('card-radio').addEventListener('click', tuneRadio);   // on a phone the radio button lives on the score card
   addEventListener('keydown', (e) => { if (e.code === 'KeyR' && !e.repeat && !paused) tuneRadio(); });
 
   // ---------- rain ----------
