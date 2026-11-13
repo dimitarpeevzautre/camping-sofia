@@ -133,7 +133,7 @@
       rares: { bus: 'a 1960s camper bus', beetle: 'a little old car with a roof tent', woodie: 'a wood-panelled estate', firetruck: 'a fire engine turned camper', airstream: 'a polished aluminium caravan', teardrop: 'a teardrop caravan', landy: 'an old green four-by-four', schoolbus: 'a school bus turned camper', bubble: 'a little round caravan from the sixties' },
       rareSpot: (name, n, of) => `A rare sight: ${name}! ${n} of ${of} spotted`, rareTitle: 'Rare vehicles spotted',
       noteNew: (name, n, of) => `In the notebook: ${name}. ${n} of ${of}`, noteTitle: 'Nature notebook', toFind: (n, have) => (have ? `${n} more to find` : `${n} to find`),
-      nature: { cat: 'the cat asleep on the roof', stork: 'the stork on its nest', ducks: 'the ducks on the pond', hedgehog: 'the hedgehog crossing the lane', fireflies: 'the fireflies over the meadow', deer: 'the deer at the edge of the forest', owl: 'the owl on the gate' },
+      nature: { cat: 'the cat asleep on the roof', stork: 'the stork on its nest', ducks: 'the ducks on the pond', hedgehog: 'the hedgehog crossing the lane', fireflies: 'the fireflies over the meadow', deer: 'the deer at the edge of the forest', owl: 'the owl on the gate', rainbow: 'the rainbow after the rain' },
       flyHint: 'Steer left and right. It cannot stop. The children are watching', trickNew: (n) => `You found one: ${n}`, secretsTitle: 'Pilot\'s secrets',
       tricks: { circle: 'A full circle', eight: 'A figure of eight', pond: 'A low pass over the pond', flypast: 'A flypast down the main road', lap: 'A lap round the whole camp', night: 'A night flight', balloon: 'A wave to the balloon' },
       sayPlane: ['Wow!', 'Again! Again!', 'Look, a plane!', 'Do another one!'], sayKid: ['A plane!', 'Hello up there!', 'Look! Look!'],
@@ -258,7 +258,7 @@
       rares: { bus: 'кемпер бус от шейсетте', beetle: 'малка стара кола с палатка на покрива', woodie: 'комби с дървени панели', firetruck: 'пожарна, превърната в кемпер', airstream: 'лъскава алуминиева каравана', teardrop: 'каравана капка', landy: 'стар зелен джип', schoolbus: 'училищен автобус, превърнат в кемпер', bubble: 'малка кръгла каравана от шейсетте' },
       rareSpot: (name, n, of) => `Рядка гледка: ${name}! Забелязани ${n} от ${of}`, rareTitle: 'Забелязани редки возила',
       noteNew: (name, n, of) => `В бележника: ${name}. ${n} от ${of}`, noteTitle: 'Природен бележник', toFind: (n, have) => (have ? `Остават още ${n}` : `${n} за откриване`),
-      nature: { cat: 'котката, заспала на покрива', stork: 'щъркелът в гнездото', ducks: 'патиците в езерцето', hedgehog: 'таралежът на алеята', fireflies: 'светулките над поляната', deer: 'сърната в края на гората', owl: 'совата на портата' },
+      nature: { cat: 'котката, заспала на покрива', stork: 'щъркелът в гнездото', ducks: 'патиците в езерцето', hedgehog: 'таралежът на алеята', fireflies: 'светулките над поляната', deer: 'сърната в края на гората', owl: 'совата на портата', rainbow: 'дъгата след дъжда' },
       flyHint: 'Завивайте наляво и надясно. Самолетът не може да спре. Децата гледат', trickNew: (n) => `Открихте: ${n}`, secretsTitle: 'Тайните на пилота',
       tricks: { circle: 'Пълен кръг', eight: 'Осморка', pond: 'Нисък полет над езерцето', flypast: 'Прелитане над главната алея', lap: 'Обиколка на целия къмпинг', night: 'Нощен полет', balloon: 'Поздрав към балона' },
       sayPlane: ['Уау!', 'Пак! Пак!', 'Вижте, самолет!', 'Още веднъж!'], sayKid: ['Самолет!', 'Ехо, там горе!', 'Виж! Виж!'],
@@ -591,7 +591,7 @@
       ctx.lineWidth = 6; ctx.strokeStyle = '#12211a'; ctx.strokeText(p.text, x, y - 34 - p.o - up);
       ctx.fillStyle = p.c; ctx.fillText(p.text, x, y - 34 - p.o - up);
     }
-    ctx.globalAlpha = 1; drawJob(); drawRain(); drawFlies(); drawPlane(); drawBubbles(); drawMap();
+    ctx.globalAlpha = 1; drawJob(); drawRain(); drawRainbow(); drawFlies(); drawPlane(); drawBubbles(); drawMap();
     ctx.restore();
   }
 
@@ -1114,12 +1114,14 @@
 
   // ---------- rain ----------
   // A shower every couple of minutes: the roads get slippery and a parking in the rain is worth a fifth more.
-  let rain = 0, raining = false, nextRain = 70, rainGain = null;
+  let rain = 0, raining = false, nextRain = 70, rainGain = null, rainbow = 0;   // rainbow: seconds it has left
   function stepWeather(dt) {
     if (clock > nextRain) {
       raining = !raining; nextRain = clock + (raining ? 35 + Math.random() * 20 : 90 + Math.random() * 80);
       if (raining) { toast(L.rainOn, 2400); thud(0.5); chorus(L.sayRain, 4); }
+      else if (night < 0.45) rainbow = 50;   // a daytime shower leaves a rainbow behind
     }
+    if (rainbow > 0) rainbow -= dt;
     rain = clamp(rain + (raining ? dt : -dt) / 4, 0, 1);
   }
   function rainSound() {
@@ -1133,6 +1135,15 @@
       src.connect(f); f.connect(rainGain); rainGain.connect(master); src.start();
     }
     rainGain.gain.setTargetAtTime(mode === 'play' && !paused ? rain * 0.06 : 0, AC.currentTime, 0.3);
+  }
+  function drawRainbow() {
+    if (rainbow <= 0) return;
+    const fade = clamp(Math.min((50 - rainbow) / 8, rainbow / 10), 0, 1) * (1 - rain) * clamp(1 - night * 2, 0, 1);
+    if (fade <= 0.01) return;
+    const cx = vw * 0.6, cy = vh * 1.45, r0 = Math.max(vw * 0.75, vh * 1.25), w = Math.max(5, vh * 0.014);
+    ctx.lineWidth = w + 0.5; ctx.globalAlpha = 0.2 * fade;
+    ['#d5503c', '#e8855f', '#f4c531', '#8fd18a', '#3f7fa6', '#7a62b0'].forEach((c, i) => { ctx.strokeStyle = c; ctx.beginPath(); ctx.arc(cx, cy, r0 - i * w, Math.PI, TAU); ctx.stroke(); });
+    ctx.globalAlpha = 1; ctx.lineWidth = 1;
   }
   function drawRain() {
     if (rain <= 0.02) return;
@@ -1572,7 +1583,7 @@
 
   // The nature notebook. Nothing announces it: stop the vehicle for a moment near one of the camp's quieter
   // residents and it is written down. The score card shows how many there are and names the ones found.
-  const NATURE = [['cat', 71.4, 78.5, 8, 0], ['stork', 16, 34, 10, 0], ['ducks', pond.x, pond.y, 14, 0], ['fireflies', 37, 72, 12, 0.6], ['deer', 33, 88.6, 9.5, 0.3], ['owl', 55, 86.5, 5.5, 0.7], ['hedgehog']];
+  const NATURE = [['cat', 71.4, 78.5, 8, 0], ['stork', 16, 34, 10, 0], ['ducks', pond.x, pond.y, 14, 0], ['fireflies', 37, 72, 12, 0.6], ['deer', 33, 88.6, 9.5, 0.3], ['owl', 55, 86.5, 5.5, 0.7], ['hedgehog'], ['rainbow']];
   const noted = new Set();
   let noteT = 0;
   try { JSON.parse(localStorage.getItem('camp-nature') || '[]').forEach((k) => { if (NATURE.some(([n]) => n === k)) noted.add(k); }); } catch (e) { /* private window */ }
@@ -1585,6 +1596,7 @@
   }
   function stepNature(dt) {
     if (mode !== 'play' || !car || demo || Math.abs(car.v) > 0.4) { noteT = 0; return; }
+    if (rainbow > 6 && rainbow < 44 && night < 0.45 && !noted.has('rainbow')) { if ((noteT += dt) > 2.5) { noteT = 0; jot('rainbow'); } return; }
     const near = NATURE.find(([k, x, y, reach, dark]) => x !== undefined && !noted.has(k) && night >= dark && Math.hypot(car.x - x, car.y - y) < reach);
     if (!near) { noteT = 0; return; }
     if ((noteT += dt) > 2.5) { noteT = 0; jot(near[0]); }
