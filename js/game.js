@@ -3097,9 +3097,12 @@
       const len = Math.hypot(nl, nw);
       if (len < 1e-6) continue;
       nl /= len; nw /= len;
-      if (upright) {   // an upright wall that faces the middle of the screen is hidden under its own roof
+      if (upright) {
+        // Things lean away from the middle of the screen, so the roof slides outwards: it uncovers the wall that
+        // faces the middle and covers the one that faces away. Only the covered one may be skipped. (This test was
+        // the wrong way round for a while, which left the near side of campers open to the ground.)
         const ml = (lo[i][0] + lo[j][0]) / 2, mw = (lo[i][1] + lo[j][1]) / 2;
-        if ((c * nl - s * nw) * (ox + c * ml - s * mw) + (s * nl + c * nw) * (oy + s * ml + c * mw) < 0) continue;
+        if ((c * nl - s * nw) * (ox + c * ml - s * mw) + (s * nl + c * nw) * (oy + s * ml + c * mw) > 0) continue;
       }
       const raw = typeof wall === 'function' ? wall(nl, nw) : wall;
       const col = raw === GLASS ? GLASS : shade(raw, 0.84 + 0.2 * ((c * nl - s * nw) * SUN[0] + (s * nl + c * nw) * SUN[1]));
@@ -3250,12 +3253,16 @@
   const sprites = new WeakMap();
   // Draws `o` (centred on wx, wy; `tag` changes when its look does, e.g. its heading) through its own small canvas.
   let frameMs = 30;   // a running average of the time a frame takes; a device with time to spare redraws sprites more often
+  let camV = 0, camPX = 0, camPY = 0;   // how fast the camera is moving, in metres a second, smoothed
   function viaSprite(o, wx, wy, tag, draw, reach = 8.5, zmid = 1.3) {
     const [sx, sy] = P(wx, wy), far = cam.s * reach;
     if (sx < -far || sx > vw + far || sy < -far || sy > vh + far) return;   // off screen
     const rx = wx - cam.x, ry = wy - cam.y;
     let sp = sprites.get(o);
-    const step = frameMs < 19 ? 0.3 : frameMs < 27 ? 0.6 : 1;   // metres of camera travel a sprite may fall behind
+    // metres of camera travel a sprite may fall behind. A slow device redraws less often the faster the camera is
+    // going: at speed a pixel's step in a parked camper's table and chairs cannot be seen, and the redraws are
+    // what cost the most when driving through a full camp.
+    const step = frameMs < 19 ? 0.3 : frameMs < 27 ? 0.6 : 1 + Math.min(1, camV * 0.15);
     if (!sp || sp.tag !== tag || Math.abs(rx - sp.rx) > step || Math.abs(ry - sp.ry) > step || Math.abs(cam.s / sp.s - 1) > 0.07 || sp.dpr !== dpr) {
       const half = Math.ceil(cam.s * reach), px = Math.round(half * 2 * dpr);
       if (!sp) { sp = { cv: document.createElement('canvas') }; sp.cx = sp.cv.getContext('2d'); sprites.set(o, sp); }
@@ -3811,8 +3818,48 @@
     if (!paused) { step(dt); stepFx(dt); stepToasts(); }
     engineSound(dt); stepRadio(dt); rainSound(); natureSound(dt);
     updateCamera(dt);
-    frame(night);
+    if (dt > 0) { camV += (Math.hypot(cam.x - camPX, cam.y - camPY) / dt - camV) * 0.2; camPX = cam.x; camPY = cam.y; }
+    frame(night); profFrames++;
     requestAnimationFrame(tick);
+  }
+  // ?debug&prof: time the main per-frame functions. window.camp.prof() returns milliseconds per frame for each
+  // since the last call. Times nest: 'frame' includes the draw functions, 'step' the step functions.
+  const PROF = {}; let profFrames = 0;
+  if (location.search.includes('debug') && location.search.includes('prof')) {
+    const timed = (name, fn) => function () { const t = performance.now(); try { return fn.apply(this, arguments); } finally { PROF[name] = (PROF[name] || 0) + performance.now() - t; } };
+    step = timed('step', step);
+    stepFx = timed('stepFx', stepFx);
+    frame = timed('frame', frame);
+    stepPeople = timed('stepPeople', stepPeople);
+    stepChats = timed('stepChats', stepChats);
+    stepRoamers = timed('stepRoamers', stepRoamers);
+    stepAmbient = timed('stepAmbient', stepAmbient);
+    stepLeaver = timed('stepLeaver', stepLeaver);
+    stepIce = timed('stepIce', stepIce);
+    stepFireside = timed('stepFireside', stepFireside);
+    stepShrooms = timed('stepShrooms', stepShrooms);
+    stepTips = timed('stepTips', stepTips);
+    stepWeather = timed('stepWeather', stepWeather);
+    drawPeople = timed('drawPeople', drawPeople);
+    drawParked = timed('drawParked', drawParked);
+    drawVehicle = timed('drawVehicle', drawVehicle);
+    drawTree = timed('drawTree', drawTree);
+    drawBuilding = timed('drawBuilding', drawBuilding);
+    drawAmbient = timed('drawAmbient', drawAmbient);
+    drawRoamers = timed('drawRoamers', drawRoamers);
+    drawFireside = timed('drawFireside', drawFireside);
+    drawFx = timed('drawFx', drawFx);
+    drawSkids = timed('drawSkids', drawSkids);
+    drawMap = timed('drawMap', drawMap);
+    drawBubbles = timed('drawBubbles', drawBubbles);
+    drawFlies = timed('drawFlies', drawFlies);
+    drawRain = timed('drawRain', drawRain);
+    updateCamera = timed('updateCamera', updateCamera);
+    hud = timed('hud', hud);
+    engineSound = timed('engineSound', engineSound);
+    stepRadio = timed('stepRadio', stepRadio);
+    natureSound = timed('natureSound', natureSound);
+    window.campProf = () => { const out = { frames: profFrames }; for (const k of Object.keys(PROF)) { out[k] = +(PROF[k] / Math.max(1, profFrames)).toFixed(2); PROF[k] = 0; } profFrames = 0; return out; };
   }
   hud();
   requestAnimationFrame(tick);
