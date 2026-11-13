@@ -345,7 +345,7 @@
         lgTip: 'Жълта монета: 25 точки.', lgBoost: 'Лилав жетон: бонус. Двойни точки, автопаркиране или щит.',
         lgJob: 'Зелен знак: поръчка. Вземете я и я закарайте до мястото за 120 точки.', lgDog: 'Кучето с наденичките: настигнете го за 200 точки.',
         lgWarden: 'Червени звезди: управителят ви гони. Глобата боли, чистото паркиране го успокоява.', lgRain: 'В дъжд и по тъмно паркирането носи повече, но пътят е хлъзгав.', stErrands: 'Изпълнени поръчки', stFines: 'Глоби от управителя', lbTitle: 'Най-добрите къмпингари', lbWeek: 'Тази седмица', lbAll: 'За всички времена', lbPost: 'Запишете резултата ми', stTips: 'Събрани бакшиши', stBumps: 'Удари', stScares: 'Стреснати хора', stGaveUp: 'Гости, които се отказаха да чакат',
-        stTime: 'Време зад волана', shareTitle: 'Споделете резултата', moreStats: 'Смяната в числа', moreAlbums: 'Колекции и значки', shareNative: 'Споделете', savePic: 'Запазете картинката', postcard: 'Запазете картичка от къмпинга', close: 'Обратно към паркирането',
+        stTime: 'Време зад волана', shareTitle: 'Споделете резултата', moreStats: 'Смяната в числа', goalsTitle: 'Целите за смяната', moreAlbums: 'Колекции и значки', shareNative: 'Споделете', savePic: 'Запазете картинката', postcard: 'Запазете картичка от къмпинга', close: 'Обратно към паркирането',
       },
       aria: {
         camp: 'Къмпинг, гледан отгоре. Закарайте всеки пристигащ гост до мястото му.',
@@ -3601,6 +3601,10 @@
     set('st-rank', rankLine(now, startBest));
     { let i = 0; while (i < RANKS.length - 1 && now >= RANKS[i + 1]) i++; set('st-boss', over === true ? L.boss.over[i] : ''); }
     boardFor(over); clubRows(); runRows(now); rareRows(); natureRows(); trickRows();
+    {   // the three goals of the shift: on a phone this is the only place they are listed
+      const gl = $('goal-list'); gl.textContent = ''; $('goal-title').hidden = gl.hidden = !goals.length;
+      goals.forEach((g) => { const li = document.createElement('li'); li.textContent = `${L.goalNames[g.key]} ${Math.min(goalNow(g), g.n)}/${g.n}`; if (g.done) li.className = 'got'; gl.append(li); });
+    }
     const ids = Object.keys(L.badges), list = $('bd-list');
     set('bd-title', `${L.badgesTitle} ${ids.filter((id) => earned.has(id)).length}/${ids.length}`);
     list.textContent = '';
