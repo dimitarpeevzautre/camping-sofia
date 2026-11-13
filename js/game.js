@@ -2078,7 +2078,17 @@
       ctx.fillStyle = '#f0b83a'; ctx.beginPath(); ctx.moveTo(0.44 * k, -0.06 * k); ctx.lineTo(0.6 * k, 0); ctx.lineTo(0.44 * k, 0.06 * k); ctx.closePath(); ctx.fill();
       ctx.restore();
     }
-    if (!ground && night < 0.35 && !reduceMotion) for (const f of flutter) {   // butterflies, by day
+    if (!ground && AUTUMN && night < 0.6 && !reduceMotion) flutter.forEach((f, i) => {   // in autumn, leaves coming down instead
+      for (let j = 0; j < 3; j++) {
+        const q = f.p + j * 2.1, ph = (clock * 0.05 + q) % 1, fx = (f.x + j * 37) % W, fy = (f.y + j * 23) % H;
+        const [x, y] = P(fx + (ph - 0.5) * 22 + Math.sin(clock * 0.9 + q * 3) * 1.4, fy + (ph - 0.5) * 9 + Math.cos(clock * 0.7 + q) * 0.9, 3 * (1 - ph));
+        if (x < 0 || x > vw || y < 0 || y > vh) continue;
+        ctx.globalAlpha = Math.sin(Math.PI * ph) * (1 - night / 0.6); ctx.fillStyle = ['#cc9a36', '#b8683a', '#e3bb52', '#9a502c'][(i + j) % 4];
+        ctx.beginPath(); ctx.ellipse(x, y, 0.3 * k, 0.14 * k, clock * 0.8 + q * 5, 0, TAU); ctx.fill();
+      }
+      ctx.globalAlpha = 1;
+    });
+    if (!ground && !AUTUMN && night < 0.35 && !reduceMotion) for (const f of flutter) {   // butterflies, by day
       const x0 = f.x + Math.sin(clock * 0.5 + f.p) * 4 + Math.sin(clock * 1.7 + f.p * 3) * 0.8, y0 = f.y + Math.cos(clock * 0.37 + f.p * 2) * 4, [x, y] = P(x0, y0, 0.8);
       if (x < 0 || x > vw || y < 0 || y > vh) continue;
       const flap = 0.25 + 0.75 * Math.abs(Math.sin(clock * 9 + f.p)), r = 0.2 * k;
