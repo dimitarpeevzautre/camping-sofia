@@ -139,7 +139,7 @@
       bAir: 'BIG AIR!',
       rares: { bus: 'a 1960s camper bus', beetle: 'a little old car with a roof tent', woodie: 'a wood-panelled estate', firetruck: 'a fire engine turned camper', airstream: 'a polished aluminium caravan', teardrop: 'a teardrop caravan', landy: 'an old green four-by-four', schoolbus: 'a school bus turned camper', bubble: 'a little round caravan from the sixties' },
       rareSpot: (name, n, of) => `A rare sight: ${name}! ${n} of ${of} spotted`, rareTitle: 'Rare vehicles spotted',
-      noteNew: (name, n, of) => `In the notebook: ${name}. ${n} of ${of}`, noteTitle: 'Nature notebook', noteHint: 'Baba Ginka: No rush. Stop now and then and look about. Not everyone here came by car.', toFind: (n, have) => (have ? `${n} more to find` : `${n} to find`),
+      noteNew: (name, n, of) => `In the notebook: ${name}. ${n} of ${of}`, noteTitle: 'Nature notebook', fireside: 'By the fire', sayFire: ['Come and sit a minute!', 'There is tea in the pot.', 'Mind the sparks.', 'Sing with us!'], noteHint: 'Baba Ginka: No rush. Stop now and then and look about. Not everyone here came by car.', toFind: (n, have) => (have ? `${n} more to find` : `${n} to find`),
       nature: { cat: 'the cat asleep on the roof', stork: 'the stork on its nest', ducks: 'the ducks on the pond', hedgehog: 'the hedgehog crossing the lane', fireflies: 'the fireflies over the meadow', deer: 'the deer at the edge of the forest', owl: 'the owl on the gate', rainbow: 'the rainbow after the rain', moon: 'the moon in the pond', squirrel: 'the squirrel between the trees' },
       flyHint: 'Steer left and right. It cannot stop. The children are watching', trickNew: (n) => `You found one: ${n}`, secretsTitle: 'Pilot\'s secrets',
       tricks: { circle: 'A full circle', eight: 'A figure of eight', pond: 'A low pass over the pond', flypast: 'A flypast down the main road', lap: 'A lap round the whole camp', night: 'A night flight', balloon: 'A wave to the balloon' },
@@ -271,7 +271,7 @@
       bAir: 'ПОЛЕТ!',
       rares: { bus: 'кемпер бус от шейсетте', beetle: 'малка стара кола с палатка на покрива', woodie: 'комби с дървени панели', firetruck: 'пожарна, превърната в кемпер', airstream: 'лъскава алуминиева каравана', teardrop: 'каравана капка', landy: 'стар зелен джип', schoolbus: 'училищен автобус, превърнат в кемпер', bubble: 'малка кръгла каравана от шейсетте' },
       rareSpot: (name, n, of) => `Рядка гледка: ${name}! Забелязани ${n} от ${of}`, rareTitle: 'Забелязани редки возила',
-      noteNew: (name, n, of) => `В бележника: ${name}. ${n} от ${of}`, noteTitle: 'Природен бележник', noteHint: 'Баба Гинка: Няма бързане. Спирай понякога и се оглеждай. Не всички тук са дошли с кола.', toFind: (n, have) => (have ? `Още ${n} за откриване` : `${n} за откриване`),
+      noteNew: (name, n, of) => `В бележника: ${name}. ${n} от ${of}`, noteTitle: 'Природен бележник', fireside: 'Край огъня', sayFire: ['Седнете за малко!', 'Има чай в чайника.', 'Пазете се от искрите.', 'Пейте с нас!'], noteHint: 'Баба Гинка: Няма бързане. Спирай понякога и се оглеждай. Не всички тук са дошли с кола.', toFind: (n, have) => (have ? `Още ${n} за откриване` : `${n} за откриване`),
       nature: { cat: 'котката, заспала на покрива', stork: 'щъркелът в гнездото', ducks: 'патиците в езерцето', hedgehog: 'таралежът на алеята', fireflies: 'светулките над поляната', deer: 'сърната в края на гората', owl: 'совата на портата', rainbow: 'дъгата след дъжда', moon: 'луната в езерцето', squirrel: 'катерицата между дърветата' },
       flyHint: 'Завивайте наляво и надясно. Самолетът не може да спре. Децата гледат', trickNew: (n) => `Открихте: ${n}`, secretsTitle: 'Тайните на пилота',
       tricks: { circle: 'Пълен кръг', eight: 'Осморка', pond: 'Нисък полет над езерцето', flypast: 'Прелитане над главната алея', lap: 'Обиколка на целия къмпинг', night: 'Нощен полет', balloon: 'Поздрав към балона' },
@@ -1799,7 +1799,7 @@
     tents.push({ x, y, a, c, born: clock, small: true }); nextTent = clock + 90 + Math.random() * 60;
   }
   function stepAmbient(dt) {
-    stepTents(); stepBalloon(dt); stepHog(dt); stepNature(dt); stepSquirrel(dt);
+    stepTents(); stepBalloon(dt); stepHog(dt); stepNature(dt); stepSquirrel(dt); stepWarm(dt);
     for (const d of ducks) d.a += d.s * dt;
     if (!flock && clock > nextFlock) { const fromLeft = Math.random() < 0.5; flock = { x: fromLeft ? -12 : W + 12, y: 10 + Math.random() * (H - 30), vx: (fromLeft ? 1 : -1) * 7, vy: 1.2 - Math.random() * 2.4 }; }
     if (flock) { flock.x += flock.vx * dt; flock.y += flock.vy * dt; if (flock.x < -20 || flock.x > W + 20) { flock = null; nextFlock = clock + 45 + Math.random() * 50; } }
@@ -1811,6 +1811,14 @@
   const circle = [[0.4, '#d5503c'], [1.7, '#3f7fa6'], [3.0, '#f0b83a'], [4.4, '#5f9070'], [5.5, '#8b6fae']];
   const notes = [];
   let strumT = 4;
+  // Pulling up by the fire after dark and staying a moment is noticed by whoever is sitting there.
+  let warmT = 0, warmNext = 0;
+  function stepWarm(dt) {
+    if (mode !== 'play' || !car || demo || night < 0.5 || clock < warmNext || Math.abs(car.v) > 0.4 || Math.hypot(car.x - fire.x, car.y - fire.y) > 7.5) { warmT = 0; return; }
+    if ((warmT += dt) < 3) return;
+    warmT = 0; warmNext = clock + 240; total += 30;
+    pop(fire.x, fire.y, `${L.fireside} +30`, '#f0b83a', 24); remark(L.sayFire, fire.x, fire.y, 10); sfx.life(); hud();
+  }
   function stepFireside(dt) {
     for (let i = notes.length - 1; i >= 0; i--) { const n = notes[i]; n.z += 0.9 * dt; n.x += 0.3 * dt; if ((n.life -= dt) <= 0) notes.splice(i, 1); }
     if (night < 0.35 || (strumT -= dt) > 0) return;
