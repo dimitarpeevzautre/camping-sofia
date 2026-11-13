@@ -3459,7 +3459,7 @@
       poly([RP(r, hl, -hw * 0.28, 0), RP(r, hl, hw * 0.28, 0), RP(r, hl, 0, zt * 0.72)], '#26343d');
     }
     // buildings and the gate beam never change, so each is drawn once and reused like a parked camper
-    for (const b of buildings) viaSprite(b, b.x + b.w / 2, b.y + b.h / 2, 0, () => drawBuilding(b), Math.max(b.w, b.h) / 2 + 4.5, b.z / 2 + 0.2);
+    for (const b of buildings) viaSprite(b, b.x + b.w / 2, b.y + b.h / 2, 0, () => drawBuilding(b), Math.max(b.w, b.h) / 2 + 4.5, b.z * 0.85);   // slid as its roof would move, like the parked vehicles
     viaSprite(GATE, 60, 85.8, 0, drawGate, 7.5, 1.6);
     // lamp posts
     for (const l of lamps) {
