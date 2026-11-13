@@ -1,3 +1,24 @@
+# What is actually in use
+
+The game now talks to Firestore directly, so nothing here is deployed as a service. The live pieces are:
+
+- the Firestore database `(default)` in project `camping-sofia-game` (europe-west3, free tier, no billing account);
+- `firestore.rules` in this directory, published as the database's security rules;
+- one composite index on `scores`: `week` ascending, `score` descending.
+
+To publish a change to the rules: create a ruleset from the file with the Firebase Rules API
+(`POST https://firebaserules.googleapis.com/v1/projects/camping-sofia-game/rulesets`), then point the release
+`projects/camping-sofia-game/releases/cloud.firestore` at it (`PATCH` the release). Both calls take a
+`gcloud auth print-access-token` bearer token and the header `x-goog-user-project: camping-sofia-game`.
+
+To remove an entry, delete its document in the Firestore console (Data, collection `scores`).
+
+`server.js` below is the earlier design, a Cloud Run service in front of Firestore with rate limiting and one best
+score per nickname. It needs a billing account and was never deployed; it is kept in case the open rules prove
+too easy to abuse.
+
+---
+
 # Camping Sofia leaderboard
 
 The backend of the parking game on camping-sofia.com. One small Node service on Cloud Run, storing scores in
