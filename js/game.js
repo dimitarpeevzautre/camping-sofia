@@ -3627,7 +3627,7 @@
     };
     paused = true; for (const k in keys) keys[k] = false;
     card.showModal();
-    if (over === true) { $('card-again').focus(); card.scrollTop = 0; }
+    if (over === true) { $('card-close').focus(); card.scrollTop = 0; }
   }
   $('score-btn').addEventListener('click', () => openCard());
   $('card-close').addEventListener('click', () => card.close());
