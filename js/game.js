@@ -3529,7 +3529,9 @@
     if (!SHOT && mode === 'play' && target && car) {
       const [tx, ty] = P(target.x + target.w / 2, target.y + target.d / 2), m = 46;
       if (tx < m || tx > vw - m || ty < m + 60 || ty > vh - m) {
-        const ax = clamp(tx, m, vw - m), ay = clamp(ty, m + 70, vh - m - 90), a = Math.atan2(ty - ay, tx - ax);
+        // it keeps below the map on the left and the plates on the right, and may go higher in the clear middle
+        const ax = clamp(tx, m, vw - m), top = ax < Math.min(320, vw * 0.4) || ax > vw - Math.min(260, vw * 0.5) ? 156 : m + 14;
+        const ay = clamp(ty, top, vh - m - 90), a = Math.atan2(ty - ay, tx - ax);
         ctx.save(); ctx.translate(ax, ay); ctx.rotate(a);
         ctx.fillStyle = '#f4c531'; ctx.strokeStyle = '#12211a'; ctx.lineWidth = 3; ctx.lineJoin = 'round';
         ctx.beginPath(); ctx.moveTo(20, 0); ctx.lineTo(-12, -16); ctx.lineTo(-4, 0); ctx.lineTo(-12, 16); ctx.closePath(); ctx.fill(); ctx.stroke();
