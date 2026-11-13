@@ -773,10 +773,9 @@
     if (car.rush) patienceMax *= 0.75;
     patience = patienceMax;
     hud();
-    if (kind === 'combo' && !metCaravan && !demo) { metCaravan = true; toast(L.firstCombo(target.n), 5000); }
+    if (kind === 'combo' && !metCaravan && !demo) { metCaravan = true; toast(L.firstCombo(target.n), 3800); }
     else if (car.vip) { toast(L.vip, 2600); sfx.best(); }
-    else if (parkedCount > 0 && parkedCount % 5 === 0) { toast(L.wave(parkedCount), 2600); sfx.best(); }
-    else if (parkedCount > 0) { toast(L.next(L.names[kind], target.n), 1500); sfx.next(); }
+    else if (parkedCount > 0) sfx.next();   // the Pitch plate, the map and the arrow already say where the next guest goes
   }
   function packUp(g, delay = 0) {   // roll in the awning, call the family back, then drive off
     g.packing = clock + delay;
@@ -2381,8 +2380,6 @@
     if (!(kind in respect)) return;
     const was = respect[kind];
     respect[kind] = clamp(was + d, -5, 5);
-    if (was < 3 && respect[kind] >= 3) toast(L.clubUp(L.clubs[kind]), 2600);
-    if (was > -3 && respect[kind] <= -3) toast(L.clubDown(L.clubs[kind]), 2600);
   }
   function clubRows() {
     const dl = $('st-clubs');
@@ -2517,7 +2514,7 @@
           const cost = Math.round(5 + Math.abs(v0) * 2);
           bumpCool = 0.5; shake = reduceMotion ? 0 : Math.min(0.4, Math.abs(v0) / 12);
           if (boost.shield) { boost.shield--; sfx.bump(Math.abs(v0)); pop(car.x, car.y, L.shielded, '#b98ce0', 26); }
-          else { trouble(0.7); bumps++; damage += cost; stats.bumps++; streak = 0; sfx.bump(Math.abs(v0)); pop(car.x, car.y, `−${cost}`, '#e2553d', 26); toast(L.bump(cost), 1100); hud(); }
+          else { trouble(0.7); bumps++; damage += cost; stats.bumps++; streak = 0; sfx.bump(Math.abs(v0)); pop(car.x, car.y, `−${cost}`, '#e2553d', 26); hud(); }
         }
         car.v = -car.v * 0.25;
         break;
@@ -2607,7 +2604,7 @@
     stats.acc += accuracy; stats.spd += speed; stats.top = Math.max(stats.top, stay.points);
     parkBadges({ clean, perfect, towing, vip, night: dark });
     if (!demo && Math.random() < 0.6) { const ax = r.cx, ay = r.cy; setTimeout(() => { if (mode === 'play' && !people.some((o) => o.sayT > clock && Math.hypot(o.x - ax, o.y - ay) < 12)) remark(L.sayArrive, ax, ay, 7); }, 3200); }
-    toast(back ? L.lifeBack : L.parked(pts, accuracy, speed, mult), back ? 2600 : 2000);
+    // no message across the screen: the points already float up from the pitch, and the breakdown is on the score card
     car = null;
     setTimeout(() => { if (mode === 'play' && !car) nextGuest(); }, 1300);
     hud();
