@@ -814,7 +814,7 @@
     }
   }
   function stepTips() {
-    for (let n = tips.filter((t) => !t.boost && !t.until).length; n < 4; n++) addTip();
+    for (let n = tips.filter((t) => !t.boost && !t.until).length; n < 2; n++) addTip();   // two at a time: four made the lanes look littered
     if (clock > nextBoost && !tips.some((t) => t.boost)) addTip(pick(['double', 'auto', 'shield']));
     if (!car) return;
     const rects = rectsOf(car);
@@ -1267,13 +1267,10 @@
     ctx.beginPath(); if (ctx.roundRect) ctx.roundRect(x0 - 4, y0 - 4, mw + 8, mh + 8, 8); else ctx.rect(x0 - 4, y0 - 4, mw + 8, mh + 8); ctx.fill();
     ctx.globalAlpha = 1; ctx.fillStyle = '#4c6b58';
     for (const r of roads) ctx.fillRect(x0 + r.x * k, y0 + r.y * k, r.w * k, r.h * k);
-    for (const t of tips) dot(t.x, t.y, t.boost ? 3 : 1.6, t.boost ? '#b98ce0' : t.time ? '#6fb6d9' : '#f4c531');
+    // the map shows the lanes, where to go and where you are; tips, traffic and the rest are left to the camp itself
     if (target) { ctx.fillStyle = Math.sin(clock * 6) > 0 ? '#f4c531' : '#f6f1df'; ctx.fillRect(x0 + target.x * k - 1, y0 + target.y * k - 1, target.w * k + 2, target.d * k + 2); }
     if (job) dot(job.carry ? job.dx : job.x, job.carry ? job.dy : job.y, 3.5, '#8fd18a');
     if (thief) dot(thief.x, thief.y, 3.5, '#c98a55');
-    if (ice) dot(ice.x, ice.y, 3, '#f2a7c0');
-    for (const t of roamers) dot(t.x, t.y, t.kind === 'tractor' ? 2.5 : 1.8, t.kind === 'tractor' ? '#56994f' : '#e8855f');
-    if (warden) dot(warden.x, warden.y, 3.5, heat > 0 && Math.sin(clock * 14) > 0 ? '#e2553d' : '#7fa6ff');
     if (car) {
       const cx = x0 + car.x * k, cy = y0 + car.y * k, c = Math.cos(car.th), s = Math.sin(car.th);
       ctx.fillStyle = '#fff'; ctx.strokeStyle = '#12211a'; ctx.lineWidth = 1.5;
