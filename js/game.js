@@ -1789,7 +1789,7 @@
   const ducks = [0, 2.1, 4.2].map((a, i) => ({ a, r: 0.35 + i * 0.16, s: (i % 2 ? -1 : 1) * (0.05 + i * 0.015) }));
   const flutter = Array.from({ length: 16 }, (_, i) => ({ x: 6 + Math.random() * (W - 12), y: 6 + Math.random() * (H - 12), p: Math.random() * TAU, c: ['#f6f1df', '#f4c531', '#e8855f', '#9fd3ee'][i % 4] }));
   const smoke = [];
-  let flock = null, nextFlock = 20, smokeT = 0;
+  let flock = null, nextFlock = 20, smokeT = 0, stoveT = 0;
   // Backpackers put their tents up in the field by the fire: one more every couple of minutes, up to six.
   const TENT_SPOTS = [[24, 72, 0.4, '#d5503c'], [46, 74, -0.9, '#5f9070'], [28, 83, 1.3, '#f0b83a'], [87, 83, 0.2, '#8b6fae'], [93, 72, -0.4, '#3f7fa6'], [47, 85, 2.2, '#e8855f']];
   let nextTent = 60, pitched = 0;
@@ -1804,6 +1804,7 @@
     if (!flock && clock > nextFlock) { const fromLeft = Math.random() < 0.5; flock = { x: fromLeft ? -12 : W + 12, y: 10 + Math.random() * (H - 30), vx: (fromLeft ? 1 : -1) * 7, vy: 1.2 - Math.random() * 2.4 }; }
     if (flock) { flock.x += flock.vx * dt; flock.y += flock.vy * dt; if (flock.x < -20 || flock.x > W + 20) { flock = null; nextFlock = clock + 45 + Math.random() * 50; } }
     if (night > 0.2 && !reduceMotion && (smokeT -= dt) <= 0) { smokeT = 0.35; smoke.push({ x: fire.x + (Math.random() - 0.5) * 0.4, y: fire.y, z: 0.6, life: 4.5, d: Math.random() - 0.5 }); }
+    if (AUTUMN && !reduceMotion && (stoveT -= dt) <= 0) { stoveT = 0.6; smoke.push({ x: 76.3 + (Math.random() - 0.5) * 0.2, y: 73.7, z: 5.4, life: 4.5, d: Math.random() - 0.5, stove: true }); }   // in autumn the reception stove is lit all day
     for (let i = smoke.length - 1; i >= 0; i--) { const s = smoke[i]; s.z += 1.1 * dt; s.x += (0.35 + s.d * 0.3) * dt; if ((s.life -= dt) <= 0) smoke.splice(i, 1); }
   }
   // In the evening a few campers sit round the fire and somebody plays the guitar: three or four soft notes now
@@ -2191,7 +2192,7 @@
     }
     for (const s of ground ? [] : smoke) {   // woodsmoke drifting up from the fire
       const [x, y] = P(s.x, s.y, s.z), a = clamp(s.life / 4.5, 0, 1);
-      ctx.fillStyle = `rgba(226,224,214,${0.28 * a * Math.min(1, night * 2)})`; ctx.beginPath(); ctx.arc(x, y, k * (0.35 + (1 - a) * 0.9), 0, TAU); ctx.fill();
+      ctx.fillStyle = `rgba(226,224,214,${(s.stove ? 0.2 : 0.28 * Math.min(1, night * 2)) * a})`; ctx.beginPath(); ctx.arc(x, y, k * ((s.stove ? 0.25 : 0.35) + (1 - a) * 0.9), 0, TAU); ctx.fill();
     }
     if (flock && !ground) for (let i = 0; i < 5; i++) {   // five birds in a V, and their shadows on the ground
       const row = Math.ceil(i / 2), side = i % 2 ? 1 : -1, dir = Math.sign(flock.vx), bx = flock.x - dir * row * 1.6, by = flock.y + side * row * 1.2;
