@@ -146,7 +146,7 @@
       sayPlane: ['Wow!', 'Again! Again!', 'Look, a plane!', 'Do another one!'], sayKid: ['A plane!', 'Hello up there!', 'Look! Look!'],
       sayArrive: ['What a lovely spot!', 'Finally, holidays.', 'Kettle on!', 'Thank you, that was easy.', 'I can see the mountain from here.', 'Who has the tent pegs?'],
       kind: 'Kind driver',
-      honk: 'Beep beep!', quack: 'Quack!', vip: 'A VIP guest: double points, less patience',
+      honk: 'Beep beep!', quack: 'Quack!', hoot: 'Hoo-hoo!', meow: 'Meow?', vip: 'A VIP guest: double points, less patience',
       ranks: ['Trainee', 'Gate keeper', 'Camp host', 'Site warden', 'Camp manager', 'Legend of Vitosha'],
       rankNext: (n, r) => `${n} more for ${r}`, short: (n) => `only ${n} short of your best`,
       perfect: 'Perfect!', newBest: 'New best score!', lifeBack: 'Five clean in a row: ♥ back',
@@ -278,7 +278,7 @@
       sayPlane: ['Уау!', 'Пак! Пак!', 'Вижте, самолет!', 'Още веднъж!'], sayKid: ['Самолет!', 'Ехо, там горе!', 'Виж! Виж!'],
       sayArrive: ['Какво хубаво място!', 'Най-после почивка.', 'Слагам кафето!', 'Благодаря, лесно беше.', 'Оттук се вижда планината.', 'У кого са колчетата?'],
       kind: 'Мил шофьор',
-      honk: 'Бийп-бийп!', quack: 'Па-па!', vip: 'VIP гост: двойни точки, по-малко търпение',
+      honk: 'Бийп-бийп!', quack: 'Па-па!', hoot: 'Бу-бу!', meow: 'Мяу?', vip: 'VIP гост: двойни точки, по-малко търпение',
       ranks: ['Стажант', 'Пазач на портала', 'Домакин на къмпинга', 'Управител на терена', 'Директор на къмпинга', 'Легенда на Витоша'],
       rankNext: (n, r) => `още ${n} до „${r}“`, short: (n) => `само ${n} до рекорда ви`,
       perfect: 'Перфектно!', newBest: 'Нов рекорд!', lifeBack: 'Пет чисти поред: +♥',
@@ -812,6 +812,8 @@
     pop(car.x, car.y, L.honk, '#f6f1df', 22);
     if (Math.hypot(car.x - pond.x, car.y - pond.y) < 18) { ducks.forEach((d) => { d.rush = 2.5; }); pop(pond.x, pond.y, L.quack, '#f6f1df', 20); }   // the ducks paddle off in a huff
     if (night >= 0.2 && Math.hypot(car.x - 33, car.y - 88.6) < 16) deerGone = clock + 25;                                                            // and the deer slips back into the trees
+    if (night >= 0.6 && Math.hypot(car.x - 55, car.y - 86.5) < 14) setTimeout(() => { if (mode === 'play') pop(55, 86.5, L.hoot, '#f4c531', 20); }, 900);   // the owl answers, in its own time
+    if (Math.hypot(car.x - 71.4, car.y - 78.5) < 12) setTimeout(() => { if (mode === 'play') pop(71.4, 78.5, L.meow, '#f6f1df', 18); }, 600);                  // and the cat is not impressed
     let said = false;
     for (const o of people) {
       if (o.hidden || o.kind === 'pet' || !o.path) continue;
