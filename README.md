@@ -66,6 +66,15 @@ above all. Treat every plate, button and message as a cost.
   rain). The owner, Baba Ginka, speaks once at the start of the first shift and gives one hint about the notebook.
 - **Score card**: the score, the buttons and the leaderboard first; statistics, collections and sharing are folded
   away until opened.
+- **No shake, no banners**: the view does not shake on a bump, and nothing is written large across the screen.
+  A parking floats up one figure from the pitch.
+
+### `?simple`
+
+`camping-sofia.com/?simple` is the game with only the parking in it, kept so the owner can compare and choose: no
+tips or boosts on the lanes, no errands, no runaway dog, no goals, no patience bar (time earns a flat 50 a
+parking), no multiplier chip, no badge or record messages, and a start card without the legend and the shop.
+To make it the default, set `SIMPLE` to `true` near the top of `js/game.js`.
 
 ## Files
 
