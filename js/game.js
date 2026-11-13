@@ -48,6 +48,7 @@
         wash: 'Squeaky clean: roll slowly through the wash bay',
         collector: 'Spotter: see every rare vehicle',
         naturalist: 'Naturalist: fill the nature notebook',
+        forager: 'Forager: pick all eight mushrooms in one autumn shift',
         pilot: 'Barnstormer: find every one of the pilot\'s secrets',
         hedgehog: 'After you: wait for the hedgehog to cross',
         goals: 'To-do list: all three goals in one shift',
@@ -100,7 +101,7 @@
       radioOff: 'Radio off',
       rainOn: 'Rain! The roads are slippery', rainBonus: 'Rain +20%', bRush: 'TIP RUSH!', bDog: 'GOOD DOG!',
       dogOn: 'A dog has run off with the sausages! Catch up with it for a reward', dogWon: 'Sausages rescued! +200', dogLost: 'The dog got away with the sausages',
-      gnome: (n, of) => `You found a garden gnome! ${n} of ${of}`, bGnomes: 'ALL THE GNOMES!', driftPark: 'Handbrake parking',
+      gnome: (n, of) => `You found a garden gnome! ${n} of ${of}`, shroomFirst: 'A mushroom! There are eight about the camp this autumn', shroomAll: 'A full basket of mushrooms!', bGnomes: 'ALL THE GNOMES!', driftPark: 'Handbrake parking',
       boss: {
         start: ['Baba Ginka: The gate is yours. Do not scratch anything.', 'Baba Ginka: Guests are coming. Smile and park.', 'Baba Ginka: Remember, the hedge costs more than you do.'],
         fine: ['Baba Ginka: That fine comes out of your banitsa money.', 'Baba Ginka: The warden is my cousin. No discounts.'],
@@ -175,6 +176,7 @@
         pilot: 'Въздушен ас: открийте всички тайни на пилота', collector: 'Наблюдател: вижте всички редки возила',
         hedgehog: 'След вас: изчакайте таралежа да пресече',
         naturalist: 'Природолюбител: попълнете природния бележник',
+        forager: 'Гъбар: наберете и осемте гъби в една есенна смяна',
         goals: 'По списък: и трите цели в една смяна',
         errand: 'Рум сървис: пет поръчки в една смяна', dog: 'Герой на наденичките: хванете кучето крадец', host: 'Домакин на къмпинга: 1500 точки в една смяна', legend: 'Легенда на Витоша: 8000 точки в една смяна',
       },
@@ -225,7 +227,7 @@
       radioOff: 'Радиото е изключено',
       rainOn: 'Дъжд! Пътищата са хлъзгави', rainBonus: 'Дъжд +20%', bRush: 'БАКШИШИ!', bDog: 'ДОБРО КУЧЕ!',
       dogOn: 'Куче избяга с наденичките! Настигнете го за награда', dogWon: 'Наденичките са спасени! +200', dogLost: 'Кучето избяга с наденичките',
-      gnome: (n, of) => `Намерихте градинско джудже! ${n} от ${of}`, bGnomes: 'ВСИЧКИ ДЖУДЖЕТА!', driftPark: 'Паркиране с ръчна',
+      gnome: (n, of) => `Намерихте градинско джудже! ${n} от ${of}`, shroomFirst: 'Гъба! Тази есен из къмпинга има осем', shroomAll: 'Пълна кошница с гъби!', bGnomes: 'ВСИЧКИ ДЖУДЖЕТА!', driftPark: 'Паркиране с ръчна',
       boss: {
         start: ['Баба Гинка: Порталът е твой. Да не одраскаш нищо.', 'Баба Гинка: Гостите идват. Усмихни се и паркирай.', 'Баба Гинка: Запомни, живият плет струва повече от теб.'],
         fine: ['Баба Гинка: Глобата се удържа от парите ти за баница.', 'Баба Гинка: Управителят ми е братовчед. Отстъпки няма.'],
@@ -735,6 +737,7 @@
     if (demo) endDemo();
     flying = false; plane = null; document.body.classList.remove('flying'); padLabels('D', 'R');
     mode = 'play'; chill = off === true; document.body.classList.toggle('chill', chill);
+    plantShrooms();
     document.body.classList.add('playing');
     $('start').hidden = true; $('hud').hidden = false;
     if (matchMedia('(pointer: coarse)').matches) $('pad').hidden = false;
@@ -1255,6 +1258,46 @@
       ctx.fillStyle = '#f6f1df'; ctx.beginPath(); ctx.arc(fx, fy, 0.3 * k, 0, TAU); ctx.fill(); ctx.stroke();
       ctx.fillStyle = '#e2553d'; ctx.beginPath(); ctx.moveTo(fx - 0.3 * k, fy - 0.1 * k); ctx.lineTo(tx, ty - 0.5 * k); ctx.lineTo(fx + 0.3 * k, fy - 0.1 * k); ctx.closePath(); ctx.fill(); ctx.stroke();
     });
+  }
+
+  // In autumn eight mushrooms come up in the grass south of the lower lane, in new places every shift. Rolling
+  // over one picks it; there is no hurry and nothing is lost by leaving them.
+  let shrooms = [];
+  function plantShrooms() {
+    shrooms = [];
+    if (!AUTUMN) return;
+    for (let tries = 0; shrooms.length < 8 && tries < 600; tries++) {
+      const x = 8 + Math.random() * (W - 16), y = 59 + Math.random() * 26;
+      if (onRoadOrPitch(x, y, 1.5) || buildings.some((b) => x > b.x - 2 && x < b.x + b.w + 2 && y > b.y - 2 && y < b.y + b.h + 2)) continue;
+      if (Math.hypot(x - fire.x, y - fire.y) < 4 || tents.some((t) => Math.hypot(x - t.x, y - t.y) < 3)) continue;
+      if (trees.some((t) => Math.hypot(x - t.x, y - t.y) < t.r + 0.8) || shrooms.some((m) => Math.hypot(x - m.x, y - m.y) < 7)) continue;
+      shrooms.push({ x, y, s: 0.85 + Math.random() * 0.35, got: false });
+    }
+  }
+  function stepShrooms() {
+    if (demo || !shrooms.length) return;
+    const rects = rectsOf(car);
+    for (const m of shrooms) {
+      if (m.got || Math.abs(m.x - car.x) > 12 || Math.abs(m.y - car.y) > 12 || !rects.some((r) => rectCircle(r, m.x, m.y, 1.4))) continue;
+      m.got = true; total += 20; sfx.best(); pop(m.x, m.y, '+20', '#c98f4a', 22);
+      const n = shrooms.filter((q) => q.got).length;
+      if (n === 1) toast(L.shroomFirst, 3200);
+      if (n === shrooms.length) { total += 100; toast(L.shroomAll, 3200); award('forager'); }
+      hud();
+    }
+  }
+  function drawShrooms() {
+    const k = cam.s;
+    for (const m of shrooms) {
+      if (m.got) continue;
+      const [x, y] = P(m.x, m.y), [cx, cy] = P(m.x, m.y, 0.35);
+      if (x < -20 || x > vw + 20 || y < -20 || y > vh + 20) continue;
+      ctx.strokeStyle = 'rgba(18,33,26,0.5)'; ctx.lineWidth = 1;
+      ctx.fillStyle = '#efe6cf'; ctx.beginPath(); ctx.arc(x, y, 0.14 * k * m.s, 0, TAU); ctx.fill();                       // the stem, seen under the cap
+      ctx.fillStyle = '#8a5a34'; ctx.beginPath(); ctx.arc(cx, cy, 0.3 * k * m.s, 0, TAU); ctx.fill(); ctx.stroke();        // the cap
+      ctx.fillStyle = '#a8744a'; ctx.beginPath(); ctx.arc(cx - 0.08 * k, cy - 0.08 * k, 0.13 * k * m.s, 0, TAU); ctx.fill();
+      ctx.fillStyle = '#8a5a34'; ctx.beginPath(); ctx.arc(cx + 0.42 * k, cy + 0.2 * k, 0.17 * k * m.s, 0, TAU); ctx.fill(); ctx.stroke();   // a small one beside it
+    }
   }
 
   // ---------- the ice-cream van ----------
@@ -2300,7 +2343,7 @@
 
     hornCool -= dt;
     if (keys.horn && hornCool <= 0) honk();
-    stepTips(); stepJobs(); stepThief(dt); stepGnomes(); stepWash(dt);
+    stepTips(); stepJobs(); stepThief(dt); stepGnomes(); stepShrooms(); stepWash(dt);
     boost.speed -= dt; boost.freeze -= dt; driftCool -= dt; boostChips();
     if (car.auto) { stepAuto(dt); return; }
     if (car.air) { stepAir(dt); return; }
@@ -3256,7 +3299,7 @@
     }
     drawPeople();
     drawAmbient(true); drawFireside(true);
-    if (mode === 'play') { drawWash(); drawGnomes(); drawIce(); drawRoamers(); drawThief(); }
+    if (mode === 'play') { drawWash(); drawGnomes(); drawShrooms(); drawIce(); drawRoamers(); drawThief(); }
 
     // tents
     for (const t of tents) {
@@ -3579,5 +3622,5 @@
   setTimeout(beginDemo, 2500);
 
   // For automated checks only: /?debug exposes the state.
-  if (location.search.includes('debug')) window.camp = { get car() { return car; }, get target() { return target; }, get parked() { return parkedCount; }, get score() { return score(); }, get night() { return night; }, people, skids, packUp, guests, pitches, stats, rectsOf, rectRect, keys, blocked, livingRect, corners, setClock: (t) => { clock = t; }, setPatience: (t) => { patience = t; }, get lives() { return lives; }, get hog() { return hog; }, callHog: () => { nextHog = 0; }, postcard, holdNight: (v) => { nightLock = v; }, get balloon() { return balloon; }, callBalloon: () => { nextBalloon = 0; }, get plane() { return plane; }, tricks, get demo() { return demo; }, roamers, respect, owned, get bank() { return bank; }, setBank: (n) => { bank = n; saveShop(); shop(); }, props, get goals() { return goals; }, get ice() { return ice; }, found, GNOMES, get thief() { return thief; }, get rain() { return rain; }, setNext: (o) => { if (o.rain !== undefined) nextRain = o.rain; if (o.thief !== undefined) nextThief = o.thief; }, get job() { return job; }, setNextJob: (t) => { nextJob = t; }, tuneRadio, get station() { return station; }, get heat() { return heat; }, get warden() { return warden; }, trouble, boost, chats, takeBoost, say, addTip, earned, award, tips, honk, rankLine, get streak() { return streak; }, get mode() { return mode; }, get patienceMax() { return patienceMax; }, pops, bits, give: (kind) => { car = makeVehicle(kind, 61.8, 80.5, -Math.PI / 2); car.born = -9; }, next: () => { car = null; nextGuest(); } };
+  if (location.search.includes('debug')) window.camp = { get car() { return car; }, get shrooms() { return shrooms; }, get target() { return target; }, get parked() { return parkedCount; }, get score() { return score(); }, get night() { return night; }, people, skids, packUp, guests, pitches, stats, rectsOf, rectRect, keys, blocked, livingRect, corners, setClock: (t) => { clock = t; }, setPatience: (t) => { patience = t; }, get lives() { return lives; }, get hog() { return hog; }, callHog: () => { nextHog = 0; }, postcard, holdNight: (v) => { nightLock = v; }, get balloon() { return balloon; }, callBalloon: () => { nextBalloon = 0; }, get plane() { return plane; }, tricks, get demo() { return demo; }, roamers, respect, owned, get bank() { return bank; }, setBank: (n) => { bank = n; saveShop(); shop(); }, props, get goals() { return goals; }, get ice() { return ice; }, found, GNOMES, get thief() { return thief; }, get rain() { return rain; }, setNext: (o) => { if (o.rain !== undefined) nextRain = o.rain; if (o.thief !== undefined) nextThief = o.thief; }, get job() { return job; }, setNextJob: (t) => { nextJob = t; }, tuneRadio, get station() { return station; }, get heat() { return heat; }, get warden() { return warden; }, trouble, boost, chats, takeBoost, say, addTip, earned, award, tips, honk, rankLine, get streak() { return streak; }, get mode() { return mode; }, get patienceMax() { return patienceMax; }, pops, bits, give: (kind) => { car = makeVehicle(kind, 61.8, 80.5, -Math.PI / 2); car.born = -9; }, next: () => { car = null; nextGuest(); } };
 })();
