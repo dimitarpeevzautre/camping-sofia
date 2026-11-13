@@ -2413,12 +2413,13 @@
     ...Array.from({ length: 22 }, () => fly(20 + Math.random() * 34, 60 + Math.random() * 25)),
   ];
   function drawFlies() {
-    if (night < 0.5 || reduceMotion) return;
+    if (night < 0.5) return;
+    const t = reduceMotion ? 0 : clock;   // with reduced motion they hang still and steady, rather than vanish
     const groups = [[], []], lit = (night - 0.5) * 2;   // [faint, bright]
     for (const f of flies) {
-      const glow = Math.sin(clock * 2.2 * f.s + f.p);
+      const glow = Math.sin(t * 2.2 * f.s + f.p);
       if (glow < -0.3) continue;
-      const [x, y] = P(f.x + Math.sin(clock * 0.4 * f.s + f.p) * 3, f.y + Math.cos(clock * 0.3 * f.s + f.p * 2) * 3, 1.2);
+      const [x, y] = P(f.x + Math.sin(t * 0.4 * f.s + f.p) * 3, f.y + Math.cos(t * 0.3 * f.s + f.p * 2) * 3, 1.2);
       if (x > 0 && x < vw && y > 0 && y < vh) groups[glow > 0.35 ? 1 : 0].push(x, y);
     }
     groups.forEach((pts, i) => {
