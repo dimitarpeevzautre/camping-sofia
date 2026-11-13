@@ -69,12 +69,16 @@ above all. Treat every plate, button and message as a cost.
 - **No shake, no banners**: the view does not shake on a bump, and nothing is written large across the screen.
   A parking floats up one figure from the pitch.
 
-### `?simple`
+### Simple by default, `?full` for the rest
 
-`camping-sofia.com/?simple` is the game with only the parking in it, kept so the owner can compare and choose: no
-tips or boosts on the lanes, no errands, no runaway dog, no goals, no patience bar (time earns a flat 50 a
-parking), no multiplier chip, no badge or record messages, and a start card without the legend and the shop.
-To make it the default, set `SIMPLE` to `true` near the top of `js/game.js`.
+The owner compared two versions and chose the simple one, so that is what `camping-sofia.com` serves: only the
+parking, with no tips or boosts on the lanes, no errands, no runaway dog, no goals, no patience bar (time earns a
+flat 50 a parking), no multiplier chip, no badge or record messages, and a start card without the legend and the
+shop. The scenery, seasons, nature notebook, foraging, biplane and leaderboard are in both.
+
+`camping-sofia.com/?full` is the fuller version with all of those switched back on. The sections of "How it
+plays" above that mention tips, boosts, errands, the dog, goals or the patience bar describe `?full`. The switch
+is `SIMPLE` near the top of `js/game.js`.
 
 ## Files
 
