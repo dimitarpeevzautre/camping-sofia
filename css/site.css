@@ -188,6 +188,9 @@ body.flying .pad .hbrake, body.flying .pad .horn { display: none; }
 body.chill .patience, body.chill .lives { visibility: hidden; }
 .legend { margin: 12px 0 0; font-size: 0.85rem; }
 .legend summary { font-weight: 800; cursor: pointer; }
+.card .more { margin-top: 12px; border-top: 2px dotted rgba(18, 33, 26, 0.35); padding-top: 8px; }
+.card .more summary { font-weight: 800; cursor: pointer; padding: 4px 0; }
+.card .more[open] summary { margin-bottom: 4px; }
 .legend ul { margin: 6px 0 0; padding-left: 1.2em; display: grid; gap: 3px; }
 .shop p { margin: 6px 0 0 !important; font-size: 0.85rem !important; }
 .shop ul { list-style: none; padding: 0; gap: 6px; }
